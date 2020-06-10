@@ -24,6 +24,9 @@ Windows (MSYS2):
   make
 
 The build will output an executable named "jollygood".
+The program may be run locally, or installed system-wide using the "install"
+target. For command line usage instructions, execute the binary with no
+arguments or the -h switch.
 
 Configuration
 -------------
@@ -45,6 +48,13 @@ The User data directory contains the following subdirectories:
   save/corename/         - SRAM, Memory Card, or other types of save data
   screenshots/           - Screenshots with a timestamp and random number
   state/corename/        - Save States
+
+Cores may be used locally by placing their build output directories into a
+"cores/" directory created in the jgrf source directory:
+mkdir cores
+cp -r /path/to/core cores/
+
+Cores that exist locally will be preferred over cores installed system-wide.
 
 Input
 -----
