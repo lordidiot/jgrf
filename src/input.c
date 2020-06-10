@@ -412,6 +412,23 @@ void jgrf_inputcfg_handler(SDL_Event *event) {
                     }
                 }
                 else { // Axes set to button input
+                    if (!axisnoise && abs(event->jaxis.value) >= 32767) {
+                        // Handle the case of hat switches pretending to be axes
+                        snprintf(defbuf, sizeof(defbuf), "j%da%d%c",
+                            event->jaxis.which, event->jaxis.axis,
+                            event->jaxis.value > 0 ? '+' : '-');
+                        
+                        ini_table_create_entry(iconf, inputinfo[confport]->name,
+                            inputinfo[confport]->defs[confindex], defbuf);
+                        
+                        jgrf_input_map_button(confport,
+                            confindex - inputinfo[confport]->numaxes,
+                            defbuf);
+                        
+                        confindex++;
+                        jgrf_inputcfg(inputinfo[confport]);
+                        break;
+                    }
                     if (abs(event->jaxis.value) >= BDEADZONE) {
                         axisnoise = 1;
                         axis = event->jaxis.axis;
