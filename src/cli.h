@@ -12,5 +12,6 @@
 const char *jgrf_cli_core();
 void jgrf_cli_override();
 void jgrf_cli_parse(int, char**);
+void jgrf_cli_usage();
 
 #endif

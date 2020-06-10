@@ -15,6 +15,7 @@
 #include "parg.h"
 
 #include "jgrf.h"
+#include "cli.h"
 #include "settings.h"
 
 // Variables for command line options
@@ -59,7 +60,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
     
     parg_init(&ps);
     
-    while ((c = parg_getopt(&ps, argc, argv, "c:dfs:wx:")) != -1) {
+    while ((c = parg_getopt(&ps, argc, argv, "c:dhfs:wx:")) != -1) {
         switch (c) {
             case 1:
                 break;
@@ -68,6 +69,9 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 break;
             case 'd': // Enable debug level logs from core and frontend
                 debug = 1;
+                break;
+            case 'h': // Show usage
+                jgrf_cli_usage();
                 break;
             case 'f': // Start in fullscreen mode
                 fullscreen = 1;
@@ -82,10 +86,32 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 scale = atoi(ps.optarg);
                 break;
             case '?':
-                jgrf_log(JG_LOG_WRN, "Unknown option '-%c'\n", ps.optopt);
+                //jgrf_log(JG_LOG_WRN, "Unknown option '-%c'\n", ps.optopt);
                 break;
             default:
                 break;
         }
     }
+}
+
+void jgrf_cli_usage() {
+    fprintf(stdout, "usage: jollygood [options] game\n");
+    fprintf(stdout, "  options:\n");
+    fprintf(stdout, "    -c corename       Specify which core to use\n");
+    fprintf(stdout, "    -d                Enable debug log level for core and "
+        "frontend\n");
+    fprintf(stdout, "    -f                Start in Fullscreen mode\n");
+    fprintf(stdout, "    -h                Show Usage\n");
+    fprintf(stdout, "    -s <value>        Select a Post-processing shader\n");
+    fprintf(stdout, "                        0 = Nearest Neighbour (None)\n");
+    fprintf(stdout, "                        1 = Linear\n");
+    fprintf(stdout, "                        2 = Sharp Bilinear\n");
+    fprintf(stdout, "                        3 = AANN (Anti-Aliased Nearest "
+        "Neighbour)\n");
+    fprintf(stdout, "                        4 = CRT-Bespoke\n");
+    fprintf(stdout, "                        5 = CRTea\n");
+    fprintf(stdout, "                        6 = LCD\n");
+    fprintf(stdout, "    -w                Start in Windowed mode\n");
+    fprintf(stdout, "    -x <value>        Video Scale Factor (1 to 8)\n\n");
+    exit(EXIT_FAILURE);
 }
