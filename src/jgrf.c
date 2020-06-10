@@ -773,7 +773,6 @@ void jgrf_quit(int status) {
         jgrf_input_deinit();
     }
     
-    jgrf_settings_deinit();
     if (gameinfo.data) free(gameinfo.data);
     SDL_Quit();
     exit(status);
@@ -1028,6 +1027,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Clean up before exiting
+    jgrf_settings_deinit();
     jgrf_quit(EXIT_SUCCESS);
     return 0;
 }
