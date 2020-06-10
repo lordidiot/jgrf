@@ -1,0 +1,160 @@
+The Jolly Good Reference Frontend
+---------------------------------
+The Jolly Good Reference Frontend is the simplest possible frontend for The
+Jolly Good API.
+
+Compiling
+---------
+Make sure you have The Jolly Good API's header files installed. If you did
+not install them, you will be required to include their path in CFLAGS.
+
+You will also require pkgconf/pkg-config, and development packages for SDL2
+and libepoxy.
+
+Linux:
+  make
+
+macOS:
+  make
+
+BSD:
+  gmake
+
+Windows (MSYS2):
+  make
+
+The build will output an executable named "jollygood".
+
+Configuration
+-------------
+Configuration files are located in:
+  ~/.config/jollygood
+
+The following filenames are used:
+  settings.ini           - General settings
+  input_sysname.ini      - Input definitions for a specific system
+  corename/settings.ini  - Core-specific overrides to general settings
+                         - Emulator settings listed in [corename] section
+
+User data is located in:
+  ~/.local/share/jollygood
+
+The User data directory contains the following subdirectories:
+  assets/corename/       - User assets such as sample data for Nestopia JG
+  bios/                  - Directory the frontend will load BIOS images from
+  save/corename/         - SRAM, Memory Card, or other types of save data
+  screenshots/           - Screenshots with a timestamp and random number
+  state/corename/        - Save States
+
+Input
+-----
+Frontend Key Definitions:
+ESC                      - Quit
+`                        - Fast-forward
+F1                       - Soft Reset
+F2                       - Hard Reset
+F3                       - Switch Media (FDS Disks or CDs)
+F4                       - Insert/Remove Media
+F5                       - Save State (Slot 0)
+F6                       - Save State (Slot 1)
+F7                       - Load State (Slot 0)
+F8                       - Load State (Slot 1)
+F9                       - Screenshot
+F                        - Toggle Fullscreen/Windowed Mode
+
+Game Input Definitions:
+Input for games is not preconfigured. To configure a device:
+
+SHIFT+ALT+[Port Number] ex. SHIFT+ALT+1, SHIFT+ALT+2
+
+Effort has been made to ensure emulator cores know what devices must be plugged
+in. Console output will indicate which emulated device is plugged into which
+emulated port.
+
+Axis and Button input is considered separate. Digital buttons cannot be
+assigned to emulated axes. This is a design choice. Use the ESC key to skip
+defining axes if you do not have a physical input devices with axes. Ideally,
+buy a budget USB gamepad with analog sticks/triggers if you want to play games
+that require analog input. The reverse, assigning physical axes to emulated
+digital buttons, is possible.
+
+Force Feedback data is sent to the physical device that handles the emulated
+device's axis definitions. Currently, this only exists in PlayStation games.
+
+Settings
+--------
+Below is an example of the General Settings configuration file, with defaults:
+/*
+[video]
+;N = Scale video output by N
+scale = 3
+
+;0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, 3 = AANN,
+;4 = CRT-Bespoke, 5 = CRTea, 6 = LCD
+shader = 3
+
+; Settings for CRTea
+;0 = Scanlines, 1 = Aperture Grille Lite, 2 = Aperture Grille,
+;3 = Shadow Mask, 4 = Custom
+crtea_mode = 3
+
+; Settings for CRTea Custom Mode
+;0 = Scanlines, 1 = Aperture Grille Lite, 2 = Aperture Grille, 3 = Shadow Mask
+crtea_masktype = 3
+
+;N = Mask Strength
+crtea_maskstr = 5
+
+;N = Scanline Strength
+crtea_scantr = 6
+
+;N = Sharpness
+crtea_sharpness = 4
+
+;N = CRT Screen Curve Strength
+crtea_curve = 2
+
+;N = CRT Corner Size
+crtea_corner = 3
+
+;N = Trinitron Curve Strength
+crtea_tcurve = 10
+
+[misc]
+;0 = Debug, 1 = Info, 2 = Warning, 3 = Error
+corelog = 1
+
+;0 = Debug, 1 = Info, 2 = Warning, 3 = Error
+frontendlog = 1
+*/
+
+The above configuration settings may be overridden in a core specific
+configuration file. Additionally, you may add a section for Emulator Settings.
+
+The following example is for the Nestopia JG core:
+/*
+[nestopia]
+;0 = Canonical, 1 = Consumer, 2 = Alternative, 3 = RGB, 4 = CXA2025AS
+palette = 1
+
+;0 = 0x00, 1 = 0xff, 2 = Random
+ram_power_state = 2
+
+;0 = Disable, 1 = Enable
+unlimited_sprites = 0
+
+;0 = Disable, 1 = Enable
+genie_distortion = 0
+
+;N = Pulse every N frames
+turbo_rate = 3
+
+;0 = NTSC, 1 = PAL, 2 = Famicom, 3 = Dendy
+favored_system = 0
+
+;0 = Auto, 1 = Force
+force_region = 0
+
+;0 = Disable, 1 = Enable
+ntsc_filter = 0
+*/
