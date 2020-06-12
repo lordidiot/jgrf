@@ -168,13 +168,14 @@ void jgrf_video_gl_create() {
 }
 
 // Initialize video buffer
-void jgrf_video_gl_init() {
+int jgrf_video_gl_init() {
     gdata = jgrf_gdata_ptr();
     if (!(gdata->hints & JG_HINT_VIDEO_INTERNAL)) {
         // Address of allocated memory owned by frontend but passed to core
         videobuf = (void*)calloc(vidinfo->wmax * vidinfo->hmax, pixfmt.size);
         vidinfo->buf = videobuf;
     }
+    return 1;
 }
 
 // Flip the image so that it can be written out with proper orientation

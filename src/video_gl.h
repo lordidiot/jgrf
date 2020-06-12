@@ -10,7 +10,7 @@
 #define VIDEO_GL_H
 
 void jgrf_video_gl_create();
-void jgrf_video_gl_init();
+int jgrf_video_gl_init();
 void jgrf_video_gl_deinit();
 void jgrf_video_gl_fullscreen();
 void jgrf_video_gl_render();

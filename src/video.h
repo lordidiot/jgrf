@@ -10,7 +10,7 @@
 #define VIDEO_H
 
 extern void (*jgrf_video_create)();
-extern void (*jgrf_video_init)();
+extern int (*jgrf_video_init)();
 extern void (*jgrf_video_deinit)();
 extern void (*jgrf_video_fullscreen)();
 extern void (*jgrf_video_render)();

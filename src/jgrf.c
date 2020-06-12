@@ -41,7 +41,6 @@
 // Jolly Good API calls
 static struct _jgapi {
     void *handle;
-    int loaded; // Game loaded 
     // Function Pointers
     int (*jg_init)(void);
     void (*jg_deinit)(void);
@@ -71,6 +70,16 @@ static struct _jgapi {
     void (*jg_set_gameinfo)(jg_gameinfo_t);
     void (*jg_set_paths)(jg_pathinfo_t);
 } jgapi;
+
+// Keep track of which internal systems have been loaded successfully
+static struct _loaded {
+    int core;
+    int game;
+    int audio;
+    int video;
+    int input;
+    int settings;
+} loaded = { 0, 0, 0, 0, 0, 0 };
 
 // Frontend knows the game and path info and passes this to the core
 static jg_gameinfo_t gameinfo;
@@ -314,7 +323,8 @@ static void jgrf_core_load(const char *corepath) {
     jgrf_input_set_states(jgapi.jg_set_inputstate);
     
     // Initialize the emulator core
-    if (!jgapi.jg_init()) {
+    loaded.core = jgapi.jg_init();
+    if (!loaded.core) {
         jgrf_log(JG_LOG_ERR, "Failed to initialize core, exiting...\n");
         jgrf_quit(EXIT_FAILURE);
     }
@@ -322,10 +332,7 @@ static void jgrf_core_load(const char *corepath) {
 
 // Unload the core
 static void jgrf_core_unload() {
-    if (jgapi.loaded) { // Only need to unload if a game was actually loaded
-        jgapi.jg_game_unload();
-        jgapi.jg_deinit(); // Move elsewhere?
-    }
+    jgapi.jg_deinit();
     if (jgapi.handle) { dlclose(jgapi.handle); }
 }
 
@@ -401,7 +408,7 @@ static int jgrf_game_load_archive(const char *filename) {
         
         // Why don't you clean up after yourself?
         mz_zip_reader_end(&zip_archive);
-        jgapi.loaded = 1;
+        loaded.game = 1;
         return 1;
     }
     
@@ -444,7 +451,7 @@ static void jgrf_game_load(const char *filename) {
         jgrf_log(JG_LOG_ERR, "Failed to load game, exiting...\n");
     
     // This item is set mostly so there can be a clean shutdown
-    jgapi.loaded = 1;
+    loaded.game = 1;
     return;
 }
 
@@ -765,14 +772,12 @@ void jgrf_schedule_quit() {
 
 // Shut everything down, clean up, exit program
 void jgrf_quit(int status) {
-    jgrf_core_unload();
-    
-    if (jgapi.loaded) { // Only clean these up if a game was actually loaded
-        if (jgrf_video_deinit) jgrf_video_deinit();
-        jgrf_audio_deinit();
-        jgrf_input_deinit();
-    }
-    jgrf_settings_deinit();
+    if (loaded.game) jgapi.jg_game_unload();
+    if (loaded.core) jgrf_core_unload();
+    if (loaded.audio) jgrf_audio_deinit();
+    if (loaded.video) jgrf_video_deinit();
+    if (loaded.input) jgrf_input_deinit();
+    if (loaded.settings) jgrf_settings_deinit();
     if (gameinfo.data) free(gameinfo.data);
     SDL_Quit();
     exit(status);
@@ -870,8 +875,7 @@ int main(int argc, char *argv[]) {
         "%sscreenshots/", gdata.datapath);
     
     // Load settings
-    jgrf_settings_init();
-    jgrf_settings_read();
+    loaded.settings = jgrf_settings_init();
     
     // Set up function pointers for video
     jgrf_video_setfuncs();
@@ -937,18 +941,18 @@ int main(int argc, char *argv[]) {
     jgrf_cli_override();
     
     // Set up video in the frontend and the core
-    jgrf_video_init();
+    loaded.video = jgrf_video_init();
     jgapi.jg_setup_video();
     
     // Create the window
     jgrf_video_create();
     
     // Initialize audio output
-    jgrf_audio_init();
+    loaded.audio = jgrf_audio_init();
     jgapi.jg_setup_audio();
     
     // Initialize input
-    jgrf_input_init();
+    loaded.input = jgrf_input_init();
     
     // Query core input devices
     jgrf_input_query(jgapi.jg_get_inputinfo);

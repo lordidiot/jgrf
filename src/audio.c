@@ -37,8 +37,8 @@ static void *outbuf = NULL; // Buffer for final output samples
 static size_t sampsize = sizeof(int16_t); // Size of samples - int16 or float32
 
 static mavg_t mavg_in = { 0, 0, {0} }; // Moving Average for input sizes
-static ringbuf_t rbuf_in = {0, 0, 0, 0, NULL }; // Ring buffer for input audio
-static ringbuf_t rbuf_out = {0, 0, 0, 0, NULL }; // Ring buffer for output audio
+static ringbuf_t rbuf_in = { 0, 0, 0, 0, NULL }; // Ring buffer (input audio)
+static ringbuf_t rbuf_out = { 0, 0, 0, 0, NULL }; // Ring buffer (output audio)
 static struct timespec req, rem;
 
 static int corefps = 0; // Emulator core's framerate rounded to nearest int
@@ -238,7 +238,7 @@ void jgrf_audio_cb_flt32(void *userdata, uint8_t *stream, int len) {
 }
 
 // Initialize the audio device and allocate buffers
-void jgrf_audio_init() {
+int jgrf_audio_init() {
     spec.channels = audinfo->channels;
     spec.freq = audinfo->rate;
     spec.silence = 0;
@@ -289,6 +289,8 @@ void jgrf_audio_init() {
     audinfo->buf = corebuf;
     
     SDL_PauseAudioDevice(dev, 1); // Setting to 0 unpauses
+    
+    return 1;
 }
 
 // Unpause the audio device

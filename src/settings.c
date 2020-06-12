@@ -29,28 +29,6 @@ settings_t *jgrf_get_settings() {
     return &settings;
 }
 
-// Initialize the settings to defaults and grab global data pointer
-void jgrf_settings_init() {
-    gdata = jgrf_gdata_ptr();
-    
-    // Set defaults
-    settings.video_api = (setting_t){ 0, 0, 0 };
-    settings.video_fullscreen = (setting_t){ 0, 0, 1 };
-    settings.video_scale = (setting_t){ 3, 1, 8 };
-    settings.video_shader = (setting_t){ 3, 0, 6 };
-    settings.video_crtea_mode = (setting_t){ 3, 0, 4 };
-    settings.video_crtea_masktype = (setting_t){ 1, 0, 3 };
-    settings.video_crtea_maskstr = (setting_t){ 5, 0, 10 };
-    settings.video_crtea_scanstr = (setting_t){ 6, 0, 10 };
-    settings.video_crtea_sharpness = (setting_t){ 4, 0, 10 };
-    settings.video_crtea_curve = (setting_t){ 0, 0, 10 };
-    settings.video_crtea_corner = (setting_t){ 3, 0, 10 };
-    settings.video_crtea_tcurve = (setting_t){ 10, 0, 10 };
-    
-    settings.misc_corelog = (setting_t){ 1, 0, 3 };
-    settings.misc_frontendlog = (setting_t){ 1, 0, 3 };
-}
-
 // Read a setting with boundary check
 static inline void jgrf_setting_rd(const char *s, const char *n, setting_t *t) {
     // section, name, setting
@@ -86,7 +64,7 @@ static void jgrf_settings_handler() {
 }
 
 // Read the general settings ini to override defaults
-void jgrf_settings_read() {
+static void jgrf_settings_read() {
     char path[192];
     snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
     
@@ -101,6 +79,32 @@ void jgrf_settings_read() {
     
     // Clean up the config data
     ini_table_destroy(conf);
+}
+
+// Initialize the settings to defaults and grab global data pointer
+int jgrf_settings_init() {
+    gdata = jgrf_gdata_ptr();
+    
+    // Set defaults
+    settings.video_api = (setting_t){ 0, 0, 0 };
+    settings.video_fullscreen = (setting_t){ 0, 0, 1 };
+    settings.video_scale = (setting_t){ 3, 1, 8 };
+    settings.video_shader = (setting_t){ 3, 0, 6 };
+    settings.video_crtea_mode = (setting_t){ 3, 0, 4 };
+    settings.video_crtea_masktype = (setting_t){ 1, 0, 3 };
+    settings.video_crtea_maskstr = (setting_t){ 5, 0, 10 };
+    settings.video_crtea_scanstr = (setting_t){ 6, 0, 10 };
+    settings.video_crtea_sharpness = (setting_t){ 4, 0, 10 };
+    settings.video_crtea_curve = (setting_t){ 0, 0, 10 };
+    settings.video_crtea_corner = (setting_t){ 3, 0, 10 };
+    settings.video_crtea_tcurve = (setting_t){ 10, 0, 10 };
+    
+    settings.misc_corelog = (setting_t){ 1, 0, 3 };
+    settings.misc_frontendlog = (setting_t){ 1, 0, 3 };
+    
+    jgrf_settings_read();
+    
+    return 1;
 }
 
 // Read core-specific overrides for frontend settings

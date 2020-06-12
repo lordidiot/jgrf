@@ -155,7 +155,7 @@ static void jgrf_input_undef_port(int port) {
 }
 
 // Initialize input
-void jgrf_input_init() {
+int jgrf_input_init() {
     // Set all joystick mappings to undefined
     for (int i = 0; i < MAXPORTS; i++) {
         jgrf_input_undef_port(i);
@@ -194,6 +194,8 @@ void jgrf_input_init() {
     
     // Set pointer to video info - Move coordinate computation?
     vidinfo = jgrf_video_get_info();
+    
+    return 1;
 }
 
 // Deinitialize input and save changes if necessary

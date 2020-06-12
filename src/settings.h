@@ -36,8 +36,7 @@ void jgrf_settings_emu(jg_setting_t*, int);
 
 settings_t *jgrf_get_settings();
 
-void jgrf_settings_init();
-void jgrf_settings_read();
+int jgrf_settings_init();
 void jgrf_settings_override(const char *);
 void jgrf_settings_deinit();
 

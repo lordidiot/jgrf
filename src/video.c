@@ -23,7 +23,7 @@
 #include "settings.h"
 
 void (*jgrf_video_create)();
-void (*jgrf_video_init)();
+int (*jgrf_video_init)();
 void (*jgrf_video_deinit)();
 void (*jgrf_video_fullscreen)();
 void (*jgrf_video_render)();
