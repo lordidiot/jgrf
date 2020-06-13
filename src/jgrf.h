@@ -45,7 +45,7 @@ void jgrf_media_insert(void);
 void jgrf_schedule_quit(void);
 void jgrf_quit(int);
 
-int jgrf_get_speed();
+int jgrf_get_speed(void);
 void jgrf_set_speed(int);
 
 void jgrf_state_save(int);

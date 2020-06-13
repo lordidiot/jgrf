@@ -24,6 +24,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string.h>
 #include <stdint.h>
 
+#include "musl_memmem.h"
+
 static char *twobyte_memmem(const unsigned char *h, size_t k, const unsigned char *n)
 {
 	uint16_t nw = n[0]<<8 | n[1], hw = h[0]<<8 | h[1];

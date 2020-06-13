@@ -193,7 +193,7 @@ void jgrf_log(int level, const char *fmt, ...) {
 }
 
 // Handle log output from the core
-void jgrf_core_log(int level, const char *fmt, ...) {
+static void jgrf_core_log(int level, const char *fmt, ...) {
     va_list va;
     char buffer[512];
     static const char *lchr = "DIWE";
@@ -456,7 +456,7 @@ static void jgrf_game_load(const char *filename) {
 }
 
 // Detect game type inside .zip archives
-int jgrf_game_detect_zip(const char *filename) {
+static int jgrf_game_detect_zip(const char *filename) {
     mz_zip_archive zip_archive;
     memset(&zip_archive, 0, sizeof(zip_archive));
     

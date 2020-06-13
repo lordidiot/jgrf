@@ -218,7 +218,7 @@ void jgrf_audio_set_info(jg_audioinfo_t *ptr) {
 }
 
 // SDL Audio Callback for 16-bit signed integer samples
-void jgrf_audio_cb_int16(void *userdata, uint8_t *stream, int len) {
+static void jgrf_audio_cb_int16(void *userdata, uint8_t *stream, int len) {
     if (userdata) {}
     int16_t *ostream = (int16_t*)stream;
     
@@ -228,7 +228,7 @@ void jgrf_audio_cb_int16(void *userdata, uint8_t *stream, int len) {
 }
 
 // SDL Audio Callback for 32-bit floating point samples
-void jgrf_audio_cb_flt32(void *userdata, uint8_t *stream, int len) {
+static void jgrf_audio_cb_flt32(void *userdata, uint8_t *stream, int len) {
     if (userdata) {}
     float *ostream = (float*)stream;
     

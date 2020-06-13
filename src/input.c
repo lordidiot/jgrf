@@ -122,7 +122,7 @@ void jgrf_input_map_button(int index, uint32_t dnum, const char* value) {
 }
 
 // Read an input config file and assign inputs
-void jgrf_inputcfg_read(jg_inputinfo_t *iinfo) {
+static void jgrf_inputcfg_read(jg_inputinfo_t *iinfo) {
     char path[256];
     snprintf(path, sizeof(path), "%sinput_%s.ini",
         gdata->configpath, gdata->sys);
@@ -268,7 +268,7 @@ static inline void jgrf_input_coords_relative(int32_t x, int32_t y,
 }
 
 // Run an input configuration iteration to set up a specific definition
-void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
+static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
     if (confindex >= (iinfo->numaxes + iinfo->numbuttons)) {
         confactive = 0; // Turn off input config mode
         jgrf_video_text(2, 0, ""); // Disable display of input config info
@@ -289,7 +289,7 @@ void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
 }
 
 // Create config definitions from input events, then configure them to be used
-void jgrf_inputcfg_handler(SDL_Event *event) {
+static void jgrf_inputcfg_handler(SDL_Event *event) {
     char defbuf[32];
     switch(event->type) {
         case SDL_KEYDOWN:

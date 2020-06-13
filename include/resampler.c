@@ -26,8 +26,10 @@ SOFTWARE.
 #include <stddef.h>
 #include <stdint.h>
 
+#include "resampler.h"
+
 size_t resamp_flt32(const float *input, float *output,
-    int in_rate, int out_rate, uint32_t in_size, int channels) {
+    int in_rate, int out_rate, size_t in_size, int channels) {
     
     if (input == NULL)
         return 0;
