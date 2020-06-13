@@ -992,7 +992,8 @@ int main(int argc, char *argv[]) {
             jgapi.jg_exec_frame();
         
         // Render and output the current video
-        jgrf_video_render();
+        if (runframes)
+            jgrf_video_render();
         jgrf_video_swapbuffers();
         
         // Count frames per second (screen frames)
