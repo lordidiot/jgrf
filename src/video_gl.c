@@ -95,7 +95,7 @@ static struct dimensions {
 } dimensions = {0};
 
 // Create the SDL OpenGL Window
-void jgrf_video_gl_create() {
+void jgrf_video_gl_create(void) {
     // Set the GL version
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -108,7 +108,7 @@ void jgrf_video_gl_create() {
     
     // Set up the window
     char title[256];
-    jgrf_gdata_t *gdata = jgrf_gdata_ptr();
+    gdata = jgrf_gdata_ptr();
     snprintf(title, sizeof(title), "%s", gdata->gamename);
     
     settings = jgrf_get_settings();
@@ -168,7 +168,7 @@ void jgrf_video_gl_create() {
 }
 
 // Initialize video buffer
-int jgrf_video_gl_init() {
+int jgrf_video_gl_init(void) {
     gdata = jgrf_gdata_ptr();
     if (!(gdata->hints & JG_HINT_VIDEO_INTERNAL)) {
         // Address of allocated memory owned by frontend but passed to core
@@ -211,7 +211,7 @@ void *jgrf_video_gl_get_pixels(int *rw, int *rh) {
 }
 
 // Deinitialize OpenGL Video
-void jgrf_video_gl_deinit() {
+void jgrf_video_gl_deinit(void) {
     for (int i = 0; i < 3; i++)
         gltDeleteText(msgtext[i]);
     gltTerminate();
@@ -238,14 +238,14 @@ void jgrf_video_gl_deinit() {
 }
 
 // Make the window fullscreen
-void jgrf_video_gl_fullscreen() {
+void jgrf_video_gl_fullscreen(void) {
     SDL_SetWindowFullscreen(window,
         SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP ?
         0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
 // Refresh any video settings that may have changed
-static void jgrf_video_gl_refresh() {
+static void jgrf_video_gl_refresh(void) {
     float top = (float)vidinfo->y / vidinfo->hmax;
     float bottom = 1.0 + top -
         ((vidinfo->hmax - (float)vidinfo->h) / vidinfo->hmax);
@@ -295,7 +295,7 @@ static void jgrf_video_gl_refresh() {
         1.0/(vidinfo->w * tmult), 1.0/(vidinfo->h * tmult));
 }
 
-void jgrf_video_gl_render() {
+void jgrf_video_gl_render(void) {
     // Render the scene
     jgrf_video_gl_refresh(); // Check for changes
     
@@ -422,7 +422,7 @@ void jgrf_video_gl_get_scale_params(float *xscale, float *yscale,
 }
 
 // Retrieve video information
-jg_videoinfo_t* jgrf_video_gl_get_info() {
+jg_videoinfo_t* jgrf_video_gl_get_info(void) {
     return vidinfo;
 }
 
@@ -538,7 +538,7 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
 }
 
 // Set up OpenGL
-void jgrf_video_gl_setup() {
+void jgrf_video_gl_setup(void) {
     //GLint status;
     GLint texfilter_in = GL_NEAREST;
     GLint texfilter_out = GL_NEAREST;
@@ -725,7 +725,7 @@ void jgrf_video_gl_setup() {
 }
 
 // Swap Buffers
-void jgrf_video_gl_swapbuffers() {
+void jgrf_video_gl_swapbuffers(void) {
     SDL_GL_SwapWindow(window);
 }
 

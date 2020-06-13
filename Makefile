@@ -1,6 +1,6 @@
 CC ?= cc
 CFLAGS ?= -O2
-FLAGS := -std=c99 -Wall -Wextra -pedantic
+FLAGS := -std=c99 -Wall -Wextra -Wshadow -pedantic
 INCLUDES := -Iinclude $(shell pkg-config --cflags epoxy sdl2)
 
 PREFIX ?= /usr/local

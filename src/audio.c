@@ -238,7 +238,7 @@ void jgrf_audio_cb_flt32(void *userdata, uint8_t *stream, int len) {
 }
 
 // Initialize the audio device and allocate buffers
-int jgrf_audio_init() {
+int jgrf_audio_init(void) {
     spec.channels = audinfo->channels;
     spec.freq = audinfo->rate;
     spec.silence = 0;
@@ -294,7 +294,7 @@ int jgrf_audio_init() {
 }
 
 // Unpause the audio device
-void jgrf_audio_unpause() {
+void jgrf_audio_unpause(void) {
     SDL_PauseAudioDevice(dev, 0);
 }
 

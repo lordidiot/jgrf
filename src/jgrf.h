@@ -30,7 +30,7 @@ typedef struct jgrf_gdata_t { // Global Data
     uint32_t hints; // Hints from the core
 } jgrf_gdata_t;
 
-jgrf_gdata_t *jgrf_gdata_ptr();
+jgrf_gdata_t *jgrf_gdata_ptr(void);
 
 void jgrf_log(int, const char*, ...);
 
@@ -39,10 +39,10 @@ void jgrf_state_save(int);
 
 void jgrf_reset(int);
 
-void jgrf_media_select();
-void jgrf_media_insert();
+void jgrf_media_select(void);
+void jgrf_media_insert(void);
 
-void jgrf_schedule_quit();
+void jgrf_schedule_quit(void);
 void jgrf_quit(int);
 
 int jgrf_get_speed();

@@ -9,18 +9,18 @@
 #ifndef VIDEO_GL_H
 #define VIDEO_GL_H
 
-void jgrf_video_gl_create();
-int jgrf_video_gl_init();
-void jgrf_video_gl_deinit();
-void jgrf_video_gl_fullscreen();
-void jgrf_video_gl_render();
-void jgrf_video_gl_resize();
+void jgrf_video_gl_create(void);
+int jgrf_video_gl_init(void);
+void jgrf_video_gl_deinit(void);
+void jgrf_video_gl_fullscreen(void);
+void jgrf_video_gl_render(void);
+void jgrf_video_gl_resize(void);
 void jgrf_video_gl_get_scale_params(float*, float*, float*, float*);
 void jgrf_video_gl_set_cursor(int);
-jg_videoinfo_t* jgrf_video_gl_get_info();
+jg_videoinfo_t* jgrf_video_gl_get_info(void);
 void jgrf_video_gl_set_info(jg_videoinfo_t*);
-void jgrf_video_gl_setup();
-void jgrf_video_gl_swapbuffers();
+void jgrf_video_gl_setup(void);
+void jgrf_video_gl_swapbuffers(void);
 void jgrf_video_gl_text(int, int, const char*);
 void *jgrf_video_gl_get_pixels(int*, int*);
 

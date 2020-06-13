@@ -101,9 +101,9 @@ void jgrf_input_map_button(int index, uint32_t dnum, const char* value) {
             jsmap[inum].button[bnum] = &(coreinput[index].button[dnum]);
         }
         else if (value[2] == 'h') { // Hat switch
-            uint8_t inum = value[1] - '0'; // Index (Frontend)
+            uint8_t hinum = value[1] - '0'; // Index (Frontend)
             // Assume hat switch 0 - are there devices with more than one?
-            jsmap[inum].hatpos[value[4] - '0'] =
+            jsmap[hinum].hatpos[value[4] - '0'] =
                 &(coreinput[index].button[dnum]);
         }
     }
@@ -155,7 +155,7 @@ static void jgrf_input_undef_port(int port) {
 }
 
 // Initialize input
-int jgrf_input_init() {
+int jgrf_input_init(void) {
     // Set all joystick mappings to undefined
     for (int i = 0; i < MAXPORTS; i++) {
         jgrf_input_undef_port(i);
@@ -199,7 +199,7 @@ int jgrf_input_init() {
 }
 
 // Deinitialize input and save changes if necessary
-void jgrf_input_deinit() {
+void jgrf_input_deinit(void) {
     // Deinitialize joysticks
     for (int i = 0; i < SDL_NumJoysticks(); i++) {
         if (SDL_JoystickIsHaptic(joystick[i])) {

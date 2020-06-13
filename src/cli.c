@@ -27,12 +27,12 @@ static int shader = -1;
 static int windowed = 0;
 
 // Return the core name specified at the command line
-const char *jgrf_cli_core() {
+const char *jgrf_cli_core(void) {
     return corename;
 }
 
 // Override settings with command line arguments
-void jgrf_cli_override() {
+void jgrf_cli_override(void) {
     settings_t *settings = jgrf_get_settings();
     
     if (debug) {
@@ -94,7 +94,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
     }
 }
 
-void jgrf_cli_usage() {
+void jgrf_cli_usage(void) {
     fprintf(stdout, "usage: jollygood [options] game\n");
     fprintf(stdout, "  options:\n");
     fprintf(stdout, "    -c corename       Specify which core to use\n");

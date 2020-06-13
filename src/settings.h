@@ -34,10 +34,10 @@ typedef struct settings_t {
 
 void jgrf_settings_emu(jg_setting_t*, int);
 
-settings_t *jgrf_get_settings();
+settings_t *jgrf_get_settings(void);
 
-int jgrf_settings_init();
+int jgrf_settings_init(void);
 void jgrf_settings_override(const char *);
-void jgrf_settings_deinit();
+void jgrf_settings_deinit(void);
 
 #endif

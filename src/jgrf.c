@@ -87,7 +87,7 @@ static jg_pathinfo_t pathinfo;
 
 // Global data struct for miscellaneous information
 static jgrf_gdata_t gdata;
-jgrf_gdata_t *jgrf_gdata_ptr() {
+jgrf_gdata_t *jgrf_gdata_ptr(void) {
     return &gdata;
 }
 
@@ -133,7 +133,7 @@ static void mkdirr(const char *dir) {
 }
 
 // Create user directories
-static void jgrf_mkdirs() {
+static void jgrf_mkdirs(void) {
     mkdirr(gdata.configpath);
     mkdirr(gdata.datapath);
     mkdirr(gdata.biospath);
@@ -144,7 +144,7 @@ static void jgrf_mkdirs() {
 }
 
 // Tell the emulator core about the paths the frontend knows
-static void jgrf_set_paths() {
+static void jgrf_set_paths(void) {
     jgapi.jg_set_paths(pathinfo);
 }
 
@@ -221,7 +221,7 @@ void jgrf_core_log(int level, const char *fmt, ...) {
 }
 
 // Pass callbacks into the core
-static void jgrf_callbacks_set() {
+static void jgrf_callbacks_set(void) {
     jgapi.jg_set_cb_log(&jgrf_core_log);
     jgapi.jg_set_cb_audio(&jgrf_audio_cb_core);
     jgapi.jg_set_cb_frametime(&jgrf_frametime);
@@ -331,18 +331,18 @@ static void jgrf_core_load(const char *corepath) {
 }
 
 // Unload the core
-static void jgrf_core_unload() {
+static void jgrf_core_unload(void) {
     jgapi.jg_deinit();
     if (jgapi.handle) { dlclose(jgapi.handle); }
 }
 
 // Generate the CRC32 checksum of the game data
-static void jgrf_hash_crc32() {
+static void jgrf_hash_crc32(void) {
     gameinfo.crc = mz_crc32(gdata.crc, gameinfo.data, gameinfo.size);
 }
 
 // Generate the MD5 checksum of the game data
-static void jgrf_hash_md5() {
+static void jgrf_hash_md5(void) {
     MD5_CTX c;
     size_t md5len = gameinfo.size;
     uint8_t *dataptr = gameinfo.data;
@@ -784,7 +784,7 @@ void jgrf_quit(int status) {
 }
 
 // Retrieve the current fast-forward speed
-int jgrf_get_speed() {
+int jgrf_get_speed(void) {
     return fforward;
 }
 

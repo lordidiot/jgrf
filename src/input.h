@@ -12,8 +12,8 @@
 #define DEADZONE 5120 // Deadzone for axis input
 #define BDEADZONE 16384 // Deadzone for axes acting as buttons
 
-int jgrf_input_init();
-void jgrf_input_deinit();
+int jgrf_input_init(void);
+void jgrf_input_deinit(void);
 void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int));
 void jgrf_input_set_states(void (*set_inputstate)(jg_inputstate_t*, int));
 void jgrf_input_handler(SDL_Event*);

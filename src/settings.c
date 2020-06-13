@@ -43,7 +43,7 @@ static inline void jgrf_setting_rd(const char *s, const char *n, setting_t *t) {
 }
 
 // Handle reading of settings
-static void jgrf_settings_handler() {
+static void jgrf_settings_handler(void) {
     // Video
     //jgrf_setting_rd("video", "api", &settings.video_api);
     jgrf_setting_rd("video", "fullscreen", &settings.video_fullscreen);
@@ -64,7 +64,7 @@ static void jgrf_settings_handler() {
 }
 
 // Read the general settings ini to override defaults
-static void jgrf_settings_read() {
+static void jgrf_settings_read(void) {
     char path[192];
     snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
     
@@ -157,7 +157,7 @@ void jgrf_settings_emu(jg_setting_t *emusettings, int numsettings) {
     ini_table_destroy(conf);
 }
 
-void jgrf_settings_deinit() {
+void jgrf_settings_deinit(void) {
     char path[192];
     snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
     

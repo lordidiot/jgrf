@@ -22,23 +22,23 @@
 #include "video_gl.h"
 #include "settings.h"
 
-void (*jgrf_video_create)();
-int (*jgrf_video_init)();
-void (*jgrf_video_deinit)();
-void (*jgrf_video_fullscreen)();
-void (*jgrf_video_render)();
-void (*jgrf_video_resize)();
+void (*jgrf_video_create)(void);
+int (*jgrf_video_init)(void);
+void (*jgrf_video_deinit)(void);
+void (*jgrf_video_fullscreen)(void);
+void (*jgrf_video_render)(void);
+void (*jgrf_video_resize)(void);
 void (*jgrf_video_get_scale_params)(float*, float*, float*, float*);
 void (*jgrf_video_set_cursor)(int);
-jg_videoinfo_t* (*jgrf_video_get_info)();
+jg_videoinfo_t* (*jgrf_video_get_info)(void);
 void (*jgrf_video_set_info)(jg_videoinfo_t*);
-void (*jgrf_video_swapbuffers)();
+void (*jgrf_video_swapbuffers)(void);
 void (*jgrf_video_text)(int, int, const char*);
 
 static jgrf_gdata_t *gdata;
 
 // Set function pointers for video - Use to select a video API when more exist
-void jgrf_video_setfuncs() {
+void jgrf_video_setfuncs(void) {
     settings_t *settings = jgrf_get_settings();
     gdata = jgrf_gdata_ptr();
     
@@ -99,7 +99,7 @@ void jgrf_video_icon_load(SDL_Window *window) {
 }
 
 // Write the currently displayed video frame to a .png file
-void jgrf_video_screenshot() {
+void jgrf_video_screenshot(void) {
     char ssname[256];
     snprintf(ssname, sizeof(ssname), "%s%ld-%03d.png",
         gdata->sspath, time(NULL), rand() % 899);
