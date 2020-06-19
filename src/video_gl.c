@@ -409,6 +409,14 @@ void jgrf_video_gl_resize() {
     
     // Update the text renderer's viewport size
     gltViewport(dimensions.rw, dimensions.rh);
+    
+    // Get current display mode
+    SDL_DisplayMode dm;
+    SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
+    
+    // Set the base fps for use in the main loop
+    jgrf_set_basefps(dm.refresh_rate);
+
 }
 
 // Retrieve scale parameters for pointing device input

@@ -47,6 +47,7 @@ void jgrf_quit(int);
 
 int jgrf_get_speed(void);
 void jgrf_set_speed(int);
+void jgrf_set_basefps(int);
 
 void jgrf_state_save(int);
 void jgrf_state_load(int);

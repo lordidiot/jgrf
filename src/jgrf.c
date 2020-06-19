@@ -91,7 +91,7 @@ jgrf_gdata_t *jgrf_gdata_ptr(void) {
     return &gdata;
 }
 
-// Program should keep running (1) or, or shut down (0)
+// Program should keep running (1) or, shut down (0)
 static int running = 1;
 
 // Number of extra frames to run for fast-forwarding purposes
@@ -100,9 +100,9 @@ int fforward = 0;
 // Frame timing
 static int corefps = 60;
 static int basefps = 60;
-static double screenfps = 60.0;
-static uint32_t t0 = 0;
-static uint32_t framecount = 0;
+/*double screenfps = 60.0;
+uint32_t t0 = 0;
+uint32_t framecount = 0;*/
 
 // Recursive mkdir (similar to mkdir -p)
 static void mkdirr(const char *dir) {
@@ -829,6 +829,11 @@ void jgrf_state_save(int slot) {
     jgrf_video_text(0, 45, msg);
 }
 
+void jgrf_set_basefps(int fps) {
+    basefps = fps;
+    jgrf_log(JG_LOG_DBG, "Screen base FPS set: %dfps\n", basefps);
+}
+
 // Callback to inform the frontend of current core framerate
 void jgrf_frametime(double frametime) {
     jgrf_audio_timing(frametime);
@@ -997,18 +1002,16 @@ int main(int argc, char *argv[]) {
         jgrf_video_swapbuffers();
         
         // Count frames per second (screen frames)
-        framecount++;
+        /*framecount++;
         uint32_t t = SDL_GetTicks();
         if (t - t0 >= 1000) {
             double seconds = (t - t0) / 1000.0;
             screenfps = framecount / seconds;
             //printf("%d frames in %f seconds = %f FPS (%d)\n",
             //  framecount, seconds, screenfps, (int)(screenfps + 0.5));
-            if (screenfps > 70)
-                basefps = (int)(screenfps + 0.5);
             t0 = t;
             framecount = 0;
-        }
+        }*/
         
         // Poll for events
         while (SDL_PollEvent(&event)) {
