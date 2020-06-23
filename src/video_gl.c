@@ -60,7 +60,7 @@ static GLfloat vertices[] = {
     -1.0, 1.0,  // Vertex 2 (X, Y) Left Top
     1.0, -1.0,  // Vertex 3 (X, Y) Right Bottom
     1.0, 1.0,   // Vertex 4 (X, Y) Right Top
-
+    
     0.0, 0.0,   // Texture 2 (X, Y) Left Top
     0.0, 1.0,   // Texture 1 (X, Y) Left Bottom
     1.0, 0.0,   // Texture 4 (X, Y) Right Top
@@ -308,7 +308,7 @@ void jgrf_video_gl_render(void) {
     // Bind user-created framebuffer and draw scene onto it
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     glBindVertexArray(vao);
-
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texGame);
     
@@ -416,7 +416,6 @@ void jgrf_video_gl_resize() {
     
     // Set the base fps for use in the main loop
     jgrf_set_basefps(dm.refresh_rate);
-
 }
 
 // Retrieve scale parameters for pointing device input
@@ -509,8 +508,10 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
     }
 #if defined(DATADIR)
     else { // Use the system-wide path
-        snprintf(vspath, sizeof(vspath), "%s/jgrf/shaders/%s", DATADIR, vs);
-        snprintf(fspath, sizeof(fspath), "%s/jgrf/shaders/%s", DATADIR, fs);
+        snprintf(vspath, sizeof(vspath),
+            "%s/jollygood/jgrf/shaders/%s", DATADIR, vs);
+        snprintf(fspath, sizeof(fspath),
+            "%s/jollygood/jgrf/shaders/%s", DATADIR, fs);
     }
 #endif
     const GLchar *vertexSource = jgrf_video_gl_shader_load(vspath);
@@ -724,7 +725,7 @@ void jgrf_video_gl_setup(void) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter_out);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter_out);
-
+    
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
         texOutput, 0);
     

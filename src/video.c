@@ -77,8 +77,8 @@ void jgrf_video_icon_load(SDL_Window *window) {
 #if defined(DATADIR)
     struct stat fbuf; // Make sure the icon actually exists at this path
     if (stat(iconpath, &fbuf) != 0) { // Not found locally, use system-wide path
-        snprintf(iconpath, sizeof(iconpath), "%s/jgrf/jollygood%d.png",
-            DATADIR, iconsize);
+        snprintf(iconpath, sizeof(iconpath),
+            "%s/jollygood/jgrf/jollygood%d.png", DATADIR, iconsize);
     }
 #endif
     

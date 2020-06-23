@@ -913,13 +913,13 @@ int main(int argc, char *argv[]) {
     }
 #if defined(LIBDIR) && defined(DATADIR) // Check for the core system-wide
     else {
-        snprintf(corepath, sizeof(corepath), "%s/%s.%s",
+        snprintf(corepath, sizeof(corepath), "%s/jollygood/%s.%s",
             LIBDIR, gdata.corename, SOEXT);
         
         // If it was found, set the core assets path
         if (stat(corepath, &fbuf) == 0) {
-            snprintf(gdata.coreassets, sizeof(gdata.coreassets), "%s/%s",
-                DATADIR, gdata.corename);
+            snprintf(gdata.coreassets, sizeof(gdata.coreassets),
+                "%s/jollygood/%s", DATADIR, gdata.corename);
             corefound = 1;
         }
     }
