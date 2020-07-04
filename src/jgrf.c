@@ -886,7 +886,8 @@ int main(int argc, char *argv[]) {
     jgrf_video_setfuncs();
     
     // Detect the system required to play the game
-    gdata.filename = argv[argc - 1]; // Filename is always the last arg
+    if (gdata.filename == NULL)
+        jgrf_log(JG_LOG_ERR, "Invalid file specified, exiting...\n");
     jgrf_game_detect_sys(gdata.filename);
     
     // Detect the default core for the system

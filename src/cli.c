@@ -72,7 +72,12 @@ void jgrf_cli_parse(int argc, char *argv[]) {
     
     parg_init(&ps);
     
-    parg_reorder(argc, argv, os_def, po_def);
+    // Reorder the arguments to place non-options last
+    int optend = parg_reorder(argc, argv, os_def, po_def);
+    
+    // First non-option is the ROM filename
+    jgrf_gdata_t *gdata = jgrf_gdata_ptr();
+    gdata->filename = argv[optend];
     
     while ((c = parg_getopt_long(&ps, argc, argv, os_def, po_def, &l)) != -1) {
         switch (c) {
