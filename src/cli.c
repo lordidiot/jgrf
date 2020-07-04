@@ -19,6 +19,17 @@
 #include "settings.h"
 
 // Variables for command line options
+static const char *os_def = "c:dfhs:wx:";
+static const struct parg_option po_def[] = {
+    { "core", PARG_REQARG, NULL, 'c' },
+    { "debug", PARG_NOARG, NULL, 'd' },
+    { "fullscreen", PARG_NOARG, NULL, 'f' },
+    { "help", PARG_NOARG, NULL, 'h' },
+    { "shader", PARG_REQARG, NULL, 's' },
+    { "window", PARG_NOARG, NULL, 'w' },
+    { "scale", PARG_REQARG, NULL, 'x' },
+};
+
 static const char *corename = NULL;
 static int debug = 0;
 static int fullscreen = 0;
@@ -57,10 +68,13 @@ void jgrf_cli_override(void) {
 void jgrf_cli_parse(int argc, char *argv[]) {
     struct parg_state ps;
     int c;
+    int l = -1;
     
     parg_init(&ps);
     
-    while ((c = parg_getopt(&ps, argc, argv, "c:dhfs:wx:")) != -1) {
+    parg_reorder(argc, argv, os_def, po_def);
+    
+    while ((c = parg_getopt_long(&ps, argc, argv, os_def, po_def, &l)) != -1) {
         switch (c) {
             case 1:
                 break;
@@ -97,21 +111,28 @@ void jgrf_cli_parse(int argc, char *argv[]) {
 void jgrf_cli_usage(void) {
     fprintf(stdout, "usage: jollygood [options] game\n");
     fprintf(stdout, "  options:\n");
-    fprintf(stdout, "    -c corename       Specify which core to use\n");
-    fprintf(stdout, "    -d                Enable debug log level for core and "
-        "frontend\n");
-    fprintf(stdout, "    -f                Start in Fullscreen mode\n");
-    fprintf(stdout, "    -h                Show Usage\n");
-    fprintf(stdout, "    -s <value>        Select a Post-processing shader\n");
-    fprintf(stdout, "                        0 = Nearest Neighbour (None)\n");
-    fprintf(stdout, "                        1 = Linear\n");
-    fprintf(stdout, "                        2 = Sharp Bilinear\n");
-    fprintf(stdout, "                        3 = AANN (Anti-Aliased Nearest "
-        "Neighbour)\n");
-    fprintf(stdout, "                        4 = CRT-Bespoke\n");
-    fprintf(stdout, "                        5 = CRTea\n");
-    fprintf(stdout, "                        6 = LCD\n");
-    fprintf(stdout, "    -w                Start in Windowed mode\n");
-    fprintf(stdout, "    -x <value>        Video Scale Factor (1 to 8)\n\n");
+    fprintf(stdout, "    -c, --core <corename>   "
+        "Specify which core to use\n");
+    fprintf(stdout, "    -d, --debug             "
+        "Enable debug log level for core and frontend\n");
+    fprintf(stdout, "    -f, --fullscreen        "
+        "Start in Fullscreen mode\n");
+    fprintf(stdout, "    -h, --help              "
+        "Show Usage\n");
+    fprintf(stdout, "    -s, --shader <value>    "
+        "Select a Post-processing shader\n");
+    fprintf(stdout, "                              0 = Nearest Neighbour (None)"
+        "\n");
+    fprintf(stdout, "                              1 = Linear\n");
+    fprintf(stdout, "                              2 = Sharp Bilinear\n");
+    fprintf(stdout, "                              3 = AANN (Anti-Aliased "
+        "Nearest Neighbour)\n");
+    fprintf(stdout, "                              4 = CRT-Bespoke\n");
+    fprintf(stdout, "                              5 = CRTea\n");
+    fprintf(stdout, "                              6 = LCD\n");
+    fprintf(stdout, "    -w, --window            "
+        "Start in Windowed mode\n");
+    fprintf(stdout, "    -x, --scale <value>     "
+        "Video Scale Factor (1 to 8)\n\n");
     exit(EXIT_FAILURE);
 }

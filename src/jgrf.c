@@ -642,7 +642,7 @@ int jgrf_game_detect_sys(const char *filename) {
     if (ext != NULL)
         ext++;
     else
-        jgrf_log(JG_LOG_ERR, "File not found: %s\n", filename);
+        return 0;
     
     if (!strcasecmp(ext, "bin"))
         return 0;
