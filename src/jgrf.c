@@ -664,7 +664,7 @@ int jgrf_game_detect_sys(const char *filename) {
     else if (!strcasecmp(ext, "a78"))
         snprintf(gdata.sys, sizeof(gdata.sys), "7800");
     
-    else if (!strcasecmp(ext, "col"))
+    else if (!strcasecmp(ext, "col") || !strcasecmp(ext, "rom"))
         snprintf(gdata.sys, sizeof(gdata.sys), "coleco");
     
     else if (!strcasecmp(ext, "gb") || !strcasecmp(ext, "gbc"))
