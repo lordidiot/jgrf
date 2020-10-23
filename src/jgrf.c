@@ -860,6 +860,12 @@ int main(int argc, char *argv[]) {
     putenv("SDL_AUDIODRIVER=directsound");
     #endif
     
+    // Allow joystick input when the window is not focused
+    SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+    
+    // Allow window to stay fullscreen if the window manager tries to iconify it
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
+    
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK |
         SDL_INIT_HAPTIC) < 0) {

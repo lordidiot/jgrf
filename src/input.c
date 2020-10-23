@@ -180,9 +180,6 @@ int jgrf_input_init(void) {
         }
     }
     
-    // Allow joystick input when the window is not focused
-    SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
-    
     // Initialize the input configuration structure
     char path[256];
     snprintf(path, sizeof(path), "%sinput_%s.ini",
