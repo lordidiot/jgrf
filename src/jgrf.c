@@ -696,6 +696,9 @@ int jgrf_game_detect_sys(const char *filename) {
     else if (!strcasecmp(ext, "vb"))
         snprintf(gdata.sys, sizeof(gdata.sys), "vb");
     
+    else if (!strcasecmp(ext, "vec"))
+        snprintf(gdata.sys, sizeof(gdata.sys), "vectrex");
+    
     else if (!strcasecmp(ext, "ws") || !strcasecmp(ext, "wsc"))
         snprintf(gdata.sys, sizeof(gdata.sys), "wswan");
     
@@ -748,6 +751,9 @@ static int jgrf_core_default() {
     
     else if (!strcmp(gdata.sys, "vb"))
         snprintf(gdata.corename, sizeof(gdata.corename), "mednafen");
+    
+    else if (!strcmp(gdata.sys, "vectrex"))
+        snprintf(gdata.corename, sizeof(gdata.corename), "vecx");
     
     else if (!strcmp(gdata.sys, "wswan"))
         snprintf(gdata.corename, sizeof(gdata.corename), "mednafen");
