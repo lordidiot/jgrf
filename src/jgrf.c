@@ -292,6 +292,8 @@ static void jgrf_core_load(const char *corepath) {
     // Populate frontend's global data with information from the core
     snprintf(gdata.corefname, sizeof(gdata.corefname),
         "%s", coreinfo->fname);
+    snprintf(gdata.coreversion, sizeof(gdata.coreversion),
+        "%s", coreinfo->version);
     snprintf(gdata.userassets, sizeof(gdata.userassets),
         "%sassets/%s", gdata.datapath, coreinfo->name); 
     snprintf(gdata.biospath, sizeof(gdata.biospath),
@@ -952,7 +954,6 @@ int main(int argc, char *argv[]) {
     
     // Load the core
     jgrf_core_load(corepath);
-    jgrf_log(JG_LOG_DBG, "Core: %s\n", gdata.corename);
     
     // Create any directories that are required
     jgrf_mkdirs();
@@ -965,6 +966,13 @@ int main(int argc, char *argv[]) {
     
     // Do final overrides using command line options
     jgrf_cli_override();
+    
+    // Show core information
+    jgrf_log(JG_LOG_INF, "Core: %s (%s %s)\n",
+        gdata.corename, gdata.corefname, gdata.coreversion);
+    jgrf_log(JG_LOG_DBG, "Core System: %s\n", gdata.sys);
+    jgrf_log(JG_LOG_DBG, "Core Path: %s\n", corepath);
+    jgrf_log(JG_LOG_DBG, "Core Asset Path: %s\n", gdata.coreassets);
     
     // Set up video in the frontend and the core
     loaded.video = jgrf_video_init();

@@ -15,6 +15,7 @@ typedef struct jgrf_gdata_t { // Global Data
     char datapath[64]; // Base user data path
     char corename[64]; // Internally used core name
     char corefname[96]; // Core Full Name
+    char coreversion[32]; // Core Version
     char gamename[128]; // Internally used game name
     char gamefname[128]; // Internally used game name with extension
     char coreassets[128]; // Core asset path
