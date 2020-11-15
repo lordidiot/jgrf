@@ -19,22 +19,22 @@
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "c:dfhs:wx:";
+static const char *os_def = "c:fhs:vwx:";
 static const struct parg_option po_def[] = {
     { "core", PARG_REQARG, NULL, 'c' },
-    { "debug", PARG_NOARG, NULL, 'd' },
     { "fullscreen", PARG_NOARG, NULL, 'f' },
     { "help", PARG_NOARG, NULL, 'h' },
     { "shader", PARG_REQARG, NULL, 's' },
+    { "verbose", PARG_NOARG, NULL, 'v' },
     { "window", PARG_NOARG, NULL, 'w' },
     { "scale", PARG_REQARG, NULL, 'x' },
 };
 
 static const char *corename = NULL;
-static int debug = 0;
 static int fullscreen = 0;
 static int scale = 0;
 static int shader = -1;
+static int verbose = 0;
 static int windowed = 0;
 
 // Return the core name specified at the command line
@@ -46,7 +46,7 @@ const char *jgrf_cli_core(void) {
 void jgrf_cli_override(void) {
     settings_t *settings = jgrf_get_settings();
     
-    if (debug) {
+    if (verbose) {
         settings->misc_corelog.val = 0;
         settings->misc_frontendlog.val = 0;
     }
@@ -86,9 +86,6 @@ void jgrf_cli_parse(int argc, char *argv[]) {
             case 'c': // Core selection
                 corename = ps.optarg;
                 break;
-            case 'd': // Enable debug level logs from core and frontend
-                debug = 1;
-                break;
             case 'h': // Show usage
                 jgrf_cli_usage();
                 break;
@@ -97,6 +94,9 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 break;
             case 's': // Shader
                 shader = atoi(ps.optarg);
+                break;
+            case 'v': // Enable verbose log output for core and frontend
+                verbose = 1;
                 break;
             case 'w': // Start in windowed mode
                 windowed = 1;
@@ -118,8 +118,6 @@ void jgrf_cli_usage(void) {
     fprintf(stdout, "  options:\n");
     fprintf(stdout, "    -c, --core <corename>   "
         "Specify which core to use\n");
-    fprintf(stdout, "    -d, --debug             "
-        "Enable debug log level for core and frontend\n");
     fprintf(stdout, "    -f, --fullscreen        "
         "Start in Fullscreen mode\n");
     fprintf(stdout, "    -h, --help              "
@@ -135,6 +133,8 @@ void jgrf_cli_usage(void) {
     fprintf(stdout, "                              4 = CRT-Bespoke\n");
     fprintf(stdout, "                              5 = CRTea\n");
     fprintf(stdout, "                              6 = LCD\n");
+    fprintf(stdout, "    -v, --verbose           "
+        "Enable verbose log output for core and frontend\n");
     fprintf(stdout, "    -w, --window            "
         "Start in Windowed mode\n");
     fprintf(stdout, "    -x, --scale <value>     "
