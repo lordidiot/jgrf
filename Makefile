@@ -1,7 +1,10 @@
+SOURCEDIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword \
+	$(MAKEFILE_LIST))))))
+
 CC ?= cc
 CFLAGS ?= -O2
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -pedantic
-INCLUDES := -Iinclude $(shell pkg-config --cflags epoxy sdl2)
+INCLUDES := -I$(SOURCEDIR)/include $(shell pkg-config --cflags epoxy sdl2)
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -41,10 +44,10 @@ CSRCS := objs/jgrf.o \
 	objs/include/resampler.o \
 	objs/include/tconfig.o \
 
-objs/%.o: src/%.c
+objs/%.o: $(SOURCEDIR)/src/%.c
 	$(CC) $(CFLAGS) $(FLAGS) $(INCLUDES) $(CPPFLAGS) $(DEFS) -c $< -o $@
 
-objs/include/%.o: include/%.c
+objs/include/%.o: $(SOURCEDIR)/include/%.c
 	$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c $< -o $@
 
 OBJS := $(CSRCS:.c=.o)
@@ -60,7 +63,7 @@ $(TARGET): $(OBJS)
 clean:
 	rm -f $(OBJS) $(TARGET)
 
-install:
+install: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
 	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps
@@ -74,25 +77,25 @@ install:
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
 	cp $(TARGET) $(DESTDIR)$(BINDIR)
-	cp shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp shaders/crt-bespoke.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp shaders/crtea.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp shaders/lcd.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp shaders/sharp-bilinear.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp icons/jollygood96.png $(DESTDIR)$(DATADIR)/jollygood/jgrf
-	cp icons/jollygood1024.png $(DESTDIR)$(DATADIR)/jollygood/jgrf
-	cp icons/jollygood32.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/jollygood.png
-	cp icons/jollygood48.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/jollygood.png
-	cp icons/jollygood64.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps/jollygood.png
-	cp icons/jollygood96.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/96x96/apps/jollygood.png
-	cp icons/jollygood128.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/128x128/apps/jollygood.png
-	cp icons/jollygood256.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/256x256/apps/jollygood.png
-	cp icons/jollygood512.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/512x512/apps/jollygood.png
-	cp icons/jollygood1024.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
-	cp icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/jollygood.svg
-	cp icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/jollygood.svg
+	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	cp $(SOURCEDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	cp $(SOURCEDIR)/shaders/crt-bespoke.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	cp $(SOURCEDIR)/shaders/crtea.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	cp $(SOURCEDIR)/shaders/lcd.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	cp $(SOURCEDIR)/shaders/sharp-bilinear.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	cp $(SOURCEDIR)/icons/jollygood96.png $(DESTDIR)$(DATADIR)/jollygood/jgrf
+	cp $(SOURCEDIR)/icons/jollygood1024.png $(DESTDIR)$(DATADIR)/jollygood/jgrf
+	cp $(SOURCEDIR)/icons/jollygood32.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/jollygood.png
+	cp $(SOURCEDIR)/icons/jollygood48.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/jollygood.png
+	cp $(SOURCEDIR)/icons/jollygood64.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps/jollygood.png
+	cp $(SOURCEDIR)/icons/jollygood96.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/96x96/apps/jollygood.png
+	cp $(SOURCEDIR)/icons/jollygood128.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/128x128/apps/jollygood.png
+	cp $(SOURCEDIR)/icons/jollygood256.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/256x256/apps/jollygood.png
+	cp $(SOURCEDIR)/icons/jollygood512.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/512x512/apps/jollygood.png
+	cp $(SOURCEDIR)/icons/jollygood1024.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
+	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/jollygood.svg
+	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/jollygood.svg
 
 uninstall:
 	rm $(DESTDIR)$(BINDIR)/$(TARGET)
