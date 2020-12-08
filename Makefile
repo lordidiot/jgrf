@@ -10,6 +10,7 @@ PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 DATAROOTDIR ?= $(PREFIX)/share
 DATADIR ?= $(DATAROOTDIR)
+DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
 LIBDIR ?= $(PREFIX)/lib
 TARGET := jollygood
 
@@ -65,6 +66,7 @@ clean:
 
 install: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
+	@mkdir -p $(DESTDIR)$(DOCDIR)
 	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps
@@ -77,6 +79,8 @@ install: all
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
 	cp $(TARGET) $(DESTDIR)$(BINDIR)
+	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
+	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
@@ -99,6 +103,7 @@ install: all
 
 uninstall:
 	rm $(DESTDIR)$(BINDIR)/$(TARGET)
+	rm -rf $(DESTDIR)$(DOCDIR)
 	rm -rf $(DESTDIR)$(DATADIR)/jollygood/jgrf
 	rm $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/jollygood.png
 	rm $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/jollygood.png
