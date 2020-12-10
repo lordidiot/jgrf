@@ -36,7 +36,7 @@ Configuration files are located in:
 The following filenames are used:
   settings.ini           - General settings
   input_sysname.ini      - Input definitions for a specific system
-  corename/settings.ini  - Core-specific overrides to general settings
+  corename.ini           - Core-specific overrides to general settings
                          - Emulator settings listed in [corename] section
 
 User data is located in:

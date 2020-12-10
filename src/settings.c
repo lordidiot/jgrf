@@ -129,7 +129,7 @@ void jgrf_settings_override(const char *name) {
 // Read core-specific settings - "Emulator Settings"
 void jgrf_settings_emu(jg_setting_t *emusettings, int numsettings) {
     char path[256];
-    snprintf(path, sizeof(path), "%s%s/settings.ini",
+    snprintf(path, sizeof(path), "%s%s.ini",
         gdata->configpath, gdata->corename);
     
     // Create config structure
