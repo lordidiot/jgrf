@@ -105,7 +105,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 scale = atoi(ps.optarg);
                 break;
             case '?':
-                //jgrf_log(JG_LOG_WRN, "Unknown option '-%c'\n", ps.optopt);
+                jgrf_log(JG_LOG_WRN, "Unknown option '-%c'\n", ps.optopt);
                 break;
             default:
                 break;
@@ -139,5 +139,4 @@ void jgrf_cli_usage(void) {
         "Start in Windowed mode\n");
     fprintf(stdout, "    -x, --scale <value>     "
         "Video Scale Factor (1 to 8)\n\n");
-    exit(EXIT_FAILURE);
 }

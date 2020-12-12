@@ -857,8 +857,10 @@ void jgrf_frametime(double frametime) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 2)
+    if (argc < 2) {
         jgrf_cli_usage();
+        jgrf_quit(EXIT_SUCCESS);
+    }
     
     // Parse command line options
     jgrf_cli_parse(argc, argv);
@@ -908,8 +910,10 @@ int main(int argc, char *argv[]) {
     jgrf_video_setfuncs();
     
     // Detect the system required to play the game
-    if (gdata.filename == NULL)
+    if (gdata.filename == NULL) {
+        jgrf_cli_usage();
         jgrf_log(JG_LOG_ERR, "Invalid file specified, exiting...\n");
+    }
     jgrf_game_detect_sys(gdata.filename);
     
     // Detect the default core for the system
