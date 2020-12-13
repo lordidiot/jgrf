@@ -88,6 +88,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 break;
             case 'h': // Show usage
                 jgrf_cli_usage();
+                jgrf_quit(EXIT_SUCCESS);
                 break;
             case 'f': // Start in fullscreen mode
                 fullscreen = 1;
