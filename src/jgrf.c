@@ -326,16 +326,16 @@ static void jgrf_core_load(const char *corepath) {
     
     // Initialize the emulator core
     loaded.core = jgapi.jg_init();
-    if (!loaded.core) {
-        jgrf_log(JG_LOG_ERR, "Failed to initialize core, exiting...\n");
-        jgrf_quit(EXIT_FAILURE);
-    }
+    if (!loaded.core)
+        jgrf_log(JG_LOG_ERR, "Failed to initialize core. Exiting...\n");
 }
 
 // Unload the core
 static void jgrf_core_unload(void) {
     jgapi.jg_deinit();
-    if (jgapi.handle) { dlclose(jgapi.handle); }
+    
+    if (jgapi.handle)
+        dlclose(jgapi.handle);
 }
 
 // Generate the CRC32 checksum of the game data
@@ -380,7 +380,7 @@ static int jgrf_game_load_archive(const char *filename) {
         
         if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
             mz_zip_reader_end(&zip_archive);
-            jgrf_log(JG_LOG_ERR, "Failed to stat archive, exiting...\n");
+            jgrf_log(JG_LOG_ERR, "Failed to stat archive. Exiting...\n");
         }
         
         // Extract the data into memory
@@ -405,7 +405,7 @@ static int jgrf_game_load_archive(const char *filename) {
         if (!jgapi.jg_game_load()) {
             mz_zip_reader_end(&zip_archive);
             jgrf_log(JG_LOG_ERR,
-                "Failed to load ROM from archive, exiting...\n");
+                "Failed to load ROM from archive. Exiting...\n");
         }
         
         // Why don't you clean up after yourself?
@@ -425,7 +425,7 @@ static void jgrf_game_load(const char *filename) {
     
     FILE *file = fopen(filename, "rb");
     
-    if (!file) jgrf_log(JG_LOG_ERR, "Failed to open file, exiting...\n");
+    if (!file) jgrf_log(JG_LOG_ERR, "Failed to open file. Exiting...\n");
     
     fseek(file, 0, SEEK_END);
     gameinfo.size = ftell(file);
@@ -433,7 +433,7 @@ static void jgrf_game_load(const char *filename) {
     
     gameinfo.data = malloc(gameinfo.size);
     if (!gameinfo.data || !fread((void*)gameinfo.data, gameinfo.size, 1, file))
-        jgrf_log(JG_LOG_ERR, "Failed to read file, exiting...\n");
+        jgrf_log(JG_LOG_ERR, "Failed to read file. Exiting...\n");
     
     // Close the file - some cores may want to load it again on their own terms
     fclose(file);
@@ -450,7 +450,7 @@ static void jgrf_game_load(const char *filename) {
     
     // If the game could not be loaded, there is no point continuing
     if (!jgapi.jg_game_load())
-        jgrf_log(JG_LOG_ERR, "Failed to load game, exiting...\n");
+        jgrf_log(JG_LOG_ERR, "Failed to load game. Exiting...\n");
     
     // This item is set mostly so there can be a clean shutdown
     loaded.game = 1;
@@ -472,7 +472,7 @@ static int jgrf_game_detect_zip(const char *filename) {
         
         if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
             mz_zip_reader_end(&zip_archive);
-            jgrf_log(JG_LOG_ERR, "Failed to stat archive, exiting...\n");
+            jgrf_log(JG_LOG_ERR, "Failed to stat archive. Exiting...\n");
         }
         
         // Set the game name based on the file inside the zip
@@ -912,7 +912,7 @@ int main(int argc, char *argv[]) {
     // Detect the system required to play the game
     if (gdata.filename == NULL) {
         jgrf_cli_usage();
-        jgrf_log(JG_LOG_ERR, "Invalid file specified, exiting...\n");
+        jgrf_log(JG_LOG_ERR, "Invalid file specified. Exiting...\n");
     }
     jgrf_game_detect_sys(gdata.filename);
     
@@ -922,7 +922,7 @@ int main(int argc, char *argv[]) {
     }
     else if (!jgrf_core_default())
         jgrf_log(JG_LOG_ERR,
-            "Invalid file, cannot detect default core, exiting...\n");
+            "Cannot detect default core, or invalid file. Exiting...\n");
     
     // Set the core path to the local core path
     char corepath[192];
@@ -954,7 +954,7 @@ int main(int argc, char *argv[]) {
     
     // If no core was found, there is no reason to keep the program running
     if (!corefound)
-        jgrf_log(JG_LOG_ERR, "Failed to locate core, exiting...\n");
+        jgrf_log(JG_LOG_ERR, "Failed to locate core. Exiting...\n");
     
     // Load the core
     jgrf_core_load(corepath);
