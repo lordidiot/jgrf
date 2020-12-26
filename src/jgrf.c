@@ -675,15 +675,17 @@ int jgrf_game_detect_sys(const char *filename) {
     else if (!strcasecmp(ext, "gba"))
         snprintf(gdata.sys, sizeof(gdata.sys), "gba");
     
+    else if (!strcasecmp(ext, "gg"))
+        snprintf(gdata.sys, sizeof(gdata.sys), "gg");
+    
     else if (!strcasecmp(ext, "lnx"))
         snprintf(gdata.sys, sizeof(gdata.sys), "lynx");
     
+    else if (!strcasecmp(ext, "md"))
+        snprintf(gdata.sys, sizeof(gdata.sys), "md");
+    
     else if (!strcasecmp(ext, "nes") || !strcasecmp(ext, "fds"))
         snprintf(gdata.sys, sizeof(gdata.sys), "nes");
-    
-    else if (!strcasecmp(ext, "md") || !strcasecmp(ext, "sms") ||
-        !strcasecmp(ext, "gg") || !strcasecmp(ext, "sg"))
-        snprintf(gdata.sys, sizeof(gdata.sys), "md"); // genplus
     
     else if (!strcasecmp(ext, "ngp") || !strcasecmp(ext, "ngc"))
         snprintf(gdata.sys, sizeof(gdata.sys), "ngp");
@@ -694,6 +696,12 @@ int jgrf_game_detect_sys(const char *filename) {
     else if (!strcasecmp(ext, "sfc") || !strcasecmp(ext, "smc") ||
         !strcasecmp(ext, "bs"))
         snprintf(gdata.sys, sizeof(gdata.sys), "snes");
+    
+    else if (!strcasecmp(ext, "sg"))
+        snprintf(gdata.sys, sizeof(gdata.sys), "sg");
+    
+    else if (!strcasecmp(ext, "sms"))
+        snprintf(gdata.sys, sizeof(gdata.sys), "sms");
     
     else if (!strcasecmp(ext, "vb"))
         snprintf(gdata.sys, sizeof(gdata.sys), "vb");
@@ -727,6 +735,9 @@ static int jgrf_core_default() {
     else if (!strcmp(gdata.sys, "gba"))
         snprintf(gdata.corename, sizeof(gdata.corename), "mgba");
     
+    else if (!strcmp(gdata.sys, "gg"))
+        snprintf(gdata.corename, sizeof(gdata.corename), "genplus");
+    
     else if (!strcmp(gdata.sys, "md"))
         snprintf(gdata.corename, sizeof(gdata.corename), "genplus");
     
@@ -744,6 +755,12 @@ static int jgrf_core_default() {
     
     else if (!strcmp(gdata.sys, "psx"))
         snprintf(gdata.corename, sizeof(gdata.corename), "mednafen");
+    
+    else if (!strcmp(gdata.sys, "sg"))
+        snprintf(gdata.corename, sizeof(gdata.corename), "genplus");
+    
+    else if (!strcmp(gdata.sys, "sms"))
+        snprintf(gdata.corename, sizeof(gdata.corename), "genplus");
     
     else if (!strcmp(gdata.sys, "snes"))
         snprintf(gdata.corename, sizeof(gdata.corename), "bsnes");
