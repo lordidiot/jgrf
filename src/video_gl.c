@@ -295,7 +295,7 @@ static void jgrf_video_gl_refresh(void) {
         1.0/(vidinfo->w * tmult), 1.0/(vidinfo->h * tmult));
 }
 
-void jgrf_video_gl_render(void) {
+void jgrf_video_gl_render(int render) {
     // Render the scene
     jgrf_video_gl_refresh(); // Check for changes
     
@@ -312,7 +312,9 @@ void jgrf_video_gl_render(void) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texGame);
     
-    glTexSubImage2D(GL_TEXTURE_2D,
+    // Render if there is new pixel data, do Black Frame Insertion otherwise
+    if (render) {
+        glTexSubImage2D(GL_TEXTURE_2D,
                 0,
                 0, // xoffset
                 0, // yoffset
@@ -321,8 +323,9 @@ void jgrf_video_gl_render(void) {
                 pixfmt.format, // format
                 pixfmt.type, // type
             vidinfo->buf);//*/
-    /*glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax,
-        0, pixfmt.format, pixfmt.type, vidinfo->buf);//*/
+        /*glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax,
+            0, pixfmt.format, pixfmt.type, vidinfo->buf);//*/
+    }
     
     // Clear the screen to black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

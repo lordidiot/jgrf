@@ -13,7 +13,7 @@ extern void (*jgrf_video_create)(void);
 extern int (*jgrf_video_init)(void);
 extern void (*jgrf_video_deinit)(void);
 extern void (*jgrf_video_fullscreen)(void);
-extern void (*jgrf_video_render)(void);
+extern void (*jgrf_video_render)(int);
 extern void (*jgrf_video_resize)(void);
 extern void (*jgrf_video_get_scale_params)(float*, float*, float*, float*);
 extern void (*jgrf_video_set_cursor)(int);

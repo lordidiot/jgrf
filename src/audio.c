@@ -130,6 +130,10 @@ void jgrf_audio_timing(double frametime) {
 
 // Callback used by core to tell the frontend how many samples are ready
 void jgrf_audio_cb_core(size_t in_size) {
+    // If the core calls this function with no samples ready, do nothing
+    if (!in_size)
+        return;
+    
     // Adjust input moving average calculation to reflect this input size
     jgrf_audio_mavg(&mavg_in, in_size);
     

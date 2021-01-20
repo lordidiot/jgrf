@@ -26,7 +26,7 @@ void (*jgrf_video_create)(void);
 int (*jgrf_video_init)(void);
 void (*jgrf_video_deinit)(void);
 void (*jgrf_video_fullscreen)(void);
-void (*jgrf_video_render)(void);
+void (*jgrf_video_render)(int);
 void (*jgrf_video_resize)(void);
 void (*jgrf_video_get_scale_params)(float*, float*, float*, float*);
 void (*jgrf_video_set_cursor)(int);

@@ -13,7 +13,7 @@ void jgrf_video_gl_create(void);
 int jgrf_video_gl_init(void);
 void jgrf_video_gl_deinit(void);
 void jgrf_video_gl_fullscreen(void);
-void jgrf_video_gl_render(void);
+void jgrf_video_gl_render(int);
 void jgrf_video_gl_resize(void);
 void jgrf_video_gl_get_scale_params(float*, float*, float*, float*);
 void jgrf_video_gl_set_cursor(int);
