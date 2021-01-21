@@ -30,39 +30,44 @@ else
 	LIBS := $(shell pkg-config --libs epoxy sdl2) -lm -ldl
 endif
 
-CSRCS := objs/jgrf.o \
-	objs/audio.o \
-	objs/cli.o \
-	objs/input.o \
-	objs/settings.o \
-	objs/video.o \
-	objs/video_gl.o \
-	objs/include/lodepng.o \
-	objs/include/md5.o \
-	objs/include/miniz.o \
-	objs/include/musl_memmem.o \
-	objs/include/parg.o \
-	objs/include/resampler.o \
-	objs/include/tconfig.o \
+OBJDIR := objs
 
-objs/%.o: $(SOURCEDIR)/src/%.c
+CSRCS := $(OBJDIR)/jgrf.o \
+	$(OBJDIR)/audio.o \
+	$(OBJDIR)/cli.o \
+	$(OBJDIR)/input.o \
+	$(OBJDIR)/settings.o \
+	$(OBJDIR)/video.o \
+	$(OBJDIR)/video_gl.o \
+	$(OBJDIR)/include/lodepng.o \
+	$(OBJDIR)/include/md5.o \
+	$(OBJDIR)/include/miniz.o \
+	$(OBJDIR)/include/musl_memmem.o \
+	$(OBJDIR)/include/parg.o \
+	$(OBJDIR)/include/resampler.o \
+	$(OBJDIR)/include/tconfig.o \
+
+$(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c maketree
 	$(CC) $(CFLAGS) $(FLAGS) $(INCLUDES) $(CPPFLAGS) $(DEFS) -c $< -o $@
 
-objs/include/%.o: $(SOURCEDIR)/include/%.c
+$(OBJDIR)/include/%.o: $(SOURCEDIR)/include/%.c maketree
 	$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c $< -o $@
 
 OBJS := $(CSRCS:.c=.o)
 
 all: maketree $(TARGET)
 
-maketree:
-	@mkdir -p objs/include/
+maketree: $(OBJDIR)/.tag
+
+$(OBJDIR)/.tag:
+	@mkdir -p $(OBJDIR)/include/
+	@touch $@
 
 $(TARGET): $(OBJS)
 	$(CC) $^ $(LDFLAGS) $(LIBS) -o $(TARGET)
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf $(OBJDIR)/ $(TARGET)
 
 install: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
