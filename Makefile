@@ -47,17 +47,15 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/include/resampler.o \
 	$(OBJDIR)/include/tconfig.o \
 
-$(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c maketree
+$(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
 	$(CC) $(CFLAGS) $(FLAGS) $(INCLUDES) $(CPPFLAGS) $(DEFS) -c $< -o $@
 
-$(OBJDIR)/include/%.o: $(SOURCEDIR)/include/%.c maketree
+$(OBJDIR)/include/%.o: $(SOURCEDIR)/include/%.c $(OBJDIR)/.tag
 	$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c $< -o $@
 
 OBJS := $(CSRCS:.c=.o)
 
-all: maketree $(TARGET)
-
-maketree: $(OBJDIR)/.tag
+all: $(TARGET)
 
 $(OBJDIR)/.tag:
 	@mkdir -p $(OBJDIR)/include/

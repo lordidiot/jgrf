@@ -757,10 +757,10 @@ static int jgrf_core_default() {
         snprintf(gdata.corename, sizeof(gdata.corename), "mednafen");
     
     else if (!strcmp(gdata.sys, "sg"))
-        snprintf(gdata.corename, sizeof(gdata.corename), "genplus");
+        snprintf(gdata.corename, sizeof(gdata.corename), "cega");
     
     else if (!strcmp(gdata.sys, "sms"))
-        snprintf(gdata.corename, sizeof(gdata.corename), "genplus");
+        snprintf(gdata.corename, sizeof(gdata.corename), "cega");
     
     else if (!strcmp(gdata.sys, "snes"))
         snprintf(gdata.corename, sizeof(gdata.corename), "bsnes");
