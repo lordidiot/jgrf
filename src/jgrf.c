@@ -736,7 +736,7 @@ static int jgrf_core_default() {
         snprintf(gdata.corename, sizeof(gdata.corename), "mgba");
     
     else if (!strcmp(gdata.sys, "gg"))
-        snprintf(gdata.corename, sizeof(gdata.corename), "genplus");
+        snprintf(gdata.corename, sizeof(gdata.corename), "cega");
     
     else if (!strcmp(gdata.sys, "md"))
         snprintf(gdata.corename, sizeof(gdata.corename), "genplus");
