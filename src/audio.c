@@ -6,13 +6,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <SDL.h>
 #define _POSIX_C_SOURCE 200112L
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
 
+#ifdef __APPLE__
+void memset_pattern4(void *__b, const void *__pattern4, size_t __len);
+#endif
+
+#include <SDL.h>
 #include <jg/jg.h>
 
 #include "resampler.h"
