@@ -23,10 +23,6 @@
 
 #define MAXPORTS 12
 
-// Configuration related variables
-static ini_table_s *iconf;
-static int confchanged = 0;
-
 // Pointers to members of core input state
 typedef struct jgrf_jsmap_t {
     int16_t *axis[JG_AXES_MAX];
@@ -67,7 +63,11 @@ static uint8_t undef8;
 static int16_t undef16;
 
 // Configuration related globals
+static ini_table_s *iconf;
 static int confactive = 0;
+static int confchanged = 0;
+static int confbtnactive = 0;
+static int confhatactive = 0;
 static int confindex = 0;
 static int confport = 0;
 static int axis = 0, axisnoise = 0;
@@ -289,7 +289,7 @@ static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
 static void jgrf_inputcfg_handler(SDL_Event *event) {
     char defbuf[32];
     switch(event->type) {
-        case SDL_KEYDOWN:
+        case SDL_KEYDOWN: {
             if (event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                 ini_table_create_entry(iconf, inputinfo[confport]->name,
                     inputinfo[confport]->defs[confindex], "");
@@ -319,12 +319,22 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             confindex++;
             jgrf_inputcfg(inputinfo[confport]);
             break;
-        case SDL_JOYBUTTONDOWN:
+        }
+        case SDL_JOYBUTTONUP: {
+            confbtnactive = 0; // Set "button active" flag off
+            break;
+        }
+        case SDL_JOYBUTTONDOWN: {
             if (confindex < inputinfo[confport]->numaxes) {
                 jgrf_log(JG_LOG_WRN, "Trying to assign digital inputs to axes"
                     " is a losing endeavour. ESC to skip.\n");
                 break;
             }
+            
+            /* Set the "button active" flag so that axis input associated with
+               the button can be ignored
+            */
+            confbtnactive = 1;
             
             snprintf(defbuf, sizeof(defbuf), "j%db%d",
                 event->jbutton.which, event->jbutton.button);
@@ -338,7 +348,14 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             confindex++;
             jgrf_inputcfg(inputinfo[confport]);
             break;
-        case SDL_JOYAXISMOTION:
+        }
+        case SDL_JOYAXISMOTION: {
+            /* Some gamepads report button + axis or hat + axis for the same
+               input. Do not assign axis input for these cases.
+            */
+            if (confbtnactive || confhatactive)
+                break;
+            
             // Triggers require special handling
             if (trigger[event->jaxis.which] & (1 << event->jaxis.axis)) {
                 // Axes set to axis input
@@ -453,12 +470,18 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                 }
             }
             break;
-        case SDL_JOYHATMOTION:
+        }
+        case SDL_JOYHATMOTION: {
             if (confindex < inputinfo[confport]->numaxes) {
                 jgrf_log(JG_LOG_WRN, "Trying to assign digital inputs to axes"
                     " is a losing endeavour. ESC to skip.\n");
                 break;
             }
+            
+            /* Set the "hat active" flag so that axis input associated with
+               the hat switch can be ignored if necessary
+            */
+            confhatactive = event->jhat.value == SDL_HAT_CENTERED;
             
             if (event->jhat.value & SDL_HAT_UP)
                 snprintf(defbuf, sizeof(defbuf), "j%dh00",
@@ -487,7 +510,8 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                 jgrf_inputcfg(inputinfo[confport]);
             }
             break;
-        case SDL_MOUSEBUTTONDOWN:
+        }
+        case SDL_MOUSEBUTTONDOWN: {
             if (confindex < inputinfo[confport]->numaxes)
                 break;
             
@@ -502,7 +526,10 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             confindex++;
             jgrf_inputcfg(inputinfo[confport]);
             break;
-        default: break;
+        }
+        default: {
+            break;
+        }
     }
 }
 
@@ -515,39 +542,54 @@ void jgrf_input_handler(SDL_Event *event) {
     // This needs to be fixed and worked into the rest of the system one day...
     if (event->type == SDL_KEYUP || event->type == SDL_KEYDOWN) {
         switch (event->key.keysym.scancode) {
-            case SDL_SCANCODE_ESCAPE: jgrf_schedule_quit(); break;
-            case SDL_SCANCODE_GRAVE:
-                jgrf_set_speed(event->type == SDL_KEYDOWN ? 1 : 0); break;
-            case SDL_SCANCODE_F1:
+            case SDL_SCANCODE_ESCAPE: {
+                jgrf_schedule_quit();
+                break;
+            }
+            case SDL_SCANCODE_GRAVE: {
+                jgrf_set_speed(event->type == SDL_KEYDOWN ? 1 : 0);
+                break;
+            }
+            case SDL_SCANCODE_F1: {
                 if (event->type == SDL_KEYUP) jgrf_reset(0);
                 break;
-            case SDL_SCANCODE_F2:
+            }
+            case SDL_SCANCODE_F2: {
                 if (event->type == SDL_KEYUP) jgrf_reset(1);
                 break;
-            case SDL_SCANCODE_F3:
+            }
+            case SDL_SCANCODE_F3: {
                 if (event->type == SDL_KEYUP) jgrf_media_insert();
                 break;
-            case SDL_SCANCODE_F4:
+            }
+            case SDL_SCANCODE_F4: {
                 if (event->type == SDL_KEYUP) jgrf_media_select();
                 break;
-            case SDL_SCANCODE_F5:
+            }
+            case SDL_SCANCODE_F5: {
                 if (event->type == SDL_KEYUP) jgrf_state_save(0);
                 break;
-            case SDL_SCANCODE_F6:
+            }
+            case SDL_SCANCODE_F6: {
                 if (event->type == SDL_KEYUP) jgrf_state_save(1);
                 break;
-            case SDL_SCANCODE_F7:
+            }
+            case SDL_SCANCODE_F7: {
                 if (event->type == SDL_KEYUP) jgrf_state_load(0);
                 break;
-            case SDL_SCANCODE_F8:
+            }
+            case SDL_SCANCODE_F8: {
                 if (event->type == SDL_KEYUP) jgrf_state_load(1);
                 break;
-            case SDL_SCANCODE_F9:
+            }
+            case SDL_SCANCODE_F9: {
                 if (event->type == SDL_KEYUP) jgrf_video_screenshot();
                 break;
-            case SDL_SCANCODE_F:
+            }
+            case SDL_SCANCODE_F: {
                 if (event->type == SDL_KEYUP) jgrf_video_fullscreen();
                 break;
+            }
             case SDL_SCANCODE_1:
             case SDL_SCANCODE_2:
             case SDL_SCANCODE_3:
@@ -555,7 +597,7 @@ void jgrf_input_handler(SDL_Event *event) {
             case SDL_SCANCODE_5:
             case SDL_SCANCODE_6:
             case SDL_SCANCODE_7:
-            case SDL_SCANCODE_8:
+            case SDL_SCANCODE_8: {
             // Want to play 12-player sports games? Hand-edit the config file.
                 if (event->type == SDL_KEYUP &&
                     event->key.keysym.mod & (KMOD_SHIFT|KMOD_CTRL)) {
@@ -573,25 +615,32 @@ void jgrf_input_handler(SDL_Event *event) {
                     confchanged = 1;
                 }
                 break;
-            default: break;
+            }
+            default: {
+                break;
+            }
         }
     }
     
     // Game input events
     switch(event->type) {
-        case SDL_KEYUP:
+        case SDL_KEYUP: {
             *kbmap.key[event->key.keysym.scancode] = 0;
             break;
-        case SDL_KEYDOWN:
+        }
+        case SDL_KEYDOWN: {
             *kbmap.key[event->key.keysym.scancode] = 1;
             break;
-        case SDL_JOYBUTTONUP:
+        }
+        case SDL_JOYBUTTONUP: {
             *jsmap[event->jbutton.which].button[event->jbutton.button] = 0;
             break;
-        case SDL_JOYBUTTONDOWN:
+        }
+        case SDL_JOYBUTTONDOWN: {
             *jsmap[event->jbutton.which].button[event->jbutton.button] = 1;
             break;
-        case SDL_JOYAXISMOTION:
+        }
+        case SDL_JOYAXISMOTION: {
             *jsmap[event->jaxis.which].axis[event->jaxis.axis] =
                 abs(event->jaxis.value) > DEADZONE ? event->jaxis.value : 0;
             if (abs(event->jaxis.value) > BDEADZONE) {
@@ -605,7 +654,8 @@ void jgrf_input_handler(SDL_Event *event) {
                 *jsmap[event->jaxis.which].abtn[(event->jaxis.axis * 2) +1] = 0;
             }
             break;
-        case SDL_JOYHATMOTION:
+        }
+        case SDL_JOYHATMOTION: {
             *jsmap[event->jhat.which].hatpos[0] =
                 event->jhat.value & SDL_HAT_UP;
             *jsmap[event->jhat.which].hatpos[1] =
@@ -615,18 +665,24 @@ void jgrf_input_handler(SDL_Event *event) {
             *jsmap[event->jhat.which].hatpos[3] =
                 event->jhat.value & SDL_HAT_RIGHT;
             break;
-        case SDL_MOUSEMOTION:
+        }
+        case SDL_MOUSEMOTION: {
             jgrf_input_coords_relative(event->motion.x, event->motion.y,
                 &coreinput[msmap.index].coord[0],
                 &coreinput[msmap.index].coord[1]);
             break;
-        case SDL_MOUSEBUTTONUP:
+        }
+        case SDL_MOUSEBUTTONUP: {
             *msmap.button[event->button.button] = 0;
             break;
-        case SDL_MOUSEBUTTONDOWN:
+        }
+        case SDL_MOUSEBUTTONDOWN: {
             *msmap.button[event->button.button] = 1;
             break;
-        default: break;
+        }
+        default: {
+            break;
+        }
     }
 }
 
