@@ -268,6 +268,8 @@ static inline void jgrf_input_coords_relative(int32_t x, int32_t y,
 static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
     if (confindex >= (iinfo->numaxes + iinfo->numbuttons)) {
         confactive = 0; // Turn off input config mode
+        confbtnactive = 0;
+        confhatactive = 0;
         jgrf_video_text(2, 0, ""); // Disable display of input config info
         return;
     }
@@ -288,6 +290,7 @@ static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
 // Create config definitions from input events, then configure them to be used
 static void jgrf_inputcfg_handler(SDL_Event *event) {
     char defbuf[32];
+    
     switch(event->type) {
         case SDL_KEYDOWN: {
             if (event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
@@ -481,7 +484,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             /* Set the "hat active" flag so that axis input associated with
                the hat switch can be ignored if necessary
             */
-            confhatactive = event->jhat.value == SDL_HAT_CENTERED;
+            confhatactive = event->jhat.value;
             
             if (event->jhat.value & SDL_HAT_UP)
                 snprintf(defbuf, sizeof(defbuf), "j%dh00",
