@@ -145,7 +145,7 @@ void jgrf_audio_cb_core(size_t in_size) {
     size_t spf = (audinfo->rate / corefps) * audinfo->channels;
     
     // Input moving average samples per frame - make sure the number is even
-    int ma_insamps = (int)(mavg_in.avg) + ((int)(mavg_in.avg) % 2);
+    size_t ma_insamps = (size_t)(mavg_in.avg) + ((size_t)(mavg_in.avg) % 2);
     
     // Baby steps if the queue size is diverging from the desired size
     if (rbuf_in.cursize == spf)
@@ -180,7 +180,7 @@ void jgrf_audio_cb_core(size_t in_size) {
         
         // Dequeue the moving average number of samples to be resampled
         int16_t *rsbuf_p = (int16_t*)rsbuf;
-        for (int i = 0; i < ma_insamps; i++)
+        for (size_t i = 0; i < ma_insamps; i++)
             rsbuf_p[i] = jgrf_rbuf_deq_int16(&rbuf_in);
         
         // Do the resampling
@@ -200,7 +200,7 @@ void jgrf_audio_cb_core(size_t in_size) {
         
         // Dequeue the moving average number of samples to be resampled
         float *rsbuf_p = (float*)rsbuf;
-        for (int i = 0; i < ma_insamps; i++)
+        for (size_t i = 0; i < ma_insamps; i++)
             rsbuf_p[i] = jgrf_rbuf_deq_flt32(&rbuf_in);
         
         // Do the resampling
