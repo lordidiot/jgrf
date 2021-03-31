@@ -151,24 +151,24 @@ void jgrf_audio_cb_core(size_t in_size) {
     if (rbuf_in.cursize == spf)
         ma_offset = 0;
     else if (rbuf_in.cursize < spf)
-        ma_offset = -2; // Eat Less
+        ma_offset = -audinfo->channels; // Eat Less
     else if (rbuf_in.cursize > (spf + 200))
-        ma_offset = 2; // Eat More
+        ma_offset = audinfo->channels; // Eat More
     
     ma_insamps += ma_offset;
     
     // Calculate rates for use in resampling
     uint32_t in_rate = (ma_insamps * corefps) / audinfo->channels;
     uint32_t out_rate = audinfo->rate / (fforward ? fforward + 1 : 1);
-    uint32_t out_size = 0;
+    size_t out_size = in_size;
     
     // Manage the size of the output buffer to avoid underruns
     if (rbuf_out.cursize < spf * 2)
-        out_rate += 120; // Push More
+        out_rate += 30 << audinfo->channels; // Push More
     else if (rbuf_out.cursize > spf * 4)
-        out_rate -= 180; // Push Less
+        out_rate -= 45 << audinfo->channels; // Push Less
     else if (rbuf_out.cursize > spf * 3)
-        out_rate -= 120; // Push Less
+        out_rate -= 30 << audinfo->channels; // Push Less
     
     // Debug output
     //jgrf_log(JG_LOG_DBG, "i - r: %d, s: %d, c: %d, ma: %d (%f), fps: %d\n",
