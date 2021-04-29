@@ -153,7 +153,7 @@ void jgrf_video_gl_create(void) {
     if (!gltInit())
         jgrf_log(JG_LOG_WRN, "Failed to initialize glText\n");
     
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; ++i)
         msgtext[i] = gltCreateText();
     
     jgrf_log(JG_LOG_INF, "Video: OpenGL %s\n", glGetString(GL_VERSION));
@@ -212,7 +212,7 @@ void *jgrf_video_gl_get_pixels(int *rw, int *rh) {
 
 // Deinitialize OpenGL Video
 void jgrf_video_gl_deinit(void) {
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; ++i)
         gltDeleteText(msgtext[i]);
     gltTerminate();
     

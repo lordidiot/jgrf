@@ -137,7 +137,7 @@ void jgrf_settings_emu(jg_setting_t *emusettings, int numsettings) {
     if (!ini_table_read_from_file(conf, path))
         jgrf_log(JG_LOG_DBG, "Core configuration file not found: %s\n", path);
     
-    for (int i = 0; i < numsettings; i++) {
+    for (int i = 0; i < numsettings; ++i) {
         if (ini_table_check_entry(conf, gdata->corename,
             emusettings[i].name)) {
             

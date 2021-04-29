@@ -114,7 +114,7 @@ static void mkdirr(const char *dir) {
     if (tmp[len - 1] == '/')
         tmp[len - 1] = 0;
     
-    for(p = tmp + 1; *p; p++) {
+    for(p = tmp + 1; *p; ++p) {
         if(*p == '/') {
             *p = 0;
             #if defined(__MINGW32__) || defined(__MINGW64__)
@@ -157,7 +157,7 @@ static void jgrf_gamename(const char *filename) {
         "%s", basename((char*)filename));
     
     // Strip the file extension off
-    for (int i = strlen(gdata.gamename) - 1; i > 0; i--) {
+    for (int i = strlen(gdata.gamename) - 1; i > 0; --i) {
         if (gdata.gamename[i] == '.') {
             gdata.gamename[i] = '\0';
             break;
@@ -359,7 +359,7 @@ static void jgrf_hash_md5(void) {
     MD5_Update(&c, dataptr, md5len);
     MD5_Final(digest, &c);
     
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; ++i) {
         snprintf(&(gdata.md5[i * 2]), 16 * 2, "%02x", (unsigned)digest[i]);
     }
     gameinfo.md5 = gdata.md5;
@@ -375,7 +375,7 @@ static int jgrf_game_load_archive(const char *filename) {
         return 0;
     
     // Open the first ROM in the archive
-    for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip_archive); i++) {
+    for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip_archive); ++i) {
         mz_zip_archive_file_stat file_stat;
         
         if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
@@ -467,7 +467,7 @@ static int jgrf_game_detect_zip(const char *filename) {
         return 0;
     
     // Cycle through files in the archive until one matches a known game type
-    for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip_archive); i++) {
+    for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip_archive); ++i) {
         mz_zip_archive_file_stat file_stat;
         
         if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)) {
@@ -535,7 +535,7 @@ static int jgrf_game_detect_bincue(const char *filename) {
     
     // Mega/Sega CD
     if (fread(sectorbuf, 1, 32, file)) { // Read data for both possible offsets
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; ++i) {
             if (!memcmp(sectorbuf, mcdmagic[i], mcdmagiclen) ||
                 !memcmp(sectorbuf + 16, mcdmagic[i], mcdmagiclen)) {
                 snprintf(gdata.sys, sizeof(gdata.sys), "md");
@@ -1043,7 +1043,7 @@ int main(int argc, char *argv[]) {
         
         // Run the required number of emulator iterations (frames)
         // Fast-forward works by running extra frames and downsampling audio
-        for (int i = 0; i < runframes + fforward; i++)
+        for (int i = 0; i < runframes + fforward; ++i)
             jgapi.jg_exec_frame();
         
         // Render and output the current video

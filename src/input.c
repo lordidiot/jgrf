@@ -127,14 +127,14 @@ static void jgrf_inputcfg_read(jg_inputinfo_t *iinfo) {
     snprintf(path, sizeof(path), "%sinput_%s.ini",
         gdata->configpath, gdata->sys);
     
-    for (int i = 0; i < iinfo->numaxes; i++) {
+    for (int i = 0; i < iinfo->numaxes; ++i) {
         if (ini_table_check_entry(iconf, iinfo->name, iinfo->defs[i])) {
             jgrf_input_map_axis(iinfo->index, i,
                 ini_table_get_entry(iconf, iinfo->name, iinfo->defs[i]));
         }
     }
     
-    for (int i = 0; i < iinfo->numbuttons; i++) {
+    for (int i = 0; i < iinfo->numbuttons; ++i) {
         if (ini_table_check_entry(iconf, iinfo->name,
             iinfo->defs[i + iinfo->numaxes])) {
             jgrf_input_map_button(iinfo->index, i,
@@ -146,26 +146,32 @@ static void jgrf_inputcfg_read(jg_inputinfo_t *iinfo) {
 
 // Unmap/undefine all joystick map pointers
 static void jgrf_input_undef_port(int port) {
-    for (int j = 0; j < JG_AXES_MAX; j++) {
+    for (int j = 0; j < JG_AXES_MAX; ++j) {
         jsmap[port].axis[j] = &undef16;
         jsmap[port].abtn[j * 2] = jsmap[port].abtn[(j * 2) + 1] = &undef8;
     }
-    for (int j = 0; j < 4; j++) jsmap[port].hatpos[j] = &undef8;
-    for (int j = 0; j < JG_BUTTONS_MAX; j++) jsmap[port].button[j] = &undef8;
+    
+    for (int j = 0; j < 4; ++j)
+        jsmap[port].hatpos[j] = &undef8;
+    
+    for (int j = 0; j < JG_BUTTONS_MAX; ++j)
+        jsmap[port].button[j] = &undef8;
 }
 
 // Initialize input
 int jgrf_input_init(void) {
     // Set all joystick mappings to undefined
-    for (int i = 0; i < MAXPORTS; i++) {
+    for (int i = 0; i < MAXPORTS; ++i) {
         jgrf_input_undef_port(i);
     }
     
     // Set all keyboard mappings to undefined
-    for (int j = 0; j < SDL_NUM_SCANCODES; j++) kbmap.key[j] = &undef8;
+    for (int j = 0; j < SDL_NUM_SCANCODES; ++j)
+        kbmap.key[j] = &undef8;
     
     // Set all mouse mappings to undefined
-    for (int j = 0; j < JG_BUTTONS_MAX; j++) msmap.button[j] = &undef8;
+    for (int j = 0; j < JG_BUTTONS_MAX; ++j)
+        msmap.button[j] = &undef8;
     
     // Initialize joysticks
     jgrf_log(JG_LOG_INF, "%d joystick(s) found:\n", SDL_NumJoysticks());
@@ -198,10 +204,10 @@ int jgrf_input_init(void) {
 // Deinitialize input and save changes if necessary
 void jgrf_input_deinit(void) {
     // Deinitialize joysticks
-    for (int i = 0; i < SDL_NumJoysticks(); i++) {
-        if (SDL_JoystickIsHaptic(joystick[i])) {
+    for (int i = 0; i < SDL_NumJoysticks(); ++i) {
+        if (SDL_JoystickIsHaptic(joystick[i]))
             SDL_HapticClose(haptic[i]);
-        }
+        
         SDL_JoystickClose(joystick[i]);
     }
     
@@ -220,7 +226,7 @@ void jgrf_input_deinit(void) {
 
 // Retrieve inputinfo data so the frontend knows what the core has plugged in
 void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
-    for(int i = 0; i < gdata->numinputs; i++) {
+    for(int i = 0; i < gdata->numinputs; ++i) {
         inputinfo[i] = get_inputinfo(i);
         if (inputinfo[i]->name) {
             jgrf_log(JG_LOG_INF,
@@ -235,8 +241,8 @@ void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
     }
     
     // Handle analog input seed values - fixes trigger input values at startup
-    for (int i = 0; i < SDL_NumJoysticks(); i++) {
-        for (int j = 0; j < SDL_JoystickNumAxes(joystick[i]); j++) {
+    for (int i = 0; i < SDL_NumJoysticks(); ++i) {
+        for (int j = 0; j < SDL_JoystickNumAxes(joystick[i]); ++j) {
             int16_t aval = SDL_JoystickGetAxis(joystick[i], j);
             if (aval <= -(DEADZONE)) {
                 *jsmap[i].axis[j] = aval;
@@ -249,7 +255,7 @@ void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
 // Pass pointers to input states into the core
 void jgrf_input_set_states(void (*set_inputstate)(jg_inputstate_t*, int)) {
     gdata = jgrf_gdata_ptr();
-    for(int i = 0; i < gdata->numinputs; i++)
+    for(int i = 0; i < gdata->numinputs; ++i)
         set_inputstate(&coreinput[i], i);
 }
 

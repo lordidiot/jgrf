@@ -59,7 +59,7 @@ static inline void jgrf_audio_mavg(mavg_t *mavg, size_t newval) {
     
     double sum = 0;
     
-    for (uint32_t i = 0; i < MAVGSIZE; i++)
+    for (uint32_t i = 0; i < MAVGSIZE; ++i)
         sum += mavg->buf[i];
     
     double divisor = MAVGSIZE;
@@ -68,7 +68,7 @@ static inline void jgrf_audio_mavg(mavg_t *mavg, size_t newval) {
 
 // Seed the moving average input sample chunk size
 static inline void jgrf_audio_mavg_seed(mavg_t *mavg, size_t seed) {
-    for (uint32_t i = 0; i < MAVGSIZE; i++)
+    for (uint32_t i = 0; i < MAVGSIZE; ++i)
         mavg->buf[i] = seed;
     jgrf_audio_mavg(mavg, seed);
 }
@@ -98,7 +98,7 @@ static inline float jgrf_rbuf_deq_flt32(ringbuf_t *rbuf) {
 
 static void jgrf_rbuf_enq_int16(ringbuf_t *rbuf, int16_t *data, size_t size) {
     int16_t *buf = (int16_t*)rbuf->buffer;
-    for (uint32_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; ++i) {
         buf[rbuf->tail] = data[i];
         rbuf->tail = (rbuf->tail + 1) % rbuf->bufsize;
         rbuf->cursize++;
@@ -109,7 +109,7 @@ static void jgrf_rbuf_enq_int16(ringbuf_t *rbuf, int16_t *data, size_t size) {
 
 static void jgrf_rbuf_enq_flt32(ringbuf_t *rbuf, float *data, size_t size) {
     float *buf = (float*)rbuf->buffer;
-    for (uint32_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; ++i) {
         buf[rbuf->tail] = data[i];
         rbuf->tail = (rbuf->tail + 1) % rbuf->bufsize;
         rbuf->cursize++;
@@ -180,7 +180,7 @@ void jgrf_audio_cb_core(size_t in_size) {
         
         // Dequeue the moving average number of samples to be resampled
         int16_t *rsbuf_p = (int16_t*)rsbuf;
-        for (size_t i = 0; i < ma_insamps; i++)
+        for (size_t i = 0; i < ma_insamps; ++i)
             rsbuf_p[i] = jgrf_rbuf_deq_int16(&rbuf_in);
         
         // Do the resampling
@@ -200,7 +200,7 @@ void jgrf_audio_cb_core(size_t in_size) {
         
         // Dequeue the moving average number of samples to be resampled
         float *rsbuf_p = (float*)rsbuf;
-        for (size_t i = 0; i < ma_insamps; i++)
+        for (size_t i = 0; i < ma_insamps; ++i)
             rsbuf_p[i] = jgrf_rbuf_deq_flt32(&rbuf_in);
         
         // Do the resampling
@@ -230,9 +230,8 @@ static void jgrf_audio_cb_int16(void *userdata, uint8_t *stream, int len) {
     if (userdata) {}
     int16_t *ostream = (int16_t*)stream;
     
-    for (size_t i = 0; i < len / sampsize; i++) {
+    for (size_t i = 0; i < len / sampsize; ++i)
         ostream[i] = jgrf_rbuf_deq_int16(&rbuf_out);
-    }
 }
 
 // SDL Audio Callback for 32-bit floating point samples
@@ -240,9 +239,8 @@ static void jgrf_audio_cb_flt32(void *userdata, uint8_t *stream, int len) {
     if (userdata) {}
     float *ostream = (float*)stream;
     
-    for (size_t i = 0; i < len / sampsize; i++) {
+    for (size_t i = 0; i < len / sampsize; ++i)
         ostream[i] = jgrf_rbuf_deq_flt32(&rbuf_out);
-    }
 }
 
 // Initialize the audio device and allocate buffers
