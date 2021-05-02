@@ -4,7 +4,8 @@ SOURCEDIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword \
 CC ?= cc
 CFLAGS ?= -O2
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -pedantic
-INCLUDES := -I$(SOURCEDIR)/include $(shell pkg-config --cflags epoxy sdl2)
+INCLUDES := -I$(SOURCEDIR)/include $(shell pkg-config --cflags epoxy sdl2 \
+	speexdsp)
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -23,11 +24,11 @@ endif
 
 # Conditions for LIBS
 ifeq ($(UNAME), NetBSD)
-	LIBS := $(shell pkg-config --libs epoxy sdl2) -lm
+	LIBS := $(shell pkg-config --libs epoxy sdl2 speexdsp) -lm
 else ifeq ($(UNAME), OpenBSD)
-	LIBS := $(shell pkg-config --libs epoxy sdl2) -lm
+	LIBS := $(shell pkg-config --libs epoxy sdl2 speexdsp) -lm
 else
-	LIBS := $(shell pkg-config --libs epoxy sdl2) -lm -ldl
+	LIBS := $(shell pkg-config --libs epoxy sdl2 speexdsp) -lm -ldl
 endif
 
 OBJDIR := objs
@@ -44,7 +45,6 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/include/miniz.o \
 	$(OBJDIR)/include/musl_memmem.o \
 	$(OBJDIR)/include/parg.o \
-	$(OBJDIR)/include/resampler.o \
 	$(OBJDIR)/include/tconfig.o \
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag

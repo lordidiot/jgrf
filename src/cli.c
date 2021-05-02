@@ -19,11 +19,12 @@
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "c:fhs:vwx:";
+static const char *os_def = "c:fhr:s:vwx:";
 static const struct parg_option po_def[] = {
     { "core", PARG_REQARG, NULL, 'c' },
     { "fullscreen", PARG_NOARG, NULL, 'f' },
     { "help", PARG_NOARG, NULL, 'h' },
+    { "rsqual", PARG_REQARG, NULL, 'r' },
     { "shader", PARG_REQARG, NULL, 's' },
     { "verbose", PARG_NOARG, NULL, 'v' },
     { "window", PARG_NOARG, NULL, 'w' },
@@ -32,6 +33,7 @@ static const struct parg_option po_def[] = {
 
 static const char *corename = NULL;
 static int fullscreen = 0;
+static int rsqual = -1;
 static int scale = 0;
 static int shader = -1;
 static int verbose = 0;
@@ -56,6 +58,9 @@ void jgrf_cli_override(void) {
     
     if (windowed)
         settings->video_fullscreen.val = 0;
+    
+    if (rsqual >= 0 && rsqual <= settings->audio_rsqual.max)
+        settings->audio_rsqual.val = rsqual;
     
     if (shader >= 0 && shader <= settings->video_shader.max)
         settings->video_shader.val = shader;
@@ -93,6 +98,9 @@ void jgrf_cli_parse(int argc, char *argv[]) {
             case 'f': // Start in fullscreen mode
                 fullscreen = 1;
                 break;
+            case 'r': // Resampler Quality
+                rsqual = atoi(ps.optarg);
+                break;
             case 's': // Shader
                 shader = atoi(ps.optarg);
                 break;
@@ -123,6 +131,8 @@ void jgrf_cli_usage(void) {
         "Start in Fullscreen mode\n");
     fprintf(stdout, "    -h, --help              "
         "Show Usage\n");
+    fprintf(stdout, "    -r, --rsqual <value>    "
+        "Resampler Quality (0 to 10)\n");
     fprintf(stdout, "    -s, --shader <value>    "
         "Select a Post-processing shader\n");
     fprintf(stdout, "                              0 = Nearest Neighbour (None)"

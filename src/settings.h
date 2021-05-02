@@ -28,6 +28,7 @@ typedef struct settings_t {
     setting_t video_crtea_curve;
     setting_t video_crtea_corner;
     setting_t video_crtea_tcurve;
+    setting_t audio_rsqual;
     setting_t misc_corelog;
     setting_t misc_frontendlog;
 } settings_t;

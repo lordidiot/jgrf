@@ -58,6 +58,9 @@ static void jgrf_settings_handler(void) {
     jgrf_setting_rd("video", "crtea_corner", &settings.video_crtea_corner);
     jgrf_setting_rd("video", "crtea_tcurve", &settings.video_crtea_tcurve);
     
+    // Audio
+    jgrf_setting_rd("audio", "rsqual", &settings.audio_rsqual);
+    
     // Misc
     jgrf_setting_rd("misc", "corelog", &settings.misc_corelog);
     jgrf_setting_rd("misc", "frontendlog", &settings.misc_frontendlog);
@@ -98,6 +101,8 @@ int jgrf_settings_init() {
     settings.video_crtea_curve = (setting_t){ 0, 0, 10 };
     settings.video_crtea_corner = (setting_t){ 3, 0, 10 };
     settings.video_crtea_tcurve = (setting_t){ 10, 0, 10 };
+    
+    settings.audio_rsqual = (setting_t){ 3, 0, 10 };
     
     settings.misc_corelog = (setting_t){ 1, 0, 3 };
     settings.misc_frontendlog = (setting_t){ 1, 0, 3 };
