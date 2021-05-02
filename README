@@ -149,7 +149,7 @@ The following example is for the JollyCV core:
 /*
 [jollycv]
 ;0 = TeaTime, 1 = SYoung
-palette = 0 
+palette = 0
 
 ;N = Resampler Quality (0-10)
 rsqual = 3
