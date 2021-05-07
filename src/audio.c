@@ -166,12 +166,14 @@ void jgrf_audio_cb_core(size_t in_size) {
     uint32_t out_rate = audinfo->rate / (fforward ? fforward + 1 : 1);
     
     // Manage the size of the output buffer to avoid underruns
-    if (rbuf_out.cursize < spf * 2)
-        out_rate += 30 << audinfo->channels; // Push More
-    else if (rbuf_out.cursize > spf * 4)
-        out_rate -= 45 << audinfo->channels; // Push Less
-    else if (rbuf_out.cursize > spf * 3)
-        out_rate -= 30 << audinfo->channels; // Push Less
+    if (rbuf_out.cursize < spf * 2) // Push More
+        out_rate += 3 * corefps;
+    else if (rbuf_out.cursize < spf * 3) // Push More
+        out_rate += 2 * corefps;
+    else if (rbuf_out.cursize < spf * 4) // Push More
+        out_rate += corefps;
+    else if (rbuf_out.cursize > spf * 5) // Push Less
+        out_rate -= corefps;
     
     // Change the resampling ratio
     err = speex_resampler_set_rate_frac(resampler,
