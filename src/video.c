@@ -96,13 +96,16 @@ void jgrf_video_icon_load(SDL_Window *window) {
     SDL_SetWindowIcon(window, icon);
     SDL_FreeSurface(icon);
     free(png_icon);
+    
+    // Seed the RNG
+    srand((unsigned)time(NULL));
 }
 
 // Write the currently displayed video frame to a .png file
 void jgrf_video_screenshot(void) {
     char ssname[256];
-    snprintf(ssname, sizeof(ssname), "%s%ld-%03d.png",
-        gdata->sspath, time(NULL), rand() % 899);
+    snprintf(ssname, sizeof(ssname), "%s%d-%03x.png",
+        gdata->sspath, (unsigned)time(NULL), rand() % 0xfff);
     
     // Rendered pixels after post-processing
     int rw, rh;
