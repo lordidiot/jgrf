@@ -4,8 +4,21 @@ SOURCEDIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword \
 CC ?= cc
 CFLAGS ?= -O2
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -pedantic
-INCLUDES := -I$(SOURCEDIR)/include $(shell pkg-config --cflags epoxy sdl2 \
-	speexdsp)
+
+PKGCONF ?= pkg-config
+CFLAGS_JG := $(shell $(PKGCONF) --cflags jg)
+
+CFLAGS_EPOXY := $(shell $(PKGCONF) --cflags epoxy)
+LIBS_EPOXY := $(shell $(PKGCONF) --libs epoxy)
+
+CFLAGS_SDL2 := $(shell $(PKGCONF) --cflags sdl2)
+LIBS_SDL2 := $(shell $(PKGCONF) --libs sdl2)
+
+CFLAGS_SPEEX := $(shell $(PKGCONF) --cflags speexdsp)
+LIBS_SPEEX := $(shell $(PKGCONF) --libs speexdsp)
+
+INCLUDES := -I$(SOURCEDIR)/deps $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
+	$(CFLAGS_SPEEX)
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -24,11 +37,11 @@ endif
 
 # Conditions for LIBS
 ifeq ($(UNAME), NetBSD)
-	LIBS := $(shell pkg-config --libs epoxy sdl2 speexdsp) -lm
+	LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 else ifeq ($(UNAME), OpenBSD)
-	LIBS := $(shell pkg-config --libs epoxy sdl2 speexdsp) -lm
+	LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 else
-	LIBS := $(shell pkg-config --libs epoxy sdl2 speexdsp) -lm -ldl
+	LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm -ldl
 endif
 
 OBJDIR := objs
@@ -40,17 +53,17 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/settings.o \
 	$(OBJDIR)/video.o \
 	$(OBJDIR)/video_gl.o \
-	$(OBJDIR)/include/lodepng.o \
-	$(OBJDIR)/include/md5.o \
-	$(OBJDIR)/include/miniz.o \
-	$(OBJDIR)/include/musl_memmem.o \
-	$(OBJDIR)/include/parg.o \
-	$(OBJDIR)/include/tconfig.o \
+	$(OBJDIR)/deps/lodepng.o \
+	$(OBJDIR)/deps/md5.o \
+	$(OBJDIR)/deps/miniz.o \
+	$(OBJDIR)/deps/musl_memmem.o \
+	$(OBJDIR)/deps/parg.o \
+	$(OBJDIR)/deps/tconfig.o
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
 	$(CC) $(CFLAGS) $(FLAGS) $(INCLUDES) $(CPPFLAGS) $(DEFS) -c $< -o $@
 
-$(OBJDIR)/include/%.o: $(SOURCEDIR)/include/%.c $(OBJDIR)/.tag
+$(OBJDIR)/deps/%.o: $(SOURCEDIR)/deps/%.c $(OBJDIR)/.tag
 	$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c $< -o $@
 
 OBJS := $(CSRCS:.c=.o)
@@ -58,7 +71,7 @@ OBJS := $(CSRCS:.c=.o)
 all: $(TARGET)
 
 $(OBJDIR)/.tag:
-	@mkdir -p $(OBJDIR)/include/
+	@mkdir -p $(OBJDIR)/deps/
 	@touch $@
 
 $(TARGET): $(OBJS)
