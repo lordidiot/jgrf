@@ -292,7 +292,11 @@ int jgrf_audio_init(void) {
     spec.samples = 512;
     spec.userdata = 0;
     spec.format = audinfo->sampfmt == JG_SAMPFMT_INT16 ?
-        AUDIO_S16SYS : AUDIO_F32SYS;
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        AUDIO_S16MSB : AUDIO_F32MSB;
+    #else
+        AUDIO_S16LSB : AUDIO_F32LSB;
+    #endif
     spec.callback = audinfo->sampfmt == JG_SAMPFMT_INT16 ?
         jgrf_audio_cb_int16 : jgrf_audio_cb_flt32;
     
