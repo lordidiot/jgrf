@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
 #include <time.h>
 
 #ifdef __APPLE__
@@ -38,10 +39,8 @@ static SpeexResamplerState *resampler = NULL;
 static int err;
 
 static void *corebuf = NULL; // Audio buffer for the core
-static void *rsbuf = NULL; // Buffer for audio data to be resampled
-static void *outbuf = NULL; // Buffer for final output samples
-
-static size_t sampsize = sizeof(int16_t); // Size of samples - int16 or float32
+static int16_t *rsbuf = NULL; // Buffer for audio data to be resampled
+static int16_t *outbuf = NULL; // Buffer for final output samples
 
 static mavg_t mavg_in = { 0, 0, {0} }; // Moving Average for input sizes
 static ringbuf_t rbuf_in = { 0, 0, 0, 0, NULL }; // Ring buffer (input audio)
@@ -77,32 +76,19 @@ static inline void jgrf_audio_mavg_seed(mavg_t *mavg, size_t seed) {
 }
 
 // Enqueue and Dequeue samples
-static inline int16_t jgrf_rbuf_deq_int16(ringbuf_t *rbuf) {
+static inline int16_t jgrf_rbuf_deq(ringbuf_t *rbuf) {
     if (rbuf->cursize == 0)
         return 0;
     
-    int16_t *buf = (int16_t*)rbuf->buffer;
-    int16_t sample = buf[rbuf->head];
+    int16_t sample = rbuf->buffer[rbuf->head];
     rbuf->head = (rbuf->head + 1) % rbuf->bufsize;
     --rbuf->cursize;
     return sample;
 }
 
-static inline float jgrf_rbuf_deq_flt32(ringbuf_t *rbuf) {
-    if (rbuf->cursize == 0)
-        return 0;
-    
-    float *buf = (float*)rbuf->buffer;
-    float sample = buf[rbuf->head];
-    rbuf->head = (rbuf->head + 1) % rbuf->bufsize;
-    --rbuf->cursize;
-    return sample;
-}
-
-static void jgrf_rbuf_enq_int16(ringbuf_t *rbuf, int16_t *data, size_t size) {
-    int16_t *buf = (int16_t*)rbuf->buffer;
+static void jgrf_rbuf_enq(ringbuf_t *rbuf, int16_t *data, size_t size) {
     for (uint32_t i = 0; i < size; ++i) {
-        buf[rbuf->tail] = data[i];
+        rbuf->buffer[rbuf->tail] = data[i];
         rbuf->tail = (rbuf->tail + 1) % rbuf->bufsize;
         ++rbuf->cursize;
         if (rbuf->cursize >= rbuf->bufsize - 1)
@@ -110,10 +96,17 @@ static void jgrf_rbuf_enq_int16(ringbuf_t *rbuf, int16_t *data, size_t size) {
     }
 }
 
-static void jgrf_rbuf_enq_flt32(ringbuf_t *rbuf, float *data, size_t size) {
-    float *buf = (float*)rbuf->buffer;
+static inline void jgrf_rbuf_enqf(ringbuf_t *rbuf, float *data, size_t size) {
     for (uint32_t i = 0; i < size; ++i) {
-        buf[rbuf->tail] = data[i];
+        data[i] *= 32768.0;
+        
+        if (data[i] >= 32767.0)
+            rbuf->buffer[rbuf->tail] = 32767;
+        else if (data[i] <= -32768.0)
+            rbuf->buffer[rbuf->tail] = -32768;
+        else
+            rbuf->buffer[rbuf->tail] = (int16_t)(lrintf(data[i]));
+        
         rbuf->tail = (rbuf->tail + 1) % rbuf->bufsize;
         ++rbuf->cursize;
         if (rbuf->cursize >= rbuf->bufsize - 1)
@@ -185,75 +178,38 @@ void jgrf_audio_cb_core(size_t in_size) {
     
     uint32_t out_size = (ma_insamps * (double)out_rate) / (double)in_rate;
     
-    // Resample the input to the proper output rate
-    switch (audinfo->sampfmt) {
-        default: case JG_SAMPFMT_INT16: {
-            jgrf_rbuf_enq_int16(&rbuf_in, audinfo->buf, in_size);
+    // Enqueue samples from the core for resampling and output
+    if (audinfo->sampfmt == JG_SAMPFMT_INT16)
+        jgrf_rbuf_enq(&rbuf_in, audinfo->buf, in_size);
+    else
+        jgrf_rbuf_enqf(&rbuf_in, audinfo->buf, in_size);
             
-            // Dequeue the moving average number of samples to be resampled
-            int16_t *rsbuf_p = (int16_t*)rsbuf;
-            for (uint32_t i = 0; i < ma_insamps; ++i)
-                rsbuf_p[i] = jgrf_rbuf_deq_int16(&rbuf_in);
-            
-            // Perform resampling
-            if (audinfo->channels == 2) {
-                ma_insamps >>= 1;
-                out_size >>= 1;
-                
-                err = speex_resampler_process_interleaved_int(resampler,
-                    (spx_int16_t*)rsbuf, &ma_insamps,
-                    (spx_int16_t*)outbuf, &out_size);
-                
-                out_size <<= 1;
-            }
-            else {
-                err = speex_resampler_process_int(resampler, 0,
-                    (spx_int16_t*)rsbuf, &ma_insamps,
-                    (spx_int16_t*)outbuf, &out_size);
-            }
-            
-            // Queue the resampled audio for output
-            while ((rbuf_out.cursize + out_size) >= rbuf_out.bufsize)
-                nanosleep(&req, &rem);
-            
-            SDL_LockAudioDevice(dev);
-            jgrf_rbuf_enq_int16(&rbuf_out, (int16_t*)outbuf, out_size);
-            SDL_UnlockAudioDevice(dev);
-            break;
-        }
-        case JG_SAMPFMT_FLT32: {
-            jgrf_rbuf_enq_flt32(&rbuf_in, audinfo->buf, in_size);
-            
-            // Dequeue the moving average number of samples to be resampled
-            float *rsbuf_p = (float*)rsbuf;
-            for (uint32_t i = 0; i < ma_insamps; ++i)
-                rsbuf_p[i] = jgrf_rbuf_deq_flt32(&rbuf_in);
-            
-            // Perform resampling
-            if (audinfo->channels == 2) {
-                ma_insamps >>= 1;
-                out_size >>= 1;
-                
-                err = speex_resampler_process_interleaved_float(resampler,
-                    (float*)rsbuf, &ma_insamps, (float*)outbuf, &out_size);
-                
-                out_size <<= 1;
-            }
-            else {
-                err = speex_resampler_process_float(resampler, 0,
-                    (float*)rsbuf, &ma_insamps, (float*)outbuf, &out_size);
-            }
-            
-            // Queue the resampled audio for output
-            while ((rbuf_out.cursize + out_size) >= rbuf_out.bufsize)
-                nanosleep(&req, &rem);
-            
-            SDL_LockAudioDevice(dev);
-            jgrf_rbuf_enq_flt32(&rbuf_out, (float*)outbuf, out_size);
-            SDL_UnlockAudioDevice(dev);
-            break;
-        }
+    // Dequeue the moving average number of samples to be resampled
+    for (uint32_t i = 0; i < ma_insamps; ++i)
+        rsbuf[i] = jgrf_rbuf_deq(&rbuf_in);
+    
+    // Perform resampling
+    if (audinfo->channels == 2) {
+        ma_insamps >>= 1;
+        out_size >>= 1;
+        
+        err = speex_resampler_process_interleaved_int(resampler,
+            rsbuf, &ma_insamps, outbuf, &out_size);
+        
+        out_size <<= 1;
     }
+    else {
+        err = speex_resampler_process_int(resampler, 0,
+            rsbuf, &ma_insamps, outbuf, &out_size);
+    }
+    
+    // Queue the resampled audio for output
+    while ((rbuf_out.cursize + out_size) >= rbuf_out.bufsize)
+        nanosleep(&req, &rem);
+    
+    SDL_LockAudioDevice(dev);
+    jgrf_rbuf_enq(&rbuf_out, outbuf, out_size);
+    SDL_UnlockAudioDevice(dev);
     
     //jgrf_log(JG_LOG_DBG, "o - r: %d, s: %d, c: %d\n",
     //  out_rate, out_size, rbuf_out.cursize);
@@ -269,17 +225,8 @@ static void jgrf_audio_cb_int16(void *userdata, uint8_t *stream, int len) {
     if (userdata) {}
     int16_t *ostream = (int16_t*)stream;
     
-    for (size_t i = 0; i < len / sampsize; ++i)
-        ostream[i] = jgrf_rbuf_deq_int16(&rbuf_out);
-}
-
-// SDL Audio Callback for 32-bit floating point samples
-static void jgrf_audio_cb_flt32(void *userdata, uint8_t *stream, int len) {
-    if (userdata) {}
-    float *ostream = (float*)stream;
-    
-    for (size_t i = 0; i < len / sampsize; ++i)
-        ostream[i] = jgrf_rbuf_deq_flt32(&rbuf_out);
+    for (size_t i = 0; i < len / sizeof(int16_t); ++i)
+        ostream[i] = jgrf_rbuf_deq(&rbuf_out);
 }
 
 // Initialize the audio device and allocate buffers
@@ -291,14 +238,12 @@ int jgrf_audio_init(void) {
     spec.silence = 0;
     spec.samples = 512;
     spec.userdata = 0;
-    spec.format = audinfo->sampfmt == JG_SAMPFMT_INT16 ?
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        AUDIO_S16MSB : AUDIO_F32MSB;
+    spec.format = AUDIO_S16MSB;
     #else
-        AUDIO_S16LSB : AUDIO_F32LSB;
+    spec.format = AUDIO_S16LSB;
     #endif
-    spec.callback = audinfo->sampfmt == JG_SAMPFMT_INT16 ?
-        jgrf_audio_cb_int16 : jgrf_audio_cb_flt32;
+    spec.callback = jgrf_audio_cb_int16;
     
     // Open the Audio Device
     dev = SDL_OpenAudioDevice(NULL, 0, &spec, &obtained,
@@ -323,26 +268,22 @@ int jgrf_audio_init(void) {
     // Set delay time in nanoseconds
     req.tv_nsec = 100000; // 1/10th of a millisecond
     
-    // Set the sample size
-    sampsize = audinfo->sampfmt == JG_SAMPFMT_INT16 ?
-        sizeof(int16_t) : sizeof(float);
-    
     // Allocate audio buffers
     gdata = jgrf_gdata_ptr();
     
-    size_t bufsize = audinfo->spf * sampsize * 4;
+    size_t bufsize = audinfo->spf * sizeof(int16_t) * 4;
     
     if (!(gdata->hints & JG_HINT_AUDIO_INTERNAL))
-        corebuf = (void*)calloc(1, bufsize);
+        corebuf = (void*)calloc(1, bufsize << audinfo->sampfmt);
     
     rsbuf = (void*)calloc(1, bufsize);
     outbuf = (void*)calloc(1, bufsize * 2);
     
     size_t rbufsize = audinfo->spf * 6;
     rbuf_in.bufsize = rbufsize;
-    rbuf_in.buffer = (void*)calloc(1, rbufsize * sampsize);
+    rbuf_in.buffer = (void*)calloc(1, rbufsize * sizeof(int16_t));
     rbuf_out.bufsize = rbufsize;
-    rbuf_out.buffer = (void*)calloc(1, rbufsize * sampsize);
+    rbuf_out.buffer = (void*)calloc(1, rbufsize * sizeof(int16_t));
     
     // Pass the core audio buffer into the emulator if needed
     audinfo->buf = corebuf;

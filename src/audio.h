@@ -24,7 +24,7 @@ typedef struct ringbuf_t {
     uint32_t tail; // Tail position
     uint32_t cursize; // Current queue size
     uint32_t bufsize; // Buffer size
-    void *buffer; // Pointer to the buffer
+    int16_t *buffer; // Pointer to the buffer
 } ringbuf_t;
 
 void jgrf_audio_set_info(jg_audioinfo_t*);
