@@ -86,7 +86,7 @@ static inline int16_t jgrf_rbuf_deq(ringbuf_t *rbuf) {
     return sample;
 }
 
-static void jgrf_rbuf_enq(ringbuf_t *rbuf, int16_t *data, size_t size) {
+static inline void jgrf_rbuf_enq(ringbuf_t *rbuf, int16_t *data, size_t size) {
     for (uint32_t i = 0; i < size; ++i) {
         rbuf->buffer[rbuf->tail] = data[i];
         rbuf->tail = (rbuf->tail + 1) % rbuf->bufsize;
