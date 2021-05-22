@@ -681,10 +681,10 @@ void jgrf_video_gl_setup(void) {
             masktype = 0; maskstr = 0; scanstr = 10; sharpness = 10;
             break;
         case 1: // Aperture Grille Lite
-            masktype = 1; maskstr = 5; scanstr = 6; sharpness = 4;
+            masktype = 1; maskstr = 5; scanstr = 6; sharpness = 7;
             break;
         case 2: // Aperture Grille
-            masktype = 2; maskstr = 5; scanstr = 6; sharpness = 4;
+            masktype = 2; maskstr = 5; scanstr = 6; sharpness = 7;
             break;
         case 3: // Shadow Mask
             masktype = 3; maskstr = 5; scanstr = 2; sharpness = 4;
