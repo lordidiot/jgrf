@@ -114,7 +114,8 @@ void jgrf_video_gl_create(void) {
     settings = jgrf_get_settings();
     
     // Set the window dimensions
-    dimensions.ww = vidinfo->aspect * vidinfo->h * settings->video_scale.val;
+    dimensions.ww =
+        (vidinfo->aspect * vidinfo->h * settings->video_scale.val) + 0.5;
     dimensions.wh = vidinfo->h * settings->video_scale.val;
     dimensions.rw = dimensions.ww;
     dimensions.rh = dimensions.wh;
