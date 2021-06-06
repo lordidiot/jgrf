@@ -3,6 +3,8 @@ The Jolly Good Reference Frontend
 The Jolly Good Reference Frontend is the simplest possible frontend for The
 Jolly Good API.
 
+This repository lives at https://gitlab.com/jgemu/jgrf
+
 Compiling
 ---------
 Make sure you have The Jolly Good API's header files installed. If you did
@@ -157,3 +159,38 @@ rsqual = 3
 ;0 = NTSC, 1 = PAL
 region = 0
 */
+
+Copyright
+---------
+The Jolly Good Reference Frontend
+  Copyright (c) 2020-2021, Rupert Carmichael (MPL-2.0)
+  See LICENSE
+
+glText
+  Copyright (c) 2013-2018 Christian Vallentin (Zlib)
+  See deps/gltext.h
+
+LodePNG
+  Copyright (c) 2005-2020 Lode Vandevenne (Zlib)
+  See deps/lodepng.c
+
+MD5 Message-Digest Algorithm (RFC 1321) Implementation
+  Public Domain or BSD-like license without advertising clause
+  See deps/md5.c
+
+miniz
+  Copyright 2013-2014 RAD Game Tools and Valve Software (MIT)
+  Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC (MIT)
+  See deps/miniz.c
+
+musl memmem Implementation
+  Copyright © 2005-2020 Rich Felker, et al. (MIT)
+  See deps/musl_memmem.c
+
+parg - parse argv
+  Public Domain (CC0-1.0)
+  See deps/parg.c
+
+tconfig
+  Copyright (c) 2019 Justin Kinnaird (MIT)
+  See deps/tconfig.c
