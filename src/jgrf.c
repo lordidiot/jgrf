@@ -52,6 +52,8 @@ static struct _jgapi {
     int (*jg_state_save)(const char *);
     void (*jg_media_select)(void);
     void (*jg_media_insert)(void);
+    void (*jg_cheat_clear)(void);
+    void (*jg_cheat_set)(const char *);
     // Callback Setup
     void (*jg_set_cb_log)(jg_cb_log_t);
     void (*jg_set_cb_audio)(jg_cb_audio_t);
@@ -248,6 +250,8 @@ static void jgrf_core_load(const char *corepath) {
     *(void**)(&jgapi.jg_state_save) = dlsym(jgapi.handle, "jg_state_save");
     *(void**)(&jgapi.jg_media_select) = dlsym(jgapi.handle, "jg_media_select");
     *(void**)(&jgapi.jg_media_insert) = dlsym(jgapi.handle, "jg_media_insert");
+    *(void**)(&jgapi.jg_cheat_clear) = dlsym(jgapi.handle, "jg_cheat_clear");
+    *(void**)(&jgapi.jg_cheat_set) = dlsym(jgapi.handle, "jg_cheat_set");
     
     *(void**)(&jgapi.jg_get_coreinfo) = dlsym(jgapi.handle,
         "jg_get_coreinfo");
