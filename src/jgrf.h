@@ -21,6 +21,7 @@ typedef struct jgrf_gdata_t { // Global Data
     char coreassets[128]; // Core asset path
     char userassets[128]; // User asset path
     char biospath[128]; // BIOS path
+    char cheatpath[128]; // Cheat path
     char statepath[128]; // State path
     char savepath[128]; // Save path
     char sspath[128]; // Screenshot path

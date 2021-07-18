@@ -48,6 +48,7 @@ OBJDIR := objs
 
 CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/audio.o \
+	$(OBJDIR)/cheats.o \
 	$(OBJDIR)/cli.o \
 	$(OBJDIR)/input.o \
 	$(OBJDIR)/settings.o \
@@ -58,7 +59,8 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/deps/miniz.o \
 	$(OBJDIR)/deps/musl_memmem.o \
 	$(OBJDIR)/deps/parg.o \
-	$(OBJDIR)/deps/tconfig.o
+	$(OBJDIR)/deps/tconfig.o \
+	$(OBJDIR)/deps/tiny-json.o
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
 	$(CC) $(CFLAGS) $(FLAGS) $(INCLUDES) $(CPPFLAGS) $(DEFS) -c $< -o $@

@@ -25,6 +25,7 @@
 
 #include "jgrf.h"
 #include "audio.h"
+#include "cheats.h"
 #include "cli.h"
 #include "input.h"
 #include "settings.h"
@@ -140,6 +141,7 @@ static void jgrf_mkdirs(void) {
     mkdirr(gdata.datapath);
     mkdirr(gdata.biospath);
     mkdirr(gdata.userassets);
+    mkdirr(gdata.cheatpath);
     mkdirr(gdata.savepath);
     mkdirr(gdata.statepath);
     mkdirr(gdata.sspath);
@@ -302,6 +304,8 @@ static void jgrf_core_load(const char *corepath) {
         "%sassets/%s", gdata.datapath, coreinfo->name); 
     snprintf(gdata.biospath, sizeof(gdata.biospath),
         "%sbios", gdata.datapath);
+    snprintf(gdata.cheatpath, sizeof(gdata.cheatpath),
+        "%scheats/%s", gdata.datapath, coreinfo->name);
     snprintf(gdata.savepath, sizeof(gdata.savepath),
         "%ssave/%s", gdata.datapath, coreinfo->name);
     snprintf(gdata.statepath, sizeof(gdata.statepath),
@@ -816,6 +820,7 @@ void jgrf_quit(int status) {
     if (loaded.input) jgrf_input_deinit();
     if (loaded.settings) jgrf_settings_deinit();
     if (gameinfo.data) free(gameinfo.data);
+    jgrf_cheats_deinit();
     SDL_Quit();
     exit(status);
 }
@@ -1018,6 +1023,9 @@ int main(int argc, char *argv[]) {
     
     // Reset the core
     jgapi.jg_reset(1);
+    
+    // Activate Cheats
+    jgrf_cheats_init(jgapi.jg_cheat_clear, jgapi.jg_cheat_set);
     
     // Allow the sound to flow
     jgrf_audio_unpause();
