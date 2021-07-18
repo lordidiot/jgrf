@@ -96,7 +96,7 @@ device's axis definitions. Currently, this only exists in PlayStation games.
 Settings
 --------
 Below is an example of the General Settings configuration file, with defaults:
-/*
+
 [video]
 ;N = Scale video output by N
 scale = 3
@@ -158,7 +158,21 @@ rsqual = 3
 
 ;0 = NTSC, 1 = PAL
 region = 0
-*/
+
+Cheats
+------
+When a core supports cheats, the standard file format is JSON formatted as such:
+
+{"cheats":[
+  {"codes":["CHEAT001"], "enabled":true, "desc":"Single-code Cheat"},
+  {"codes":["CHEAT002"], "enabled":false, "desc":"Disabled Single-code Cheat"},
+  {"codes":["CHEAT003", "CHEAT004"], "enabled":true, "desc":"Multi-code Cheat"},
+//  {"codes":["CHEAT005"], "enabled":true, "desc":"Commented Cheat"},
+  {"codes":["CHEAT006"], "enabled":true, "desc":"Final Cheat has no comma"}
+]}
+
+The format for the cheat codes is different for each system, and some systems
+support multiple types of codes. All codes are represented as JSON strings.
 
 Copyright
 ---------
@@ -190,6 +204,10 @@ musl memmem Implementation
 parg - parse argv
   Public Domain (CC0-1.0)
   See deps/parg.c
+
+parson
+  Copyright (c) 2012 - 2021 Krzysztof Gabis (MIT)
+  See deps/parson.c
 
 tconfig
   Copyright (c) 2019 Justin Kinnaird (MIT)
