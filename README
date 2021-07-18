@@ -92,6 +92,8 @@ digital buttons, is possible.
 
 Force Feedback data is sent to the physical device that handles the emulated
 device's axis definitions. Currently, this only exists in PlayStation games.
+In the case of the Game Boy, there is only a single controller, so force
+feedback data is sent to this controller.
 
 Settings
 --------
@@ -142,13 +144,12 @@ corelog = 1
 
 ;0 = Debug, 1 = Info, 2 = Warning, 3 = Error
 frontendlog = 1
-*/
 
 The above configuration settings may be overridden in a core specific
 configuration file. Additionally, you may add a section for Emulator Settings.
 
 The following example is for the JollyCV core:
-/*
+
 [jollycv]
 ;0 = TeaTime, 1 = SYoung
 palette = 0
