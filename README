@@ -161,7 +161,12 @@ region = 0
 
 Cheats
 ------
-When a core supports cheats, the standard file format is JSON formatted as such:
+When a core supports cheats, the cheat file must be named the same as the
+game, but with a file extension of ".json". The file must be located in the
+cheats directory for the core, for example:
+  ~/.local/share/jollygood/cheats/corename/gamename.json
+
+The file must be formatted as such:
 
 {"cheats":[
   {"codes":["CHEAT001"], "enabled":true, "desc":"Single-code Cheat"},
