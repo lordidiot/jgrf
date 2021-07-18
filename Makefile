@@ -59,8 +59,8 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/deps/miniz.o \
 	$(OBJDIR)/deps/musl_memmem.o \
 	$(OBJDIR)/deps/parg.o \
-	$(OBJDIR)/deps/tconfig.o \
-	$(OBJDIR)/deps/tiny-json.o
+	$(OBJDIR)/deps/parson.o \
+	$(OBJDIR)/deps/tconfig.o
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
 	$(CC) $(CFLAGS) $(FLAGS) $(INCLUDES) $(CPPFLAGS) $(DEFS) -c $< -o $@

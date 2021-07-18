@@ -12,48 +12,47 @@
 
 #include <jg/jg.h>
 
-#include "tiny-json.h"
+#include "parson.h"
 
 #include "jgrf.h"
-
-#define MAX_FIELDS 4096
 
 static void (*jgrf_cheat_clear)(void);
 static void (*jgrf_cheat_set)(const char *);
 
 static char *chtfile = NULL;
 
-static json_t pool[MAX_FIELDS];
-
+// Parse the cheat file and activate any cheats
 void jgrf_cheats_activate(void) {
-    const json_t *parent = json_create(chtfile, pool, MAX_FIELDS);
+    // Parse the JSON string
+    JSON_Value *root_value = json_parse_string_with_comments(chtfile);
     
-    if (parent == NULL) {
+    if (root_value == NULL || json_value_get_type(root_value) != JSONObject) {
         jgrf_log(JG_LOG_WRN, "Failed to parse cheat file\n");
         return;
     }
     
-    const json_t *cheatarray = json_getProperty(parent, "cheats");
-    const json_t *cheat = json_getChild(cheatarray);
+    // Retrieve the cheats array
+    JSON_Object *parent = json_value_get_object(root_value);
+    JSON_Array *cheatarray = json_object_get_array(parent, "cheats");
     
-    while (cheat) {
-        const json_t *enabled = json_getProperty(cheat, "enabled");
+    // Loop through all the cheats
+    for (size_t i = 0; i < json_array_get_count(cheatarray); ++i) {
+        JSON_Object *cheat = json_array_get_object(cheatarray, i);
         
-        if (json_getBoolean(enabled)) { // if it's enabled
-            const json_t *desc = json_getProperty(cheat, "desc");
-            jgrf_log(JG_LOG_DBG, "Cheat enabled: %s\n", json_getValue(desc));
+        // Apply any cheats set to "enabled"
+        if (json_object_get_boolean(cheat, "enabled")) {
+            jgrf_log(JG_LOG_DBG,
+                "Cheat enabled: %s\n", json_object_get_string(cheat, "desc"));
             
-            const json_t *codearray = json_getProperty(cheat, "codes");
-            const json_t *code = json_getChild(codearray);
-            
-            while (code) {
-                jgrf_cheat_set(json_getValue(code));
-                code = json_getSibling(code);
-            }
+            // Enable all codes in the array
+            JSON_Array *codes = json_object_get_array(cheat, "codes");
+            for (size_t j = 0; j < json_array_get_count(codes); ++j)
+                jgrf_cheat_set(json_array_get_string(codes, j));
         }
-        
-        cheat = json_getSibling(cheat);
     }
+    
+    // Free resources associated with parsing the JSON string
+    json_value_free(root_value);
 }
 
 void jgrf_cheats_deactivate(void) {
