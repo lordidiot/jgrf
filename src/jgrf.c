@@ -187,7 +187,10 @@ void jgrf_log(int level, const char *fmt, ...) {
     FILE *fout = level == 1 ? stdout : stderr;
     
     settings_t *settings = jgrf_get_settings();
-    if (level >= settings->misc_frontendlog.val) {
+    if (level == JG_LOG_SCR) {
+        jgrf_video_text(0, corefps, buffer);
+    }
+    else if (level >= settings->misc_frontendlog.val) {
         fprintf(fout, "%s%c: %s\033[0m", lcol[level], lchr[level], buffer);
         fflush(fout);
     }

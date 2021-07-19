@@ -18,6 +18,7 @@
 #include "tconfig.h"
 
 #include "jgrf.h"
+#include "cheats.h"
 #include "video.h"
 #include "input.h"
 
@@ -593,6 +594,14 @@ void jgrf_input_handler(SDL_Event *event) {
             }
             case SDL_SCANCODE_F9: {
                 if (event->type == SDL_KEYUP) jgrf_video_screenshot();
+                break;
+            }
+            case SDL_SCANCODE_F11: {
+                if (event->type == SDL_KEYUP) jgrf_cheats_activate();
+                break;
+            }
+            case SDL_SCANCODE_F12: {
+                if (event->type == SDL_KEYUP) jgrf_cheats_deactivate();
                 break;
             }
             case SDL_SCANCODE_F: {
