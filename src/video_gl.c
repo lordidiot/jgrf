@@ -520,16 +520,33 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
 #endif
     const GLchar *vertexSource = jgrf_video_gl_shader_load(vspath);
     const GLchar *fragmentSource = jgrf_video_gl_shader_load(fspath);
+    GLint err;
     
     // Create and compile the vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
     
+    // Test if the shader compiled
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &err);
+    if (err == GL_FALSE) {
+        char shaderlog[1024];
+        glGetShaderInfoLog(vertexShader, 1024, NULL, shaderlog);
+        jgrf_log(JG_LOG_WRN, "Vertex shader: %s", shaderlog);
+    }
+    
     // Create and compile the fragment shader
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
     glCompileShader(fragmentShader);
+    
+    // Test if the fragment shader compiled
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &err);
+    if (err == GL_FALSE) {
+        char shaderlog[1024];
+        glGetShaderInfoLog(fragmentShader, 1024, NULL, shaderlog);
+        jgrf_log(JG_LOG_WRN, "Fragment shader: %s", shaderlog);
+    }
     
     // Free the allocated memory for shader sources
     free((GLchar*)vertexSource);
