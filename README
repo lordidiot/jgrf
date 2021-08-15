@@ -102,6 +102,9 @@ Settings
 Below is an example of the General Settings configuration file, with defaults:
 
 [video]
+; 0 = OpenGL Core Profile, 1 = OpenGL Compatibility Profile
+api = 0
+
 ;N = Scale video output by N
 scale = 3
 

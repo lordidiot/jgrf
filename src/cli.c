@@ -93,7 +93,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
         switch (c) {
             case 1:
                 break;
-            case 'a': // Shader
+            case 'a': // Video API
                 video = atoi(ps.optarg);
                 break;
             case 'c': // Core selection
