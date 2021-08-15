@@ -43,7 +43,7 @@ void jgrf_video_setfuncs(void) {
     gdata = jgrf_gdata_ptr();
     
     switch (settings->video_api.val) {
-        case 0: // OpenGL
+        case 0: // OpenGL - Core Profile
             jgrf_video_create = &jgrf_video_gl_create;
             jgrf_video_init = &jgrf_video_gl_init;
             jgrf_video_deinit = &jgrf_video_gl_deinit;
@@ -57,7 +57,21 @@ void jgrf_video_setfuncs(void) {
             jgrf_video_swapbuffers = &jgrf_video_gl_swapbuffers;
             jgrf_video_text = &jgrf_video_gl_text;
             break;
-        case 1: // Vulkan - one day...
+        case 1: // OpenGL - Compatibility Profile
+            jgrf_video_create = &jgrf_video_gl_create;
+            jgrf_video_init = &jgrf_video_gl_init;
+            jgrf_video_deinit = &jgrf_video_gl_deinit;
+            jgrf_video_fullscreen = &jgrf_video_gl_fullscreen;
+            jgrf_video_render = &jgrf_video_gl_render_compat;
+            jgrf_video_resize = &jgrf_video_gl_resize;
+            jgrf_video_get_scale_params = &jgrf_video_gl_get_scale_params;
+            jgrf_video_set_cursor = &jgrf_video_gl_set_cursor;
+            jgrf_video_get_info = &jgrf_video_gl_get_info;
+            jgrf_video_set_info = &jgrf_video_gl_set_info;
+            jgrf_video_swapbuffers = &jgrf_video_gl_swapbuffers;
+            jgrf_video_text = &jgrf_video_gl_text;
+            break;
+        case 2: // Vulkan - one day...
         default:
             jgrf_log(JG_LOG_ERR, "Invalid Video API: %d\n",
                 settings->video_api.val);

@@ -19,8 +19,9 @@
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "c:fhr:s:vwx:";
+static const char *os_def = "a:c:fhr:s:vwx:";
 static const struct parg_option po_def[] = {
+    { "video", PARG_REQARG, NULL, 'a' },
     { "core", PARG_REQARG, NULL, 'c' },
     { "fullscreen", PARG_NOARG, NULL, 'f' },
     { "help", PARG_NOARG, NULL, 'h' },
@@ -32,6 +33,7 @@ static const struct parg_option po_def[] = {
 };
 
 static const char *corename = NULL;
+static int video = 0;
 static int fullscreen = 0;
 static int rsqual = -1;
 static int scale = 0;
@@ -52,6 +54,9 @@ void jgrf_cli_override(void) {
         settings->misc_corelog.val = 0;
         settings->misc_frontendlog.val = 0;
     }
+    
+    if (video >= 0 && video <= settings->video_api.max)
+        settings->video_api.val = video;
     
     if (fullscreen)
         settings->video_fullscreen.val = 1;
@@ -87,6 +92,9 @@ void jgrf_cli_parse(int argc, char *argv[]) {
     while ((c = parg_getopt_long(&ps, argc, argv, os_def, po_def, &l)) != -1) {
         switch (c) {
             case 1:
+                break;
+            case 'a': // Shader
+                video = atoi(ps.optarg);
                 break;
             case 'c': // Core selection
                 corename = ps.optarg;
@@ -125,6 +133,11 @@ void jgrf_cli_parse(int argc, char *argv[]) {
 void jgrf_cli_usage(void) {
     fprintf(stdout, "usage: jollygood [options] game\n");
     fprintf(stdout, "  options:\n");
+    fprintf(stdout, "    -a, --video <value>     "
+        "Specify which Video API to use\n");
+    fprintf(stdout, "                              0 = OpenGL Core Profile\n");
+    fprintf(stdout, "                              1 = OpenGL Compatibility "
+        "Profile\n");
     fprintf(stdout, "    -c, --core <corename>   "
         "Specify which core to use\n");
     fprintf(stdout, "    -f, --fullscreen        "

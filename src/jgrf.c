@@ -1000,6 +1000,9 @@ int main(int argc, char *argv[]) {
     // Do final overrides using command line options
     jgrf_cli_override();
     
+    // Set up function pointers for video
+    jgrf_video_setfuncs();
+    
     // Show core information
     jgrf_log(JG_LOG_INF, "Core: %s (%s %s)\n",
         gdata.corename, gdata.corefname, gdata.coreversion);

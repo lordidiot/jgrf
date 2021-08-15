@@ -45,7 +45,7 @@ static inline void jgrf_setting_rd(const char *s, const char *n, setting_t *t) {
 // Handle reading of settings
 static void jgrf_settings_handler(void) {
     // Video
-    //jgrf_setting_rd("video", "api", &settings.video_api);
+    jgrf_setting_rd("video", "api", &settings.video_api);
     jgrf_setting_rd("video", "fullscreen", &settings.video_fullscreen);
     jgrf_setting_rd("video", "scale", &settings.video_scale);
     jgrf_setting_rd("video", "shader", &settings.video_shader);
@@ -89,7 +89,7 @@ int jgrf_settings_init() {
     gdata = jgrf_gdata_ptr();
     
     // Set defaults
-    settings.video_api = (setting_t){ 0, 0, 0 };
+    settings.video_api = (setting_t){ 0, 0, 1 };
     settings.video_fullscreen = (setting_t){ 0, 0, 1 };
     settings.video_scale = (setting_t){ 3, 1, 8 };
     settings.video_shader = (setting_t){ 3, 0, 6 };
@@ -173,6 +173,9 @@ void jgrf_settings_deinit(void) {
         char ibuf[4]; // Buffer to hold integers converted to strings
         
         // Video
+        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_api.val);
+        ini_table_create_entry(conf, "video", "api", ibuf);
+        
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_fullscreen.val);
         ini_table_create_entry(conf, "video", "fullscreen", ibuf);
         

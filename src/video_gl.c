@@ -96,11 +96,26 @@ static struct dimensions {
 
 // Create the SDL OpenGL Window
 void jgrf_video_gl_create(void) {
+    // Grab settings pointer
+    settings = jgrf_get_settings();
+    
     // Set the GL version
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-        SDL_GL_CONTEXT_PROFILE_CORE);
+    switch (settings->video_api.val) {
+        default: case 0: { // OpenGL - Core Profile
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                SDL_GL_CONTEXT_PROFILE_CORE);
+            break;
+        }
+        case 1: {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+            break;
+        }
+    }
     
     // Set window flags
     Uint32 windowflags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL |
@@ -110,8 +125,6 @@ void jgrf_video_gl_create(void) {
     char title[256];
     gdata = jgrf_gdata_ptr();
     snprintf(title, sizeof(title), "%s", gdata->gamename);
-    
-    settings = jgrf_get_settings();
     
     // Set the window dimensions
     dimensions.ww =
@@ -157,11 +170,15 @@ void jgrf_video_gl_create(void) {
     for (int i = 0; i < 3; ++i)
         msgtext[i] = gltCreateText();
     
+    // Do post window creation OpenGL setup
+    if (settings->video_api.val)
+        jgrf_video_gl_setup_compat();
+    else
+        jgrf_video_gl_setup();
+    
     jgrf_log(JG_LOG_INF, "Video: OpenGL %s\n", glGetString(GL_VERSION));
     
     SDL_ShowCursor(false);
-    
-    jgrf_video_gl_setup();
     
     // Set fullscreen if required
     if (settings->video_fullscreen.val)
@@ -296,8 +313,8 @@ static void jgrf_video_gl_refresh(void) {
         1.0/(vidinfo->w * tmult), 1.0/(vidinfo->h * tmult));
 }
 
+// Render the scene
 void jgrf_video_gl_render(int render) {
-    // Render the scene
     jgrf_video_gl_refresh(); // Check for changes
     
     // Viewport set to size of the input pixel array
@@ -323,9 +340,7 @@ void jgrf_video_gl_render(int render) {
                 vidinfo->h + vidinfo->y, // height
                 pixfmt.format, // format
                 pixfmt.type, // type
-            vidinfo->buf);//*/
-        /*glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax,
-            0, pixfmt.format, pixfmt.type, vidinfo->buf);//*/
+            vidinfo->buf);
     }
     
     // Clear the screen to black
@@ -386,6 +401,48 @@ void jgrf_video_gl_render(int render) {
             dimensions.dpiscale * 2.0f, GLT_CENTER, GLT_CENTER);
         gltEndDraw();
     }
+}
+
+// Render the scene
+void jgrf_video_gl_render_compat(int render) {
+    jgrf_video_gl_refresh(); // Check for changes
+    
+    // Viewport set to size of the output
+    glViewport(dimensions.xo, dimensions.yo, dimensions.rw, dimensions.rh);
+    
+    // Clear the screen to black
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texGame);
+    
+    // Render if there is new pixel data, do Black Frame Insertion otherwise
+    if (render) {
+        glTexSubImage2D(GL_TEXTURE_2D,
+                0,
+                0, // xoffset
+                0, // yoffset
+                vidinfo->w + vidinfo->x, // width
+                vidinfo->h + vidinfo->y, // height
+                pixfmt.format, // format
+                pixfmt.type, // type
+            vidinfo->buf);
+    }
+    
+    glBegin(GL_QUADS);
+        glTexCoord2f(vertices[10], vertices[11]);
+        glVertex2f(vertices[0], vertices[1]); // Bottom Left
+        
+        glTexCoord2f(vertices[8], vertices[9]);
+        glVertex2f(vertices[2], vertices[3]); // Top Left
+        
+        glTexCoord2f(vertices[12], vertices[13]);
+        glVertex2f(vertices[6], vertices[7]); // Top Right
+        
+        glTexCoord2f(vertices[14], vertices[15]);
+        glVertex2f(vertices[4], vertices[5]); // Bottom Right
+    glEnd();
 }
 
 // Handle viewport resizing
@@ -749,6 +806,40 @@ void jgrf_video_gl_setup(void) {
     
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
         texOutput, 0);
+    
+    jgrf_video_gl_resize();
+    jgrf_video_gl_refresh();
+}
+
+// Set up OpenGL - Compatibility Profile
+void jgrf_video_gl_setup_compat(void) {
+    GLint texfilter_in = GL_LINEAR;
+    
+    switch (settings->video_shader.val) {
+        case 0: // Nearest Neighbour
+            texfilter_in = GL_NEAREST;
+            break;
+        case 1: // Linear
+            break;
+        default:
+            jgrf_log(JG_LOG_WRN, "Post-processing shaders are not available in "
+                "OpenGL Compatibility Profile, defaulting to Linear\n");
+    }
+    
+    // Generate texture for raw game output
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &texGame);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texGame);
+    
+    // The full sized source image before any clipping
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax,
+        0, pixfmt.format, pixfmt.type, vidinfo->buf);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter_in);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter_in);
     
     jgrf_video_gl_resize();
     jgrf_video_gl_refresh();
