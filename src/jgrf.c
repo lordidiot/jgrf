@@ -177,7 +177,7 @@ void jgrf_log(int level, const char *fmt, ...) {
     char buffer[512];
     static const char *lchr = "diwe";
     static const char *lcol[4] = {
-        "\033[0;36m", "\033[0m", "\033[0;33m", "\033[1;31m"
+        "\033[0;35m", "\033[0m", "\033[0;33m", "\033[1;31m"
     };
     
     va_start(va, fmt);
@@ -205,7 +205,7 @@ static void jgrf_core_log(int level, const char *fmt, ...) {
     char buffer[512];
     static const char *lchr = "DIWE";
     static const char *lcol[4] = {
-        "\033[0;35m", "\033[0;34m", "\033[7;33m", "\033[1;7;31m"
+        "\033[0;35m", "\033[0;36m", "\033[7;33m", "\033[1;7;31m"
     };
     
     va_start(va, fmt);
