@@ -115,7 +115,7 @@ int jgrf_settings_init() {
 // Read core-specific overrides for frontend settings
 void jgrf_settings_override(const char *name) {
     char overridepath[256];
-    snprintf(overridepath, sizeof(overridepath), "%s%s/settings.ini",
+    snprintf(overridepath, sizeof(overridepath), "%s%s.ini",
         gdata->configpath, name);
     
     conf = ini_table_create();
