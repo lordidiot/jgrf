@@ -115,11 +115,11 @@ shader = 3
 ; Settings for CRTea
 ;0 = Scanlines, 1 = Aperture Grille Lite, 2 = Aperture Grille,
 ;3 = Shadow Mask, 4 = Custom
-crtea_mode = 3
+crtea_mode = 2
 
 ; Settings for CRTea Custom Mode
 ;0 = Scanlines, 1 = Aperture Grille Lite, 2 = Aperture Grille, 3 = Shadow Mask
-crtea_masktype = 3
+crtea_masktype = 2
 
 ;N = Mask Strength
 crtea_maskstr = 5
@@ -128,7 +128,7 @@ crtea_maskstr = 5
 crtea_scantr = 6
 
 ;N = Sharpness
-crtea_sharpness = 4
+crtea_sharpness = 7
 
 ;N = CRT Screen Curve Strength
 crtea_curve = 2

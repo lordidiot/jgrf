@@ -93,12 +93,12 @@ int jgrf_settings_init() {
     settings.video_fullscreen = (setting_t){ 0, 0, 1 };
     settings.video_scale = (setting_t){ 3, 1, 8 };
     settings.video_shader = (setting_t){ 3, 0, 6 };
-    settings.video_crtea_mode = (setting_t){ 3, 0, 4 };
-    settings.video_crtea_masktype = (setting_t){ 1, 0, 3 };
+    settings.video_crtea_mode = (setting_t){ 2, 0, 4 };
+    settings.video_crtea_masktype = (setting_t){ 2, 0, 3 };
     settings.video_crtea_maskstr = (setting_t){ 5, 0, 10 };
     settings.video_crtea_scanstr = (setting_t){ 6, 0, 10 };
-    settings.video_crtea_sharpness = (setting_t){ 4, 0, 10 };
-    settings.video_crtea_curve = (setting_t){ 0, 0, 10 };
+    settings.video_crtea_sharpness = (setting_t){ 7, 0, 10 };
+    settings.video_crtea_curve = (setting_t){ 2, 0, 10 };
     settings.video_crtea_corner = (setting_t){ 3, 0, 10 };
     settings.video_crtea_tcurve = (setting_t){ 10, 0, 10 };
     
