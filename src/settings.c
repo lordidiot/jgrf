@@ -92,7 +92,7 @@ int jgrf_settings_init() {
     settings.video_api = (setting_t){ 0, 0, 1 };
     settings.video_fullscreen = (setting_t){ 0, 0, 1 };
     settings.video_scale = (setting_t){ 3, 1, 8 };
-    settings.video_shader = (setting_t){ 3, 0, 6 };
+    settings.video_shader = (setting_t){ 2, 0, 6 };
     settings.video_crtea_mode = (setting_t){ 2, 0, 4 };
     settings.video_crtea_masktype = (setting_t){ 2, 0, 3 };
     settings.video_crtea_maskstr = (setting_t){ 5, 0, 10 };
