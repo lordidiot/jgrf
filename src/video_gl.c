@@ -304,13 +304,12 @@ static void jgrf_video_gl_refresh(void) {
         pixfmt.format, pixfmt.type, NULL);
     
     // Update uniforms for post-processing
-    float tmult = (float)settings->video_scale.val;
     glUniform4f(glGetUniformLocation(shaderProgram_out, "sourceSize"),
         (float)vidinfo->w, (float)vidinfo->h,
         1.0/(float)vidinfo->w, 1.0/(float)vidinfo->h);
     glUniform4f(glGetUniformLocation(shaderProgram_out, "targetSize"),
-        vidinfo->w * tmult, vidinfo->h * tmult,
-        1.0/(vidinfo->w * tmult), 1.0/(vidinfo->h * tmult));
+        dimensions.rw, dimensions.rh,
+        1.0/dimensions.rw, 1.0/dimensions.rh);
 }
 
 // Render the scene
