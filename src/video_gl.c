@@ -463,8 +463,8 @@ void jgrf_video_gl_resize() {
     dimensions.xo = (dimensions.ww - dimensions.rw) / 2;
     dimensions.yo = (dimensions.wh - dimensions.rh) / 2;
     
-    // Update the outputSize uniform
-    glUniform4f(glGetUniformLocation(shaderProgram_out, "outputSize"),
+    // Update the targetSize uniform
+    glUniform4f(glGetUniformLocation(shaderProgram_out, "targetSize"),
         dimensions.rw, dimensions.rh,
         1.0/dimensions.rw, 1.0/dimensions.rh);
     
@@ -629,7 +629,6 @@ void jgrf_video_gl_setup(void) {
     //GLint status;
     GLint texfilter_in = GL_NEAREST;
     GLint texfilter_out = GL_NEAREST;
-    GLfloat tmult = (float)settings->video_scale.val; // Target Multiplier
     
     // Create Vertex Array Objects
     glGenVertexArrays(1, &vao);
@@ -739,9 +738,6 @@ void jgrf_video_gl_setup(void) {
         (float)vidinfo->w, (float)vidinfo->h,
         1.0/(float)vidinfo->w, 1.0/(float)vidinfo->h);
     glUniform4f(glGetUniformLocation(shaderProgram_out, "targetSize"),
-        vidinfo->w * tmult, vidinfo->h * tmult,
-        1.0/(vidinfo->w * tmult), 1.0/(vidinfo->h * tmult));
-    glUniform4f(glGetUniformLocation(shaderProgram_out, "outputSize"),
         dimensions.rw, dimensions.rh,
         1.0/dimensions.rw, 1.0/dimensions.rh);
     
