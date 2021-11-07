@@ -23,15 +23,15 @@ vec2 res = sourceSize[0].xy;
 
 // Hardness of scanline
 // -4.0 = ultrasoft, -8.0 = soft, -16.0 = medium, -24.0 = hard
-float hardScan = -5.2;
+float hardScan = -7.0;
 
 // Hardness of pixels in scanline
 // -2.0 = soft, -4.0 = medium, -6.0 = hard
 float hardPix = -4.0;
 
 // Shadow mask
-float maskDark = 0.45;
-float maskLight = 1.2;
+float maskDark = 0.5;
+float maskLight = 1.0;
 
 // sRGB to Linear
 // Assuing using sRGB typed textures this should not be needed
