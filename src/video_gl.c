@@ -129,7 +129,7 @@ void jgrf_video_gl_create(void) {
     // Set the window dimensions
     dimensions.ww =
         (vidinfo->aspect * vidinfo->h * settings->video_scale.val) + 0.5;
-    dimensions.wh = vidinfo->h * settings->video_scale.val;
+    dimensions.wh = (vidinfo->h * settings->video_scale.val) + 0.5;
     dimensions.rw = dimensions.ww;
     dimensions.rh = dimensions.wh;
     
@@ -452,9 +452,9 @@ void jgrf_video_gl_resize() {
     
     // Check which dimension to optimize
     if (dimensions.rh * vidinfo->aspect > dimensions.rw)
-        dimensions.rh = dimensions.rw / vidinfo->aspect;
+        dimensions.rh = dimensions.rw / vidinfo->aspect + 0.5;
     else if (dimensions.rw / vidinfo->aspect > dimensions.rh)
-        dimensions.rw = dimensions.rh * vidinfo->aspect;
+        dimensions.rw = dimensions.rh * vidinfo->aspect + 0.5;
     
     truescale = dimensions.rh / vidinfo->h;
     
