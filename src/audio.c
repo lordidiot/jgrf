@@ -48,7 +48,8 @@ static ringbuf_t rbuf_out = { 0, 0, 0, 0, NULL }; // Ring buffer (output audio)
 static struct timespec req, rem;
 
 static int corefps = 0; // Emulator core's framerate rounded to nearest int
-static int ma_offset = 0; // Offset the moving average to control buffer sizes
+static int ma_offset = 0; // Offset the input moving average chunk size
+static int out_offset = 0; // Offset the output rate
 
 extern int fforward; // External fast-forward level
 
@@ -161,14 +162,18 @@ void jgrf_audio_cb_core(size_t in_size) {
     uint32_t out_rate = audinfo->rate / (fforward ? fforward + 1 : 1);
     
     // Manage the size of the output buffer to avoid underruns
-    if (rbuf_out.cursize < spf * 2) // Push More
-        out_rate += 3 * corefps;
-    else if (rbuf_out.cursize < spf * 3) // Push More
-        out_rate += 2 * corefps;
-    else if (rbuf_out.cursize < spf * 4) // Push More
-        out_rate += corefps;
+    if (rbuf_out.cursize < spf) // Push More
+        out_offset = 3 * corefps;
+    else if (rbuf_out.cursize < (spf + (spf >> 1))) // Push More
+        out_offset = 2 * corefps;
+    else if (rbuf_out.cursize < spf * 2) // Push More
+        out_offset = corefps;
     else if (rbuf_out.cursize > spf * 5) // Push Less
-        out_rate -= corefps;
+        out_offset = -corefps;
+    else if (rbuf_out.cursize > spf * 3) // Goldilocks Zone
+        out_offset = 0;
+    
+    out_rate += out_offset;
     
     // Change the resampling ratio
     err = speex_resampler_set_rate_frac(resampler,
