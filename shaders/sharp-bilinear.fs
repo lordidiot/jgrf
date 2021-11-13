@@ -16,6 +16,7 @@ out vec4 fragColor;
 
 void main() {
    float prescale = floor(targetSize.y / sourceSize[0].y + 0.01);
+   if (prescale == 0.0) prescale = 1.0;
    vec2 texel = texCoord.xy * sourceSize[0].xy;
    vec2 texel_floored = floor(texel);
    vec2 s = fract(texel);
