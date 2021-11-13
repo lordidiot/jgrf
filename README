@@ -76,10 +76,8 @@ F11                      - Activate Cheats
 F12                      - Deactivate Cheats
 F                        - Toggle Fullscreen/Windowed Mode
 
-Game Input Definitions:
 Input for games is not preconfigured. To configure a device:
-
-SHIFT+ALT+[Port Number] ex. SHIFT+ALT+1, SHIFT+ALT+2
+  SHIFT+ALT+[Port Number] ex. SHIFT+ALT+1, SHIFT+ALT+2
 
 Effort has been made to ensure emulator cores know what devices must be plugged
 in. Console output will indicate which emulated device is plugged into which
@@ -93,9 +91,9 @@ that require analog input. The reverse, assigning physical axes to emulated
 digital buttons, is possible.
 
 Force Feedback data is sent to the physical device that handles the emulated
-device's axis definitions. Currently, this only exists in PlayStation games.
-In the case of the Game Boy, there is only a single controller, so force
-feedback data is sent to this controller.
+device's axis definitions. Currently, this only exists in PlayStation and Game
+Boy games. In the case of the Game Boy, there is only a single controller, so
+force feedback data is sent to this controller.
 
 Settings
 --------
