@@ -52,8 +52,6 @@ static GLuint texOutput; // Output texture used for post-processing
 static GLTtext *msgtext[3];
 static int textframes[3];
 
-static float truescale;
-
 // Triangle and Texture vertices
 static GLfloat vertices[] = {
     -1.0, -1.0, // Vertex 1 (X, Y) Left Bottom
@@ -374,10 +372,11 @@ void jgrf_video_gl_render(int render) {
     if (textframes[0]) {
         gltBeginDraw();
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
-        gltDrawText2DAligned(msgtext[0], 2.0 * truescale, dimensions.rh,
-        dimensions.dpiscale * 2.0f, GLT_LEFT, GLT_BOTTOM);
+        gltDrawText2DAligned(msgtext[0],
+            0.0, floor(dimensions.rh),
+            dimensions.dpiscale * 2.0f, GLT_LEFT, GLT_BOTTOM);
         gltEndDraw();
-        textframes[0]--;
+        --textframes[0];
     }
     
     // Text from the core
@@ -385,10 +384,10 @@ void jgrf_video_gl_render(int render) {
         gltBeginDraw();
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[1],
-            dimensions.rw, dimensions.rh,
+            floor(dimensions.rw), floor(dimensions.rh),
             dimensions.dpiscale * 2.0f, GLT_RIGHT, GLT_BOTTOM);
         gltEndDraw();
-        textframes[1]--;
+        --textframes[1];
     }
     
     // Input Config
@@ -455,8 +454,6 @@ void jgrf_video_gl_resize() {
         dimensions.rh = dimensions.rw / vidinfo->aspect + 0.5;
     else if (dimensions.rw / vidinfo->aspect > dimensions.rh)
         dimensions.rw = dimensions.rh * vidinfo->aspect + 0.5;
-    
-    truescale = dimensions.rh / vidinfo->h;
     
     // Store X and Y offsets
     dimensions.xo = (dimensions.ww - dimensions.rw) / 2;
