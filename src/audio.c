@@ -25,7 +25,7 @@ void memset_pattern4(void *__b, const void *__pattern4, size_t __len);
 #include "audio.h"
 #include "settings.h"
 
-#define SPFTOLERANCE 32 // Divergence tolerance between current and average SPF
+#define SPFTOLERANCE 28 // Divergence tolerance between current and average SPF
 
 static jgrf_gdata_t *gdata = NULL;
 
@@ -120,7 +120,7 @@ void jgrf_audio_timing(double frametime) {
     int spf = (audinfo->rate / (int)(frametime + 0.5)) * audinfo->channels;
     corefps = frametime + 0.5;
     
-    if (abs(spf - (int)(mavg_in.avg + 0.5)) > SPFTOLERANCE) {
+    if (abs(spf - (int)(mavg_in.avg + 0.5)) >= SPFTOLERANCE) {
         int oldavg = (int)mavg_in.avg;
         jgrf_audio_mavg_seed(&mavg_in, spf);
         jgrf_log(JG_LOG_DBG,
