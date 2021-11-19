@@ -359,7 +359,7 @@ static void jgrf_hash_md5(void) {
     MD5_CTX c;
     size_t md5len = gameinfo.size;
     uint8_t *dataptr = gameinfo.data;
-    unsigned char digest[16];
+    uint8_t digest[16];
     MD5_Init(&c);
     /*while (md5len > 0) { // Use for large file sizes
         md5len > 512 ? MD5_Update(&c, dataptr, 512) :
@@ -442,7 +442,7 @@ static void jgrf_game_load(const char *filename) {
     gameinfo.size = ftell(file);
     rewind(file);
     
-    gameinfo.data = malloc(gameinfo.size);
+    gameinfo.data = calloc(gameinfo.size, sizeof(uint8_t));
     if (!gameinfo.data || !fread((void*)gameinfo.data, gameinfo.size, 1, file))
         jgrf_log(JG_LOG_ERR, "Failed to read file. Exiting...\n");
     

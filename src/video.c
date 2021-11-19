@@ -125,7 +125,7 @@ void jgrf_video_screenshot(void) {
     int rw, rh;
     void *ssdata = jgrf_video_gl_get_pixels(&rw, &rh);
     
-    uint8_t error = lodepng_encode32_file(ssname, (const unsigned char*)ssdata,
+    uint8_t error = lodepng_encode32_file(ssname, (const uint8_t*)ssdata,
         rw, rh);
     
     if (error) jgrf_log(JG_LOG_WRN,

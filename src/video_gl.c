@@ -195,13 +195,13 @@ int jgrf_video_gl_init(void) {
 }
 
 // Flip the image so that it can be written out with proper orientation
-static inline void jgrf_video_gl_ssflip(unsigned char *pixels,
+static inline void jgrf_video_gl_ssflip(uint8_t *pixels,
     int width, int height, int bytes) {
     // Flip the pixels
-    int rowsize = width * bytes;
-    unsigned char *row = (unsigned char*)malloc(rowsize);
-    unsigned char *low = pixels;
-    unsigned char *high = &pixels[(height - 1) * rowsize];
+    size_t rowsize = width * bytes;
+    uint8_t *row = (uint8_t*)calloc(rowsize, sizeof(uint8_t));
+    uint8_t *low = pixels;
+    uint8_t *high = &pixels[(height - 1) * rowsize];
     
     for (; low < high; low += rowsize, high -= rowsize) {
         memcpy(row, low, rowsize);
@@ -213,14 +213,15 @@ static inline void jgrf_video_gl_ssflip(unsigned char *pixels,
 
 // Dump the pixels rendered to the default framebuffer
 void *jgrf_video_gl_get_pixels(int *rw, int *rh) {
-    unsigned char *pixels;
-    pixels = (unsigned char*)malloc(sizeof(unsigned char) *
-        dimensions.rw * dimensions.rh * 4);
+    uint8_t *pixels;
+    pixels = (uint8_t*)calloc(dimensions.rw * dimensions.rh,
+        sizeof(uint32_t));
     
     // Read the pixels and flip them vertically
     glReadPixels(dimensions.xo, dimensions.yo, dimensions.rw, dimensions.rh,
         GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    jgrf_video_gl_ssflip(pixels, dimensions.rw, dimensions.rh, 4);
+    jgrf_video_gl_ssflip(pixels, dimensions.rw, dimensions.rh,
+        sizeof(uint32_t));
     *rw = dimensions.rw;
     *rh = dimensions.rh;
     return pixels;
