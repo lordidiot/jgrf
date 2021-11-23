@@ -189,6 +189,9 @@ The Jolly Good Reference Frontend
   Copyright (c) 2020-2021, Rupert Carmichael (MPL-2.0)
   See LICENSE
 
+AntiAliased Nearest Neighbor Fragment Shader
+  Copyright (c) 2015 nyanpasu64 and wareya (MIT)
+
 glText
   Copyright (c) 2013-2018 Christian Vallentin (Zlib)
   See deps/gltext.h
