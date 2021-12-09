@@ -9,6 +9,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#define JGRF_AUXFILE_MAX 2
+
 typedef struct jgrf_gdata_t { // Global Data
     const char *filename;
     char configpath[128]; // Base user config path
@@ -25,16 +27,20 @@ typedef struct jgrf_gdata_t { // Global Data
     char statepath[128]; // State path
     char savepath[128]; // Save path
     char sspath[128]; // Screenshot path
+    char auxfilename[JGRF_AUXFILE_MAX][128]; // Auxiliary filenames
     uint32_t crc; // CRC32 Checksum
     char md5[33]; // MD5 Checksum
     char sys[24]; // Name of emulated system
     int numinputs; // Number of ports/inputs in core
+    int numauxfiles; // Number of loaded support files
     uint32_t hints; // Hints from the core
 } jgrf_gdata_t;
 
 jgrf_gdata_t *jgrf_gdata_ptr(void);
 
 void jgrf_log(int, const char*, ...);
+
+void jgrf_auxfile_load(const char*, int);
 
 void jgrf_state_load(int);
 void jgrf_state_save(int);

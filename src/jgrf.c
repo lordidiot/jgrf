@@ -70,7 +70,8 @@ static struct _jgapi {
     void (*jg_setup_video)(void);
     void (*jg_setup_audio)(void);
     void (*jg_set_inputstate)(jg_inputstate_t*, int);
-    void (*jg_set_gameinfo)(jg_gameinfo_t);
+    void (*jg_set_gameinfo)(jg_fileinfo_t);
+    void (*jg_set_auxinfo)(jg_fileinfo_t, int);
     void (*jg_set_paths)(jg_pathinfo_t);
 } jgapi;
 
@@ -85,7 +86,8 @@ static struct _loaded {
 } loaded = { 0, 0, 0, 0, 0, 0 };
 
 // Frontend knows the game and path info and passes this to the core
-static jg_gameinfo_t gameinfo;
+static jg_fileinfo_t gameinfo;
+static jg_fileinfo_t auxinfo[JGRF_AUXFILE_MAX];
 static jg_pathinfo_t pathinfo;
 
 // Global data struct for miscellaneous information
@@ -275,6 +277,8 @@ static void jgrf_core_load(const char *corepath) {
         "jg_set_inputstate");
     *(void**)(&jgapi.jg_set_gameinfo) = dlsym(jgapi.handle,
         "jg_set_gameinfo");
+    *(void**)(&jgapi.jg_set_auxinfo) = dlsym(jgapi.handle,
+        "jg_set_auxinfo");
     *(void**)(&jgapi.jg_set_paths) = dlsym(jgapi.handle,
         "jg_set_paths");
     
@@ -374,6 +378,33 @@ static void jgrf_hash_md5(void) {
         snprintf(&(gdata.md5[i * 2]), 16 * 2, "%02x", (unsigned)digest[i]);
     }
     gameinfo.md5 = gdata.md5;
+}
+
+// Load an Auxiliary File
+void jgrf_auxfile_load(const char *filename, int index) {
+    FILE *file = fopen(filename, "rb");
+    
+    if (!file)
+        jgrf_log(JG_LOG_WRN, "Failed to open file: %s\n", filename);
+    
+    fseek(file, 0, SEEK_END);
+    auxinfo[index].size = ftell(file);
+    rewind(file);
+    
+    auxinfo[index].data = calloc(auxinfo[index].size, sizeof(uint8_t));
+    if (!auxinfo[index].data ||
+        !fread((void*)auxinfo[index].data, auxinfo[index].size, 1, file)) {
+        jgrf_log(JG_LOG_WRN, "Failed to read file: %s\n", filename);
+        fclose(file);
+        return;
+    }
+    
+    snprintf(gdata.auxfilename[index], sizeof(gdata.auxfilename[index]),
+        "%s", filename);
+    auxinfo[index].fname = filename;
+    
+    // Close the file - some cores may want to load it again on their own terms
+    fclose(file);
 }
 
 // Load the game data from a .zip archive
@@ -823,6 +854,8 @@ void jgrf_quit(int status) {
     if (loaded.input) jgrf_input_deinit();
     if (loaded.settings) jgrf_settings_deinit();
     if (gameinfo.data) free(gameinfo.data);
+    for (int i = 0; i < gdata.numauxfiles; ++i)
+        if (auxinfo[i].data) free(auxinfo[i].data);
     jgrf_cheats_deinit();
     SDL_Quit();
     exit(status);
@@ -990,6 +1023,10 @@ int main(int argc, char *argv[]) {
     
     // Create any directories that are required
     jgrf_mkdirs();
+    
+    // Load Auxiliary files
+    for (int i = 0; i < gdata.numauxfiles; ++i)
+        jgapi.jg_set_auxinfo(auxinfo[i], i);
     
     // Load the game
     jgrf_game_load(gdata.filename);

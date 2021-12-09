@@ -33,6 +33,7 @@ static const struct parg_option po_def[] = {
 };
 
 static const char *corename = NULL;
+
 static int video = 0;
 static int fullscreen = 0;
 static int rsqual = -1;
@@ -85,9 +86,17 @@ void jgrf_cli_parse(int argc, char *argv[]) {
     // Reorder the arguments to place non-options last
     int optend = parg_reorder(argc, argv, os_def, po_def);
     
-    // First non-option is the ROM filename
+    // Last non-option is the ROM filename
     jgrf_gdata_t *gdata = jgrf_gdata_ptr();
-    gdata->filename = argv[optend];
+    gdata->filename = argv[argc - 1];
+    
+    // Count the number of auxiliary files
+    gdata->numauxfiles = argc - optend - 1;
+    if (gdata->numauxfiles > JGRF_AUXFILE_MAX)
+        gdata->numauxfiles = JGRF_AUXFILE_MAX;
+    
+    for (int i = 0; i < gdata->numauxfiles; ++i)
+        jgrf_auxfile_load(argv[optend + i], i);
     
     while ((c = parg_getopt_long(&ps, argc, argv, os_def, po_def, &l)) != -1) {
         switch (c) {
@@ -131,7 +140,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
 }
 
 void jgrf_cli_usage(void) {
-    fprintf(stdout, "usage: jollygood [options] game\n");
+    fprintf(stdout, "usage: jollygood [options] [auxiliary files] game\n");
     fprintf(stdout, "  options:\n");
     fprintf(stdout, "    -a, --video <value>     "
         "Specify which Video API to use\n");
@@ -152,8 +161,8 @@ void jgrf_cli_usage(void) {
         "\n");
     fprintf(stdout, "                              1 = Linear\n");
     fprintf(stdout, "                              2 = Sharp Bilinear\n");
-    fprintf(stdout, "                              3 = AANN (Anti-Aliased "
-        "Nearest Neighbour)\n");
+    fprintf(stdout, "                              3 = Anti-Aliased Nearest "
+        "Neighbour\n");
     fprintf(stdout, "                              4 = CRT-Bespoke\n");
     fprintf(stdout, "                              5 = CRTea\n");
     fprintf(stdout, "                              6 = LCD\n");
