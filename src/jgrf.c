@@ -385,7 +385,7 @@ void jgrf_auxfile_load(const char *filename, int index) {
     FILE *file = fopen(filename, "rb");
     
     if (!file)
-        jgrf_log(JG_LOG_WRN, "Failed to open file: %s\n", filename);
+        jgrf_log(JG_LOG_ERR, "Failed to open file: %s\n", filename);
     
     fseek(file, 0, SEEK_END);
     auxinfo[index].size = ftell(file);
@@ -394,7 +394,7 @@ void jgrf_auxfile_load(const char *filename, int index) {
     auxinfo[index].data = calloc(auxinfo[index].size, sizeof(uint8_t));
     if (!auxinfo[index].data ||
         !fread((void*)auxinfo[index].data, auxinfo[index].size, 1, file)) {
-        jgrf_log(JG_LOG_WRN, "Failed to read file: %s\n", filename);
+        jgrf_log(JG_LOG_ERR, "Failed to read file: %s\n", filename);
         fclose(file);
         return;
     }
