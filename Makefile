@@ -62,6 +62,8 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/deps/parson.o \
 	$(OBJDIR)/deps/tconfig.o
 
+.PHONY: all clean install install-strip uninstall
+
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
 	$(CC) $(CFLAGS) $(FLAGS) $(INCLUDES) $(CPPFLAGS) $(DEFS) -c $< -o $@
 
