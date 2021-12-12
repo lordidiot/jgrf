@@ -261,7 +261,7 @@ void jgrf_input_set_states(void (*set_inputstate)(jg_inputstate_t*, int)) {
 }
 
 // Calculate mouse input coordinates, taking into account aspect ratio and scale
-static inline void jgrf_input_coords_relative(int32_t x, int32_t y,
+static inline void jgrf_input_coords_scaled(int32_t x, int32_t y,
     int32_t *xcoord, int32_t *ycoord) {
     
     float xscale, yscale, xo, yo;
@@ -685,9 +685,11 @@ void jgrf_input_handler(SDL_Event *event) {
             break;
         }
         case SDL_MOUSEMOTION: {
-            jgrf_input_coords_relative(event->motion.x, event->motion.y,
+            jgrf_input_coords_scaled(event->motion.x, event->motion.y,
                 &coreinput[msmap.index].coord[0],
                 &coreinput[msmap.index].coord[1]);
+            coreinput[msmap.index].axis[0] += event->motion.xrel;
+            coreinput[msmap.index].axis[1] += event->motion.yrel;
             break;
         }
         case SDL_MOUSEBUTTONUP: {
