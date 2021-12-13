@@ -736,7 +736,7 @@ int jgrf_game_detect_sys(const char *filename) {
         snprintf(gdata.sys, sizeof(gdata.sys), "pce");
     
     else if (!strcasecmp(ext, "sfc") || !strcasecmp(ext, "smc") ||
-        !strcasecmp(ext, "bs"))
+        !strcasecmp(ext, "bs") || !strcasecmp(ext, "st"))
         snprintf(gdata.sys, sizeof(gdata.sys), "snes");
     
     else if (!strcasecmp(ext, "sg"))
