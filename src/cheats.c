@@ -15,6 +15,7 @@
 #include "parson.h"
 
 #include "jgrf.h"
+#include "cheats.h"
 
 static void (*jgrf_cheat_clear)(void);
 static void (*jgrf_cheat_set)(const char *);
