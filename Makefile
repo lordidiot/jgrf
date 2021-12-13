@@ -65,10 +65,14 @@ CSRCS := $(OBJDIR)/jgrf.o \
 .PHONY: all clean install install-strip uninstall
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
-	$(CC) $(CFLAGS) $(FLAGS) $(INCLUDES) $(CPPFLAGS) $(DEFS) -c $< -o $@
+	$(info $(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) $(DEFS) \
+		$(subst $(SOURCEDIR)/,,$(INCLUDES) -c $<) -o $@)
+	@$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
 
 $(OBJDIR)/deps/%.o: $(SOURCEDIR)/deps/%.c $(OBJDIR)/.tag
-	$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c $< -o $@
+	$(info $(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c \
+		$(subst $(SOURCEDIR)/,,$<) -o $@)
+	@$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c $< -o $@
 
 OBJS := $(CSRCS:.c=.o)
 
