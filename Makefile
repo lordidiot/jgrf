@@ -3,7 +3,7 @@ SOURCEDIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword \
 
 CC ?= cc
 CFLAGS ?= -O2
-FLAGS := -std=c99 -Wall -Wextra -Wshadow -pedantic
+FLAGS := -std=c99 -Wall -Wextra -Wshadow -Wmissing-prototypes -pedantic
 
 PKGCONF ?= pkg-config
 CFLAGS_JG := $(shell $(PKGCONF) --cflags jg)
