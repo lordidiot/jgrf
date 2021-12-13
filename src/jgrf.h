@@ -9,7 +9,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#define JGRF_AUXFILE_MAX 2
+#define JGRF_AUXFILE_MAX 3
 
 typedef struct jgrf_gdata_t { // Global Data
     const char *filename;
