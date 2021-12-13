@@ -27,7 +27,7 @@ typedef struct jgrf_gdata_t { // Global Data
     char statepath[128]; // State path
     char savepath[128]; // Save path
     char sspath[128]; // Screenshot path
-    char auxfilename[JGRF_AUXFILE_MAX][128]; // Auxiliary filenames
+    char auxfilepath[JGRF_AUXFILE_MAX][128]; // Auxiliary filepaths
     uint32_t crc; // CRC32 Checksum
     char md5[33]; // MD5 Checksum
     char sys[24]; // Name of emulated system

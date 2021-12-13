@@ -399,9 +399,9 @@ void jgrf_auxfile_load(const char *filename, int index) {
         return;
     }
     
-    snprintf(gdata.auxfilename[index], sizeof(gdata.auxfilename[index]),
+    snprintf(gdata.auxfilepath[index], sizeof(gdata.auxfilepath[index]),
         "%s", filename);
-    auxinfo[index].fname = filename;
+    auxinfo[index].path = filename;
     
     // Close the file - some cores may want to load it again on their own terms
     fclose(file);
