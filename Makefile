@@ -35,13 +35,13 @@ ifneq ($(OS), Windows_NT)
 	DEFS := -DDATADIR=\"$(DATADIR)\" -DLIBDIR=\"$(LIBDIR)\"
 endif
 
+LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
+
 # Conditions for LIBS
 ifeq ($(UNAME), NetBSD)
-	LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 else ifeq ($(UNAME), OpenBSD)
-	LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 else
-	LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm -ldl
+	LIBS += -ldl
 endif
 
 OBJDIR := objs
