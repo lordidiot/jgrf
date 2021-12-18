@@ -405,6 +405,19 @@ void jgrf_auxfile_load(const char *filename, int index) {
     
     // Close the file - some cores may want to load it again on their own terms
     fclose(file);
+    
+    snprintf(gdata.auxname[index], sizeof(gdata.auxname[index]),
+        "%s", basename((char*)filename));
+    
+    // Strip the file extension off
+    for (int j = strlen(gdata.auxname[index]) - 1; j > 0; --j) {
+        if (gdata.auxname[index][j] == '.') {
+            gdata.auxname[index][j] = '\0';
+            break;
+        }
+    }
+    
+    auxinfo[index].name = gdata.auxname[index];
 }
 
 // Load the game data from a .zip archive
