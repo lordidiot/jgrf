@@ -62,17 +62,27 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/deps/parson.o \
 	$(OBJDIR)/deps/tconfig.o
 
+# Compiler command
+COMPILE_C = $(CC) $(CFLAGS) $(1) -c $< -o $@
+
+# Info command
+COMPILE_INFO = $(info $(subst $(SOURCEDIR)/,,$(1)))
+
+# Dependencies command
+BUILD_DEPS = $(call COMPILE_C, $(FLAGS) $(CPPFLAGS))
+
+# Core command
+BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(CPPFLAGS) $(DEFS) $(INCLUDES))
+
 .PHONY: all clean install install-strip uninstall
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
-	$(info $(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) $(DEFS) \
-		$(subst $(SOURCEDIR)/,,$(INCLUDES) -c $<) -o $@)
-	@$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) $(DEFS) $(INCLUDES) -c $< -o $@
+	$(call COMPILE_INFO, $(BUILD_MAIN))
+	@$(BUILD_MAIN)
 
 $(OBJDIR)/deps/%.o: $(SOURCEDIR)/deps/%.c $(OBJDIR)/.tag
-	$(info $(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c \
-		$(subst $(SOURCEDIR)/,,$<) -o $@)
-	@$(CC) $(CFLAGS) $(FLAGS) $(CPPFLAGS) -c $< -o $@
+	$(call COMPILE_INFO, $(BUILD_DEPS))
+	@$(BUILD_DEPS)
 
 OBJS := $(CSRCS:.c=.o)
 
