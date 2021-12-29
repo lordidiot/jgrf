@@ -63,7 +63,7 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/deps/tconfig.o
 
 # Compiler command
-COMPILE_C = $(CC) $(CFLAGS) $(1) -c $< -o $@
+COMPILE_C = $(strip $(CC) $(CFLAGS) $(1) -c $< -o $@)
 
 # Info command
 COMPILE_INFO = $(info $(subst $(SOURCEDIR)/,,$(1)))
