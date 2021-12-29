@@ -63,16 +63,16 @@ CSRCS := $(OBJDIR)/jgrf.o \
 	$(OBJDIR)/deps/tconfig.o
 
 # Compiler command
-COMPILE_C = $(strip $(CC) $(CFLAGS) $(1) -c $< -o $@)
+COMPILE_C = $(strip $(CC) $(CFLAGS) $(CPPFLAGS) $(1) -c $< -o $@)
 
 # Info command
 COMPILE_INFO = $(info $(subst $(SOURCEDIR)/,,$(1)))
 
 # Dependencies command
-BUILD_DEPS = $(call COMPILE_C, $(FLAGS) $(CPPFLAGS))
+BUILD_DEPS = $(call COMPILE_C, $(FLAGS))
 
 # Core command
-BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(CPPFLAGS) $(DEFS) $(INCLUDES))
+BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(DEFS) $(INCLUDES))
 
 .PHONY: all clean install install-strip uninstall
 
