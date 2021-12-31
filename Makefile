@@ -44,23 +44,26 @@ else
 	LIBS += -ldl
 endif
 
+CSRCS := jgrf.c \
+	audio.c \
+	cheats.c \
+	cli.c \
+	input.c \
+	settings.c \
+	video.c \
+	video_gl.c \
+	deps/lodepng.c \
+	deps/md5.c \
+	deps/miniz.c \
+	deps/musl_memmem.c \
+	deps/parg.c \
+	deps/parson.c \
+	deps/tconfig.c
+
 OBJDIR := objs
 
-CSRCS := $(OBJDIR)/jgrf.o \
-	$(OBJDIR)/audio.o \
-	$(OBJDIR)/cheats.o \
-	$(OBJDIR)/cli.o \
-	$(OBJDIR)/input.o \
-	$(OBJDIR)/settings.o \
-	$(OBJDIR)/video.o \
-	$(OBJDIR)/video_gl.o \
-	$(OBJDIR)/deps/lodepng.o \
-	$(OBJDIR)/deps/md5.o \
-	$(OBJDIR)/deps/miniz.o \
-	$(OBJDIR)/deps/musl_memmem.o \
-	$(OBJDIR)/deps/parg.o \
-	$(OBJDIR)/deps/parson.o \
-	$(OBJDIR)/deps/tconfig.o
+# List of object files
+OBJS := $(patsubst %,$(OBJDIR)/%,$(CSRCS:.c=.o))
 
 # Compiler command
 COMPILE_C = $(strip $(CC) $(CFLAGS) $(CPPFLAGS) $(1) -c $< -o $@)
@@ -76,6 +79,8 @@ BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(DEFS) $(INCLUDES))
 
 .PHONY: all clean install install-strip uninstall
 
+all: $(TARGET)
+
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
 	$(call COMPILE_INFO, $(BUILD_MAIN))
 	@$(BUILD_MAIN)
@@ -84,16 +89,12 @@ $(OBJDIR)/deps/%.o: $(SOURCEDIR)/deps/%.c $(OBJDIR)/.tag
 	$(call COMPILE_INFO, $(BUILD_DEPS))
 	@$(BUILD_DEPS)
 
-OBJS := $(CSRCS:.c=.o)
-
-all: $(TARGET)
-
 $(OBJDIR)/.tag:
-	@mkdir -p $(OBJDIR)/deps/
+	@mkdir -p $(OBJDIR)/deps
 	@touch $@
 
 $(TARGET): $(OBJS)
-	$(CC) $^ $(LDFLAGS) $(LIBS) -o $(TARGET)
+	$(CC) $^ $(LDFLAGS) $(LIBS) -o $@
 
 clean:
 	rm -rf $(OBJDIR)/ $(TARGET)
