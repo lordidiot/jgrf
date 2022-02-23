@@ -422,6 +422,10 @@ void jgrf_auxfile_load(const char *filename, int index) {
 
 // Load the game data from a .zip archive
 static int jgrf_game_load_archive(const char *filename) {
+    // Don't load archived files if the emulator expects an archive
+    if (gdata.hints & JG_HINT_MEDIA_ARCHIVED)
+        return 0;
+    
     mz_zip_archive zip_archive;
     memset(&zip_archive, 0, sizeof(zip_archive));
     
