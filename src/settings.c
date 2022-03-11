@@ -35,7 +35,7 @@ static inline void jgrf_setting_rd(const char *s, const char *n, setting_t *t) {
     if (ini_table_check_entry(conf, s, n)) {
         int val_orig = t->val; // Save the default value
         ini_table_get_entry_as_int(conf, s, n, &(t->val)); // Read new the value
-        
+
         // Reset to default if out of bounds
         if ((t->val > t->max) || (t->val < t->min))
             t->val = val_orig;
@@ -57,10 +57,10 @@ static void jgrf_settings_handler(void) {
     jgrf_setting_rd("video", "crtea_curve", &settings.video_crtea_curve);
     jgrf_setting_rd("video", "crtea_corner", &settings.video_crtea_corner);
     jgrf_setting_rd("video", "crtea_tcurve", &settings.video_crtea_tcurve);
-    
+
     // Audio
     jgrf_setting_rd("audio", "rsqual", &settings.audio_rsqual);
-    
+
     // Misc
     jgrf_setting_rd("misc", "corelog", &settings.misc_corelog);
     jgrf_setting_rd("misc", "frontendlog", &settings.misc_frontendlog);
@@ -70,16 +70,16 @@ static void jgrf_settings_handler(void) {
 static void jgrf_settings_read(void) {
     char path[192];
     snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
-    
+
     conf = ini_table_create();
-    
+
     if (!ini_table_read_from_file(conf, path)) {
         jgrf_log(JG_LOG_DBG, "Main configuration file not found: %s\n", path);
         confchanged = 1;
     }
     else
         jgrf_settings_handler();
-    
+
     // Clean up the config data
     ini_table_destroy(conf);
 }
@@ -87,7 +87,7 @@ static void jgrf_settings_read(void) {
 // Initialize the settings to defaults and grab global data pointer
 int jgrf_settings_init() {
     gdata = jgrf_gdata_ptr();
-    
+
     // Set defaults
     settings.video_api = (setting_t){ 0, 0, 1 };
     settings.video_fullscreen = (setting_t){ 0, 0, 1 };
@@ -101,14 +101,14 @@ int jgrf_settings_init() {
     settings.video_crtea_curve = (setting_t){ 2, 0, 10 };
     settings.video_crtea_corner = (setting_t){ 3, 0, 10 };
     settings.video_crtea_tcurve = (setting_t){ 10, 0, 10 };
-    
+
     settings.audio_rsqual = (setting_t){ 3, 0, 10 };
-    
+
     settings.misc_corelog = (setting_t){ 1, 0, 3 };
     settings.misc_frontendlog = (setting_t){ 1, 0, 3 };
-    
+
     jgrf_settings_read();
-    
+
     return 1;
 }
 
@@ -117,16 +117,16 @@ void jgrf_settings_override(const char *name) {
     char overridepath[256];
     snprintf(overridepath, sizeof(overridepath), "%s%s.ini",
         gdata->configpath, name);
-    
+
     conf = ini_table_create();
-    
+
     if (!ini_table_read_from_file(conf, overridepath)) {
         jgrf_log(JG_LOG_DBG, "Override configuration file not found: %s\n",
             overridepath);
     }
     else
         jgrf_settings_handler();
-    
+
     // Clean up the config data
     ini_table_destroy(conf);
 }
@@ -136,20 +136,20 @@ void jgrf_settings_emu(jg_setting_t *emusettings, int numsettings) {
     char path[256];
     snprintf(path, sizeof(path), "%s%s.ini",
         gdata->configpath, gdata->corename);
-    
+
     // Create config structure
     conf = ini_table_create();
     if (!ini_table_read_from_file(conf, path))
         jgrf_log(JG_LOG_DBG, "Core configuration file not found: %s\n", path);
-    
+
     for (int i = 0; i < numsettings; ++i) {
         if (ini_table_check_entry(conf, gdata->corename,
             emusettings[i].name)) {
-            
+
             int value;
             ini_table_get_entry_as_int(conf, gdata->corename,
                 emusettings[i].name, &value);
-            
+
             if (value <= emusettings[i].max && value >= emusettings[i].min)
                 emusettings[i].value = value;
             else
@@ -157,7 +157,7 @@ void jgrf_settings_emu(jg_setting_t *emusettings, int numsettings) {
                     emusettings[i].name, value);
         }
     }
-    
+
     // Clean up the config data
     ini_table_destroy(conf);
 }
@@ -165,59 +165,59 @@ void jgrf_settings_emu(jg_setting_t *emusettings, int numsettings) {
 void jgrf_settings_deinit(void) {
     char path[192];
     snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
-    
+
     if (confchanged) {
         // Create data structure
         conf = ini_table_create();
-        
+
         char ibuf[4]; // Buffer to hold integers converted to strings
-        
+
         // Video
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_api.val);
         ini_table_create_entry(conf, "video", "api", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_fullscreen.val);
         ini_table_create_entry(conf, "video", "fullscreen", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_scale.val);
         ini_table_create_entry(conf, "video", "scale", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_shader.val);
         ini_table_create_entry(conf, "video", "shader", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_mode.val);
         ini_table_create_entry(conf, "video", "crtea_mode", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_masktype.val);
         ini_table_create_entry(conf, "video", "crtea_masktype", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_maskstr.val);
         ini_table_create_entry(conf, "video", "crtea_maskstr", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_scanstr.val);
         ini_table_create_entry(conf, "video", "crtea_scanstr", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_sharpness.val);
         ini_table_create_entry(conf, "video", "crtea_sharpness", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_curve.val);
         ini_table_create_entry(conf, "video", "crtea_curve", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_corner.val);
         ini_table_create_entry(conf, "video", "crtea_corner", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_tcurve.val);
         ini_table_create_entry(conf, "video", "crtea_tcurve", ibuf);
-        
+
         // Misc
         snprintf(ibuf, sizeof(ibuf), "%d", settings.misc_corelog.val);
         ini_table_create_entry(conf, "misc", "corelog", ibuf);
-        
+
         snprintf(ibuf, sizeof(ibuf), "%d", settings.misc_frontendlog.val);
         ini_table_create_entry(conf, "misc", "frontendlog", ibuf);
-        
+
         ini_table_write_to_file(conf, path);
-        
+
         // Clean up the config data
         ini_table_destroy(conf);
     }

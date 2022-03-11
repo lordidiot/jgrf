@@ -50,27 +50,27 @@ const char *jgrf_cli_core(void) {
 // Override settings with command line arguments
 void jgrf_cli_override(void) {
     settings_t *settings = jgrf_get_settings();
-    
+
     if (verbose) {
         settings->misc_corelog.val = 0;
         settings->misc_frontendlog.val = 0;
     }
-    
+
     if (video >= 0 && video <= settings->video_api.max)
         settings->video_api.val = video;
-    
+
     if (fullscreen)
         settings->video_fullscreen.val = 1;
-    
+
     if (windowed)
         settings->video_fullscreen.val = 0;
-    
+
     if (rsqual >= 0 && rsqual <= settings->audio_rsqual.max)
         settings->audio_rsqual.val = rsqual;
-    
+
     if (shader >= 0 && shader <= settings->video_shader.max)
         settings->video_shader.val = shader;
-    
+
     if (scale && scale <= settings->video_scale.max)
         settings->video_scale.val = scale;
 }
@@ -80,24 +80,24 @@ void jgrf_cli_parse(int argc, char *argv[]) {
     struct parg_state ps;
     int c;
     int l = -1;
-    
+
     parg_init(&ps);
-    
+
     // Reorder the arguments to place non-options last
     int optend = parg_reorder(argc, argv, os_def, po_def);
-    
+
     // Last non-option is the ROM filename
     jgrf_gdata_t *gdata = jgrf_gdata_ptr();
     gdata->filename = argv[argc - 1];
-    
+
     // Count the number of auxiliary files
     gdata->numauxfiles = argc - optend - 1;
     if (gdata->numauxfiles > JGRF_AUXFILE_MAX)
         gdata->numauxfiles = JGRF_AUXFILE_MAX;
-    
+
     for (int i = 0; i < gdata->numauxfiles; ++i)
         jgrf_auxfile_load(argv[optend + i], i);
-    
+
     while ((c = parg_getopt_long(&ps, argc, argv, os_def, po_def, &l)) != -1) {
         switch (c) {
             case 1:

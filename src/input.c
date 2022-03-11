@@ -127,14 +127,14 @@ static void jgrf_inputcfg_read(jg_inputinfo_t *iinfo) {
     char path[256];
     snprintf(path, sizeof(path), "%sinput_%s.ini",
         gdata->configpath, gdata->sys);
-    
+
     for (int i = 0; i < iinfo->numaxes; ++i) {
         if (ini_table_check_entry(iconf, iinfo->name, iinfo->defs[i])) {
             jgrf_input_map_axis(iinfo->index, i,
                 ini_table_get_entry(iconf, iinfo->name, iinfo->defs[i]));
         }
     }
-    
+
     for (int i = 0; i < iinfo->numbuttons; ++i) {
         if (ini_table_check_entry(iconf, iinfo->name,
             iinfo->defs[i + iinfo->numaxes])) {
@@ -151,10 +151,10 @@ static void jgrf_input_undef_port(int port) {
         jsmap[port].axis[j] = &undef16;
         jsmap[port].abtn[j * 2] = jsmap[port].abtn[(j * 2) + 1] = &undef8;
     }
-    
+
     for (int j = 0; j < 4; ++j)
         jsmap[port].hatpos[j] = &undef8;
-    
+
     for (int j = 0; j < JG_BUTTONS_MAX; ++j)
         jsmap[port].button[j] = &undef8;
 }
@@ -165,15 +165,15 @@ int jgrf_input_init(void) {
     for (int i = 0; i < MAXPORTS; ++i) {
         jgrf_input_undef_port(i);
     }
-    
+
     // Set all keyboard mappings to undefined
     for (int j = 0; j < SDL_NUM_SCANCODES; ++j)
         kbmap.key[j] = &undef8;
-    
+
     // Set all mouse mappings to undefined
     for (int j = 0; j < JG_BUTTONS_MAX; ++j)
         msmap.button[j] = &undef8;
-    
+
     // Initialize joysticks
     jgrf_log(JG_LOG_INF, "%d joystick(s) found:\n", SDL_NumJoysticks());
     for (int i = 0; i < SDL_NumJoysticks(); i++) {
@@ -186,19 +186,19 @@ int jgrf_input_init(void) {
             jgrf_log(JG_LOG_DBG, "Force Feedback Enabled\n");
         }
     }
-    
+
     // Initialize the input configuration structure
     char path[256];
     snprintf(path, sizeof(path), "%sinput_%s.ini",
         gdata->configpath, gdata->sys);
-    
+
     iconf = ini_table_create();
     if (!ini_table_read_from_file(iconf, path))
         jgrf_log(JG_LOG_WRN, "Input configuration file not found: %s\n", path);
-    
+
     // Set pointer to video info - Move coordinate computation?
     vidinfo = jgrf_video_get_info();
-    
+
     return 1;
 }
 
@@ -208,19 +208,19 @@ void jgrf_input_deinit(void) {
     for (int i = 0; i < SDL_NumJoysticks(); ++i) {
         if (SDL_JoystickIsHaptic(joystick[i]))
             SDL_HapticClose(haptic[i]);
-        
+
         SDL_JoystickClose(joystick[i]);
     }
-    
+
     // Write out the input config file
     if (confchanged) {
         char path[256];
         snprintf(path, sizeof(path), "%sinput_%s.ini",
             gdata->configpath, gdata->sys);
-        
+
         ini_table_write_to_file(iconf, path);
     }
-    
+
     // Clean up the input config data
     ini_table_destroy(iconf);
 }
@@ -240,7 +240,7 @@ void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
             jgrf_video_set_cursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
         }
     }
-    
+
     // Handle analog input seed values - fixes trigger input values at startup
     for (int i = 0; i < SDL_NumJoysticks(); ++i) {
         for (int j = 0; j < SDL_JoystickNumAxes(joystick[i]); ++j) {
@@ -263,7 +263,7 @@ void jgrf_input_set_states(void (*set_inputstate)(jg_inputstate_t*, int)) {
 // Calculate mouse input coordinates, taking into account aspect ratio and scale
 static inline void jgrf_input_coords_scaled(int32_t x, int32_t y,
     int32_t *xcoord, int32_t *ycoord) {
-    
+
     float xscale, yscale, xo, yo;
     jgrf_video_get_scale_params(&xscale, &yscale, &xo, &yo);
     *xcoord = (x - xo) /
@@ -282,7 +282,7 @@ static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
     }
     else
         confactive = 1;
-    
+
     // Display input config information on screen
     if (iinfo->name) {
         char msg[128];
@@ -297,7 +297,7 @@ static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
 // Create config definitions from input events, then configure them to be used
 static void jgrf_inputcfg_handler(SDL_Event *event) {
     char defbuf[32];
-    
+
     switch(event->type) {
         case SDL_KEYDOWN: {
             if (event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
@@ -307,25 +307,25 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                 jgrf_inputcfg(inputinfo[confport]);
                 break;
             }
-            
+
             if (event->key.repeat)
                 break;
-            
+
             if (confindex < inputinfo[confport]->numaxes) {
                 jgrf_log(JG_LOG_WRN, "Trying to assign digital inputs to axes"
                     " is a losing endeavour. ESC to skip.\n");
                 break;
             }
-            
+
             snprintf(defbuf, sizeof(defbuf), "%d",
                 event->key.keysym.scancode);
-            
+
             ini_table_create_entry(iconf, inputinfo[confport]->name,
                 inputinfo[confport]->defs[confindex], defbuf);
-            
+
             jgrf_input_map_button(confport,
                 confindex - inputinfo[confport]->numaxes, defbuf);
-            
+
             confindex++;
             jgrf_inputcfg(inputinfo[confport]);
             break;
@@ -340,21 +340,21 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     " is a losing endeavour. ESC to skip.\n");
                 break;
             }
-            
+
             /* Set the "button active" flag so that axis input associated with
                the button can be ignored
             */
             confbtnactive = 1;
-            
+
             snprintf(defbuf, sizeof(defbuf), "j%db%d",
                 event->jbutton.which, event->jbutton.button);
-            
+
             ini_table_create_entry(iconf, inputinfo[confport]->name,
                 inputinfo[confport]->defs[confindex], defbuf);
-            
+
             jgrf_input_map_button(confport,
                 confindex - inputinfo[confport]->numaxes, defbuf);
-            
+
             confindex++;
             jgrf_inputcfg(inputinfo[confport]);
             break;
@@ -365,7 +365,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             */
             if (confbtnactive || confhatactive)
                 break;
-            
+
             // Triggers require special handling
             if (trigger[event->jaxis.which] & (1 << event->jaxis.axis)) {
                 // Axes set to axis input
@@ -377,15 +377,15 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     else if (event->jaxis.value < -(BDEADZONE) && axisnoise &&
                         event->jaxis.axis == axis) {
                         axisnoise = 0;
-                        
+
                         snprintf(defbuf, sizeof(defbuf), "j%da%d",
                             event->jaxis.which, event->jaxis.axis);
-                        
+
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
                             inputinfo[confport]->defs[confindex], defbuf);
-                        
+
                         jgrf_input_map_axis(confport, confindex, defbuf);
-                        
+
                         confindex++;
                         jgrf_inputcfg(inputinfo[confport]);
                     }
@@ -398,17 +398,17 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     else if (event->jaxis.value < -(BDEADZONE) && axisnoise &&
                         event->jaxis.axis == axis) {
                         axisnoise = 0;
-                        
+
                         snprintf(defbuf, sizeof(defbuf), "j%da%d+",
                             event->jaxis.which, event->jaxis.axis);
-                        
+
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
                             inputinfo[confport]->defs[confindex], defbuf);
-                        
+
                         jgrf_input_map_button(confport,
                             confindex - inputinfo[confport]->numaxes,
                             defbuf);
-                        
+
                         confindex++;
                         jgrf_inputcfg(inputinfo[confport]);
                     }
@@ -424,15 +424,15 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     else if (abs(event->jaxis.value) < BDEADZONE && axisnoise &&
                         event->jaxis.axis == axis) {
                         axisnoise = 0;
-                        
+
                         snprintf(defbuf, sizeof(defbuf), "j%da%d",
                             event->jaxis.which, event->jaxis.axis);
-                        
+
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
                             inputinfo[confport]->defs[confindex], defbuf);
-                        
+
                         jgrf_input_map_axis(confport, confindex, defbuf);
-                        
+
                         confindex++;
                         jgrf_inputcfg(inputinfo[confport]);
                     }
@@ -443,14 +443,14 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                         snprintf(defbuf, sizeof(defbuf), "j%da%d%c",
                             event->jaxis.which, event->jaxis.axis,
                             event->jaxis.value > 0 ? '+' : '-');
-                        
+
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
                             inputinfo[confport]->defs[confindex], defbuf);
-                        
+
                         jgrf_input_map_button(confport,
                             confindex - inputinfo[confport]->numaxes,
                             defbuf);
-                        
+
                         confindex++;
                         jgrf_inputcfg(inputinfo[confport]);
                         break;
@@ -462,18 +462,18 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     else if (abs(event->jaxis.value) < BDEADZONE && axisnoise &&
                         event->jaxis.axis == axis) {
                         axisnoise = 0;
-                        
+
                         snprintf(defbuf, sizeof(defbuf), "j%da%d%c",
                             event->jaxis.which, event->jaxis.axis,
                             event->jaxis.value > 0 ? '+' : '-');
-                        
+
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
                             inputinfo[confport]->defs[confindex], defbuf);
-                        
+
                         jgrf_input_map_button(confport,
                             confindex - inputinfo[confport]->numaxes,
                             defbuf);
-                        
+
                         confindex++;
                         jgrf_inputcfg(inputinfo[confport]);
                     }
@@ -487,35 +487,35 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     " is a losing endeavour. ESC to skip.\n");
                 break;
             }
-            
+
             /* Set the "hat active" flag so that axis input associated with
                the hat switch can be ignored if necessary
             */
             confhatactive = event->jhat.value;
-            
+
             if (event->jhat.value & SDL_HAT_UP)
                 snprintf(defbuf, sizeof(defbuf), "j%dh00",
                     event->jaxis.which);
-            
+
             else if (event->jhat.value & SDL_HAT_DOWN)
                 snprintf(defbuf, sizeof(defbuf), "j%dh01",
                     event->jaxis.which);
-            
+
             else if (event->jhat.value & SDL_HAT_LEFT)
                 snprintf(defbuf, sizeof(defbuf), "j%dh02",
                     event->jaxis.which);
-            
+
             else if (event->jhat.value & SDL_HAT_RIGHT)
                 snprintf(defbuf, sizeof(defbuf), "j%dh03",
                     event->jaxis.which);
-            
+
             if (event->jhat.value != 0) {
                 jgrf_input_map_button(confport,
                     confindex - inputinfo[confport]->numaxes, defbuf);
-                
+
                 ini_table_create_entry(iconf, inputinfo[confport]->name,
                     inputinfo[confport]->defs[confindex], defbuf);
-                
+
                 confindex++;
                 jgrf_inputcfg(inputinfo[confport]);
             }
@@ -524,15 +524,15 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
         case SDL_MOUSEBUTTONDOWN: {
             if (confindex < inputinfo[confport]->numaxes)
                 break;
-            
+
             snprintf(defbuf, sizeof(defbuf), "mb%d", event->button.button);
-            
+
             ini_table_create_entry(iconf, inputinfo[confport]->name,
                 inputinfo[confport]->defs[confindex], defbuf);
-            
+
             jgrf_input_map_button(confport,
                 confindex - inputinfo[confport]->numaxes, defbuf);
-            
+
             confindex++;
             jgrf_inputcfg(inputinfo[confport]);
             break;
@@ -621,13 +621,13 @@ void jgrf_input_handler(SDL_Event *event) {
                     event->key.keysym.mod & (KMOD_SHIFT|KMOD_CTRL)) {
                     confport =
                         atoi(SDL_GetScancodeName(event->key.keysym.scancode));
-                    
+
                     if (confport > gdata->numinputs)
                         break;
-                    
+
                     confport--;
                     confindex = 0;
-                    
+
                     jgrf_input_undef_port(confport);
                     jgrf_inputcfg(inputinfo[confport]);
                     confchanged = 1;
@@ -639,7 +639,7 @@ void jgrf_input_handler(SDL_Event *event) {
             }
         }
     }
-    
+
     // Game input events
     switch(event->type) {
         case SDL_KEYUP: {

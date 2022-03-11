@@ -58,7 +58,7 @@ static GLfloat vertices[] = {
     -1.0, 1.0,  // Vertex 2 (X, Y) Left Top
     1.0, -1.0,  // Vertex 3 (X, Y) Right Bottom
     1.0, 1.0,   // Vertex 4 (X, Y) Right Top
-    
+
     0.0, 0.0,   // Texture 2 (X, Y) Left Top
     0.0, 1.0,   // Texture 1 (X, Y) Left Bottom
     1.0, 0.0,   // Texture 4 (X, Y) Right Top
@@ -70,7 +70,7 @@ static GLfloat vertices_out[] = {
     -1.0, 1.0,  // Vertex 2 (X, Y) Left Top
     1.0, -1.0,  // Vertex 3 (X, Y) Right Bottom
     1.0, 1.0,   // Vertex 4 (X, Y) Right Top
-    
+
     0.0, 1.0,   // Texture 1 (X, Y) Left Bottom
     0.0, 0.0,   // Texture 2 (X, Y) Left Top
     1.0, 1.0,   // Texture 3 (X, Y) Right Bottom
@@ -96,7 +96,7 @@ static struct dimensions {
 void jgrf_video_gl_create(void) {
     // Grab settings pointer
     settings = jgrf_get_settings();
-    
+
     // Set the GL version
     switch (settings->video_api.val) {
         default: case 0: { // OpenGL - Core Profile
@@ -114,26 +114,26 @@ void jgrf_video_gl_create(void) {
             break;
         }
     }
-    
+
     // Set window flags
     Uint32 windowflags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL |
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
-    
+
     // Set up the window
     char title[256];
     gdata = jgrf_gdata_ptr();
     snprintf(title, sizeof(title), "%s", gdata->gamename);
-    
+
     // Set the window dimensions
     dimensions.ww =
         (vidinfo->aspect * vidinfo->h * settings->video_scale.val) + 0.5;
     dimensions.wh = (vidinfo->h * settings->video_scale.val) + 0.5;
     dimensions.rw = dimensions.ww;
     dimensions.rh = dimensions.wh;
-    
+
     jgrf_log(JG_LOG_DBG, "Creating window with dimensions: %d x %d\n",
         dimensions.ww, dimensions.wh);
-    
+
     window = SDL_CreateWindow(
         title,                      // title
         SDL_WINDOWPOS_UNDEFINED,    // initial x position
@@ -141,43 +141,43 @@ void jgrf_video_gl_create(void) {
         dimensions.ww,              // width
         dimensions.wh,              // height
         windowflags);
-    
+
     if (!window)
         jgrf_log(JG_LOG_ERR, "Failed to create window: %s\n", SDL_GetError());
-    
+
     // Store the DPI scale
     int xdpi;
     SDL_GL_GetDrawableSize(window, &xdpi, NULL);
     dimensions.dpiscale = (float)xdpi/dimensions.ww;
-    
+
     jgrf_video_icon_load(window);
-    
+
     // Set the GL context
     glcontext = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, glcontext);
     SDL_GL_SetSwapInterval(1);
-    
+
     if (!glcontext)
         jgrf_log(JG_LOG_WRN, "Failed to create glcontext: %s\n",
             SDL_GetError());
-    
+
     // Initialize glText after setting GL context
     if (!gltInit())
         jgrf_log(JG_LOG_WRN, "Failed to initialize glText\n");
-    
+
     for (int i = 0; i < 3; ++i)
         msgtext[i] = gltCreateText();
-    
+
     // Do post window creation OpenGL setup
     if (settings->video_api.val)
         jgrf_video_gl_setup_compat();
     else
         jgrf_video_gl_setup();
-    
+
     jgrf_log(JG_LOG_INF, "Video: OpenGL %s\n", glGetString(GL_VERSION));
-    
+
     SDL_ShowCursor(false);
-    
+
     // Set fullscreen if required
     if (settings->video_fullscreen.val)
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
@@ -202,7 +202,7 @@ static inline void jgrf_video_gl_ssflip(uint8_t *pixels,
     uint8_t *row = (uint8_t*)calloc(rowsize, sizeof(uint8_t));
     uint8_t *low = pixels;
     uint8_t *high = &pixels[(height - 1) * rowsize];
-    
+
     for (; low < high; low += rowsize, high -= rowsize) {
         memcpy(row, low, rowsize);
         memcpy(low, high, rowsize);
@@ -216,7 +216,7 @@ void *jgrf_video_gl_get_pixels(int *rw, int *rh) {
     uint8_t *pixels;
     pixels = (uint8_t*)calloc(dimensions.rw * dimensions.rh,
         sizeof(uint32_t));
-    
+
     // Read the pixels and flip them vertically
     glReadPixels(dimensions.xo, dimensions.yo, dimensions.rw, dimensions.rh,
         GL_RGBA, GL_UNSIGNED_BYTE, pixels);
@@ -232,23 +232,23 @@ void jgrf_video_gl_deinit(void) {
     for (int i = 0; i < 3; ++i)
         gltDeleteText(msgtext[i]);
     gltTerminate();
-    
+
     if (texGame) glDeleteTextures(1, &texGame);
     if (texOutput) glDeleteTextures(1, &texOutput);
-    
+
     if (frameBuffer) glDeleteFramebuffers(1, &frameBuffer);
-    
+
     if (shaderProgram) glDeleteProgram(shaderProgram);
     if (vao) glDeleteVertexArrays(1, &vao);
     if (vbo) glDeleteBuffers(1, &vbo);
-    
+
     if (shaderProgram_out) glDeleteProgram(shaderProgram_out);
     if (vao_out) glDeleteVertexArrays(1, &vao_out);
     if (vbo_out) glDeleteBuffers(1, &vbo_out);
-    
+
     if (!(gdata->hints & JG_HINT_VIDEO_INTERNAL))
         if (videobuf) free(videobuf);
-    
+
     if (cursor) SDL_FreeCursor(cursor);
     if (glcontext) SDL_GL_DeleteContext(glcontext);
     SDL_DestroyWindow(window);
@@ -269,7 +269,7 @@ static void jgrf_video_gl_refresh(void) {
     float left = (float)vidinfo->x / vidinfo->wmax;
     float right = 1.0 + left -
         ((vidinfo->wmax -(float)vidinfo->w) / vidinfo->wmax);
-    
+
     // Check if any vertices have changed since last time
     if (vertices[9] != top || vertices[11] != bottom
         || vertices[8] != left || vertices[12] != right) {
@@ -281,27 +281,27 @@ static void jgrf_video_gl_refresh(void) {
     else { // If nothing changed, return
         return;
     }
-    
+
     // Bind the VAO/VBO for the offscreen texture, update with new vertex data
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    
+
     // Resize the offscreen texture
     glBindTexture(GL_TEXTURE_2D, texGame);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax, 0,
         pixfmt.format, pixfmt.type, NULL);
-    
+
     // Set row length
     glUseProgram(shaderProgram);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, vidinfo->p);
-    
+
     // Resize the output texture
     glUseProgram(shaderProgram_out);
     glBindTexture(GL_TEXTURE_2D, texOutput);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->w, vidinfo->h, 0,
         pixfmt.format, pixfmt.type, NULL);
-    
+
     // Update uniforms for post-processing
     glUniform4f(glGetUniformLocation(shaderProgram_out, "sourceSize"),
         (float)vidinfo->w, (float)vidinfo->h,
@@ -314,20 +314,20 @@ static void jgrf_video_gl_refresh(void) {
 // Render the scene
 void jgrf_video_gl_render(int render) {
     jgrf_video_gl_refresh(); // Check for changes
-    
+
     // Viewport set to size of the input pixel array
     glViewport(0, 0, vidinfo->w, vidinfo->h);
-    
+
     // Make sure first pass shader program is active
     glUseProgram(shaderProgram);
-    
+
     // Bind user-created framebuffer and draw scene onto it
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     glBindVertexArray(vao);
-    
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texGame);
-    
+
     // Render if there is new pixel data, do Black Frame Insertion otherwise
     if (render) {
         glTexSubImage2D(GL_TEXTURE_2D,
@@ -340,35 +340,35 @@ void jgrf_video_gl_render(int render) {
                 pixfmt.type, // type
             vidinfo->buf);
     }
-    
+
     // Clear the screen to black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     // Draw a rectangle from the 2 triangles
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
+
     // Now deal with the actual image to be output
     // Viewport adjusted for output
     glViewport(dimensions.xo, dimensions.yo, dimensions.rw, dimensions.rh);
-    
+
     // Make sure second pass shader program is active
     glUseProgram(shaderProgram_out);
-    
+
     // Bind default framebuffer and draw contents of user framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(vao_out);
-    
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texOutput);
-    
+
     // Clear the screen to black again
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     // Draw framebuffer contents
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
+
     // Draw any text that needs to be displayed
     if (textframes[0]) {
         gltBeginDraw();
@@ -379,7 +379,7 @@ void jgrf_video_gl_render(int render) {
         gltEndDraw();
         --textframes[0];
     }
-    
+
     // Text from the core
     if (textframes[1]) {
         gltBeginDraw();
@@ -390,7 +390,7 @@ void jgrf_video_gl_render(int render) {
         gltEndDraw();
         --textframes[1];
     }
-    
+
     // Input Config
     if (textframes[2]) {
         gltBeginDraw();
@@ -405,17 +405,17 @@ void jgrf_video_gl_render(int render) {
 // Render the scene
 void jgrf_video_gl_render_compat(int render) {
     jgrf_video_gl_refresh(); // Check for changes
-    
+
     // Viewport set to size of the output
     glViewport(dimensions.xo, dimensions.yo, dimensions.rw, dimensions.rh);
-    
+
     // Clear the screen to black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texGame);
-    
+
     // Render if there is new pixel data, do Black Frame Insertion otherwise
     if (render) {
         glTexSubImage2D(GL_TEXTURE_2D,
@@ -428,17 +428,17 @@ void jgrf_video_gl_render_compat(int render) {
                 pixfmt.type, // type
             vidinfo->buf);
     }
-    
+
     glBegin(GL_QUADS);
         glTexCoord2f(vertices[10], vertices[11]);
         glVertex2f(vertices[0], vertices[1]); // Bottom Left
-        
+
         glTexCoord2f(vertices[8], vertices[9]);
         glVertex2f(vertices[2], vertices[3]); // Top Left
-        
+
         glTexCoord2f(vertices[12], vertices[13]);
         glVertex2f(vertices[6], vertices[7]); // Top Right
-        
+
         glTexCoord2f(vertices[14], vertices[15]);
         glVertex2f(vertices[4], vertices[5]); // Bottom Right
     glEnd();
@@ -449,29 +449,29 @@ void jgrf_video_gl_resize() {
     SDL_GL_GetDrawableSize(window, &dimensions.ww, &dimensions.wh);
     dimensions.rw = dimensions.ww;
     dimensions.rh = dimensions.wh;
-    
+
     // Check which dimension to optimize
     if (dimensions.rh * vidinfo->aspect > dimensions.rw)
         dimensions.rh = dimensions.rw / vidinfo->aspect + 0.5;
     else if (dimensions.rw / vidinfo->aspect > dimensions.rh)
         dimensions.rw = dimensions.rh * vidinfo->aspect + 0.5;
-    
+
     // Store X and Y offsets
     dimensions.xo = (dimensions.ww - dimensions.rw) / 2;
     dimensions.yo = (dimensions.wh - dimensions.rh) / 2;
-    
+
     // Update the targetSize uniform
     glUniform4f(glGetUniformLocation(shaderProgram_out, "targetSize"),
         dimensions.rw, dimensions.rh,
         1.0/dimensions.rw, 1.0/dimensions.rh);
-    
+
     // Update the text renderer's viewport size
     gltViewport(dimensions.rw, dimensions.rh);
-    
+
     // Get current display mode
     SDL_DisplayMode dm;
     SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
-    
+
     // Set the base fps for use in the main loop
     jgrf_set_basefps(dm.refresh_rate);
 }
@@ -501,7 +501,7 @@ void jgrf_video_gl_set_cursor(int ctype) {
 // Pass a pointer to the video info held in  the core into the frontend
 void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
     vidinfo = ptr;
-    
+
     // Also set the GL pixel format at this time
     switch (vidinfo->pixfmt) {
         case JG_PIXFMT_XRGB8888:
@@ -539,18 +539,18 @@ void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
 // Load a shader source file into memory
 static const GLchar* jgrf_video_gl_shader_load(const char *filename) {
     FILE *file = fopen(filename, "rb");
-    
+
     if (!file)
         jgrf_log(JG_LOG_ERR, "Could not open shader file, exiting...\n");
-    
+
     fseek(file, 0, SEEK_END);
     size_t size = ftell(file);
     rewind(file);
-    
+
     GLchar *src = (GLchar*)calloc(size + 1, sizeof(GLchar));
     if (!src || !fread(src, size, sizeof(GLchar), file))
         jgrf_log(JG_LOG_ERR, "Could not open shader file, exiting...\n");
-    
+
     fclose(file);
     return src;
 }
@@ -575,12 +575,12 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
     const GLchar *vertexSource = jgrf_video_gl_shader_load(vspath);
     const GLchar *fragmentSource = jgrf_video_gl_shader_load(fspath);
     GLint err;
-    
+
     // Create and compile the vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
-    
+
     // Test if the shader compiled
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &err);
     if (err == GL_FALSE) {
@@ -588,12 +588,12 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
         glGetShaderInfoLog(vertexShader, 1024, NULL, shaderlog);
         jgrf_log(JG_LOG_WRN, "Vertex shader: %s", shaderlog);
     }
-    
+
     // Create and compile the fragment shader
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
     glCompileShader(fragmentShader);
-    
+
     // Test if the fragment shader compiled
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &err);
     if (err == GL_FALSE) {
@@ -601,22 +601,22 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
         glGetShaderInfoLog(fragmentShader, 1024, NULL, shaderlog);
         jgrf_log(JG_LOG_WRN, "Fragment shader: %s", shaderlog);
     }
-    
+
     // Free the allocated memory for shader sources
     free((GLchar*)vertexSource);
     free((GLchar*)fragmentSource);
-    
+
     // Create the shader program
     GLuint prog = glCreateProgram();
     glAttachShader(prog, vertexShader);
     glAttachShader(prog, fragmentShader);
     //glBindFragDataLocation(prog, 0, "fragColor");
     glLinkProgram(prog);
-    
+
     // Clean up fragment and vertex shaders
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-    
+
     // Return the successfully linked shader program
     return prog;
 }
@@ -626,28 +626,28 @@ void jgrf_video_gl_setup(void) {
     //GLint status;
     GLint texfilter_in = GL_NEAREST;
     GLint texfilter_out = GL_NEAREST;
-    
+
     // Create Vertex Array Objects
     glGenVertexArrays(1, &vao);
     glGenVertexArrays(1, &vao_out);
-    
+
     // Create Vertex Buffer Objects
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &vbo_out);
-    
+
     // Bind buffers for vertex buffer objects
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),
         vertices, GL_STATIC_DRAW);
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, vbo_out);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_out),
         vertices_out, GL_STATIC_DRAW);
-    
+
     // Create the shader program for the first pass (clipping)
     shaderProgram =
         jgrf_video_gl_prog_create("default.vs", "default.fs");
-    
+
     // Create the shader program for the second pass (post-processing)
     switch (settings->video_shader.val) {
         default: case 0: // Nearest Neighbour
@@ -682,54 +682,54 @@ void jgrf_video_gl_setup(void) {
                 jgrf_video_gl_prog_create("default.vs", "lcd.fs");
             break;
     }
-    
+
     // Bind vertex array and specify layout for first pass
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    
+
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    
+
     GLint texAttrib = glGetAttribLocation(shaderProgram, "texCoord");
     glEnableVertexAttribArray(texAttrib);
     glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE,
         0, (void*)(8 * sizeof(GLfloat)));
-    
+
     // Do the same for the post-processing shader
     glBindVertexArray(vao_out);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_out);
-    
+
     GLint posAttrib_out = glGetAttribLocation(shaderProgram_out, "position");
     glEnableVertexAttribArray(posAttrib_out);
     glVertexAttribPointer(posAttrib_out, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    
+
     GLint texAttrib_out = glGetAttribLocation(shaderProgram_out, "texCoord");
     glEnableVertexAttribArray(texAttrib_out);
     glVertexAttribPointer(texAttrib_out, 2, GL_FLOAT, GL_FALSE,
         0, (void*)(8 * sizeof(GLfloat)));
-    
+
     // Generate texture for raw game output
     glGenTextures(1, &texGame);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texGame);
-    
+
     // The full sized source image before any clipping
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax,
         0, pixfmt.format, pixfmt.type, vidinfo->buf);
-    
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter_in);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter_in);
-    
+
     // Set up uniforms for input texture
     glUseProgram(shaderProgram);
     glUniform1i(glGetUniformLocation(shaderProgram, "source"), 0);
-    
+
     // Set up uniforms for post-processing texture
     glUseProgram(shaderProgram_out);
-    
+
     glUniform1i(glGetUniformLocation(shaderProgram_out, "source"), 0);
     glUniform4f(glGetUniformLocation(shaderProgram_out, "sourceSize"),
         (float)vidinfo->w, (float)vidinfo->h,
@@ -737,13 +737,13 @@ void jgrf_video_gl_setup(void) {
     glUniform4f(glGetUniformLocation(shaderProgram_out, "targetSize"),
         dimensions.rw, dimensions.rh,
         1.0/dimensions.rw, 1.0/dimensions.rh);
-    
+
     // Settings for CRTea
     int masktype = 0, maskstr = 0, scanstr = 0, sharpness = 0,
         curve = settings->video_crtea_curve.val,
         corner = settings->video_crtea_corner.val,
         tcurve = settings->video_crtea_tcurve.val;
-    
+
     switch (settings->video_crtea_mode.val) {
         default: case 0: // Scanlines
             masktype = 0; maskstr = 0; scanstr = 10; sharpness = 10;
@@ -778,28 +778,28 @@ void jgrf_video_gl_setup(void) {
         corner ? (float)corner : -3.0);
     glUniform1f(glGetUniformLocation(shaderProgram_out, "tcurve"),
         tcurve / 10.0);
-    
+
     // Create framebuffer
     glGenFramebuffers(1, &frameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-    
+
     // Create texture to hold colour buffer
     glGenTextures(1, &texOutput);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texOutput);
-    
+
     // The framebuffer texture that is being rendered to offscreen, after clip
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->w, vidinfo->h, 0,
         pixfmt.format, pixfmt.type, NULL);
-    
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter_out);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter_out);
-    
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
         texOutput, 0);
-    
+
     jgrf_video_gl_resize();
     jgrf_video_gl_refresh();
 }
@@ -807,7 +807,7 @@ void jgrf_video_gl_setup(void) {
 // Set up OpenGL - Compatibility Profile
 void jgrf_video_gl_setup_compat(void) {
     GLint texfilter_in = GL_LINEAR;
-    
+
     switch (settings->video_shader.val) {
         case 0: // Nearest Neighbour
             texfilter_in = GL_NEAREST;
@@ -818,22 +818,22 @@ void jgrf_video_gl_setup_compat(void) {
             jgrf_log(JG_LOG_WRN, "Post-processing shaders are not available in "
                 "OpenGL Compatibility Profile, defaulting to Linear\n");
     }
-    
+
     // Generate texture for raw game output
     glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &texGame);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texGame);
-    
+
     // The full sized source image before any clipping
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax,
         0, pixfmt.format, pixfmt.type, vidinfo->buf);
-    
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter_in);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter_in);
-    
+
     jgrf_video_gl_resize();
     jgrf_video_gl_refresh();
 }

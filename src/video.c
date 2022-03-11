@@ -41,7 +41,7 @@ static jgrf_gdata_t *gdata;
 void jgrf_video_setfuncs(void) {
     settings_t *settings = jgrf_get_settings();
     gdata = jgrf_gdata_ptr();
-    
+
     switch (settings->video_api.val) {
         case 0: // OpenGL - Core Profile
             jgrf_video_create = &jgrf_video_gl_create;
@@ -95,22 +95,22 @@ void jgrf_video_icon_load(SDL_Window *window) {
             "%s/jollygood/jgrf/jollygood%d.png", DATADIR, iconsize);
     }
 #endif
-    
+
     uint32_t x, y;
     uint8_t *png_icon = 0;
     uint8_t error = lodepng_decode32_file(&png_icon, &x, &y, iconpath);
     if (error) jgrf_log(JG_LOG_WRN, "lodepng code %u: %s\n",
         error, lodepng_error_text(error));
-    
+
     SDL_Surface *icon;
     // pixels, width, height, depth, pitch, rmask, gmask, bmask, amask
     icon = SDL_CreateRGBSurfaceFrom(png_icon, x, y, 32, x * sizeof(uint32_t),
         0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-    
+
     SDL_SetWindowIcon(window, icon);
     SDL_FreeSurface(icon);
     free(png_icon);
-    
+
     // Seed the RNG
     srand((unsigned)time(NULL));
 }
@@ -120,16 +120,16 @@ void jgrf_video_screenshot(void) {
     char ssname[256];
     snprintf(ssname, sizeof(ssname), "%s%d-%03x.png",
         gdata->sspath, (unsigned)time(NULL), rand() % 0xfff);
-    
+
     // Rendered pixels after post-processing
     int rw, rh;
     void *ssdata = jgrf_video_gl_get_pixels(&rw, &rh);
-    
+
     uint8_t error = lodepng_encode32_file(ssname, (const uint8_t*)ssdata,
         rw, rh);
-    
+
     if (error) jgrf_log(JG_LOG_WRN,
         "lodepng code %u: %s\n", error, lodepng_error_text(error));
-    
+
     free(ssdata);
 }

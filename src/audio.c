@@ -56,15 +56,15 @@ extern int fforward; // External fast-forward level
 // Add a new sample chunk size to the moving average and recalculate
 static inline void jgrf_audio_mavg(mavg_t *mavg, size_t newval) {
     mavg->buf[mavg->pos++] = newval;
-    
+
     if (mavg->pos == MAVGSIZE)
         mavg->pos = 0;
-    
+
     double sum = 0;
-    
+
     for (uint32_t i = 0; i < MAVGSIZE; ++i)
         sum += mavg->buf[i];
-    
+
     double divisor = MAVGSIZE;
     mavg->avg = sum / divisor;
 }
@@ -80,7 +80,7 @@ static inline void jgrf_audio_mavg_seed(mavg_t *mavg, size_t seed) {
 static inline int16_t jgrf_rbuf_deq(ringbuf_t *rbuf) {
     if (rbuf->cursize == 0)
         return 0;
-    
+
     int16_t sample = rbuf->buffer[rbuf->head];
     rbuf->head = (rbuf->head + 1) % rbuf->bufsize;
     --rbuf->cursize;
@@ -100,14 +100,14 @@ static inline void jgrf_rbuf_enq(ringbuf_t *rbuf, int16_t *data, size_t size) {
 static inline void jgrf_rbuf_enqf(ringbuf_t *rbuf, float *data, size_t size) {
     for (uint32_t i = 0; i < size; ++i) {
         data[i] *= 32768.0;
-        
+
         if (data[i] >= 32767.0)
             rbuf->buffer[rbuf->tail] = 32767;
         else if (data[i] <= -32768.0)
             rbuf->buffer[rbuf->tail] = -32768;
         else
             rbuf->buffer[rbuf->tail] = (int16_t)(lrintf(data[i]));
-        
+
         rbuf->tail = (rbuf->tail + 1) % rbuf->bufsize;
         ++rbuf->cursize;
         if (rbuf->cursize >= rbuf->bufsize - 1)
@@ -119,7 +119,7 @@ static inline void jgrf_rbuf_enqf(ringbuf_t *rbuf, float *data, size_t size) {
 void jgrf_audio_timing(double frametime) {
     int spf = (audinfo->rate / (int)(frametime + 0.5)) * audinfo->channels;
     corefps = frametime + 0.5;
-    
+
     if (abs(spf - (int)(mavg_in.avg + 0.5)) >= SPFTOLERANCE) {
         int oldavg = (int)mavg_in.avg;
         jgrf_audio_mavg_seed(&mavg_in, spf);
@@ -134,17 +134,17 @@ void jgrf_audio_cb_core(size_t in_size) {
     // If the core calls this function with no samples ready, do nothing
     if (!in_size)
         return;
-    
+
     // Adjust input moving average calculation to reflect this input size
     jgrf_audio_mavg(&mavg_in, in_size);
-    
+
     // Try to keep the queue around the size of the ideal samples per frame
     size_t spf = (audinfo->rate / corefps) * audinfo->channels;
-    
+
     // Input moving average samples per frame - make sure the number is even
     uint32_t ma_insamps =
         (uint32_t)(mavg_in.avg) + ((uint32_t)(mavg_in.avg) % 2);
-    
+
     // Control the size of the input queue
     if (rbuf_in.cursize == 0)
         ma_offset = -(in_size >> 1); // Buffer half of the samples if empty
@@ -154,13 +154,13 @@ void jgrf_audio_cb_core(size_t in_size) {
         ma_offset = audinfo->channels; // Eat More
     else if (rbuf_in.cursize == spf)
         ma_offset = 0; // Goldilocks Zone
-    
+
     ma_insamps += ma_offset;
-    
+
     // Calculate rates for use in resampling
     uint32_t in_rate = (ma_insamps * corefps) / audinfo->channels;
     uint32_t out_rate = audinfo->rate / (fforward ? fforward + 1 : 1);
-    
+
     // Manage the size of the output buffer to avoid underruns
     if (rbuf_out.cursize < spf) // Push More
         out_offset = 3 * corefps;
@@ -172,52 +172,52 @@ void jgrf_audio_cb_core(size_t in_size) {
         out_offset = -corefps;
     else if (rbuf_out.cursize > spf * 3) // Goldilocks Zone
         out_offset = 0;
-    
+
     out_rate += out_offset;
-    
+
     // Change the resampling ratio
     err = speex_resampler_set_rate_frac(resampler,
         in_rate, out_rate, in_rate, out_rate);
-    
+
     // Debug output
     //jgrf_log(JG_LOG_DBG, "i - r: %d, s: %d, c: %d, ma: %d (%f), fps: %d\n",
     //  in_rate, in_size, rbuf_in.cursize, ma_insamps, mavg_in.avg, corefps);
-    
+
     uint32_t out_size = (ma_insamps * (double)out_rate) / (double)in_rate;
-    
+
     // Enqueue samples from the core for resampling and output
     if (audinfo->sampfmt == JG_SAMPFMT_INT16)
         jgrf_rbuf_enq(&rbuf_in, audinfo->buf, in_size);
     else
         jgrf_rbuf_enqf(&rbuf_in, audinfo->buf, in_size);
-            
+
     // Dequeue the moving average number of samples to be resampled
     for (uint32_t i = 0; i < ma_insamps; ++i)
         rsbuf[i] = jgrf_rbuf_deq(&rbuf_in);
-    
+
     // Perform resampling
     if (audinfo->channels == 2) {
         ma_insamps >>= 1;
         out_size >>= 1;
-        
+
         err = speex_resampler_process_interleaved_int(resampler,
             rsbuf, &ma_insamps, outbuf, &out_size);
-        
+
         out_size <<= 1;
     }
     else {
         err = speex_resampler_process_int(resampler, 0,
             rsbuf, &ma_insamps, outbuf, &out_size);
     }
-    
+
     // Queue the resampled audio for output
     while ((rbuf_out.cursize + out_size) >= rbuf_out.bufsize)
         nanosleep(&req, &rem);
-    
+
     SDL_LockAudioDevice(dev);
     jgrf_rbuf_enq(&rbuf_out, outbuf, out_size);
     SDL_UnlockAudioDevice(dev);
-    
+
     //jgrf_log(JG_LOG_DBG, "o - r: %d, s: %d, c: %d\n",
     //  out_rate, out_size, rbuf_out.cursize);
 }
@@ -231,7 +231,7 @@ void jgrf_audio_set_info(jg_audioinfo_t *ptr) {
 static void jgrf_audio_cb_int16(void *userdata, uint8_t *stream, int len) {
     if (userdata) {}
     int16_t *ostream = (int16_t*)stream;
-    
+
     for (size_t i = 0; i < len / sizeof(int16_t); ++i)
         ostream[i] = jgrf_rbuf_deq(&rbuf_out);
 }
@@ -239,7 +239,7 @@ static void jgrf_audio_cb_int16(void *userdata, uint8_t *stream, int len) {
 // Initialize the audio device and allocate buffers
 int jgrf_audio_init(void) {
     settings_t *settings = jgrf_get_settings();
-    
+
     spec.channels = audinfo->channels;
     spec.freq = audinfo->rate;
     spec.silence = 0;
@@ -251,52 +251,52 @@ int jgrf_audio_init(void) {
     spec.format = AUDIO_S16LSB;
     #endif
     spec.callback = jgrf_audio_cb_int16;
-    
+
     // Open the Audio Device
     dev = SDL_OpenAudioDevice(NULL, 0, &spec, &obtained,
         SDL_AUDIO_ALLOW_ANY_CHANGE);
-    
+
     // Set up the Resampler
     resampler = speex_resampler_init(audinfo->channels,
         audinfo->rate, audinfo->rate, settings->audio_rsqual.val, &err);
-    
+
     if (dev && resampler)
         jgrf_log(JG_LOG_INF, "Audio: %dHz %s, Speex %d\n", spec.freq,
             spec.channels == 1 ? "Mono" : "Stereo", settings->audio_rsqual.val);
     else
         jgrf_log(JG_LOG_WRN, "Audio: Error opening audio device.\n");
-    
+
     // Seed the moving averages
     jgrf_audio_mavg_seed(&mavg_in, audinfo->spf);
-    
+
     if (!corefps)
         corefps = (audinfo->rate / audinfo->spf) * audinfo->channels;
-    
+
     // Set delay time in nanoseconds
     req.tv_nsec = 100000; // 1/10th of a millisecond
-    
+
     // Allocate audio buffers
     gdata = jgrf_gdata_ptr();
-    
+
     size_t bufsize = audinfo->spf * sizeof(int16_t) * 4;
-    
+
     if (!(gdata->hints & JG_HINT_AUDIO_INTERNAL))
         corebuf = (void*)calloc(1, bufsize << audinfo->sampfmt);
-    
+
     rsbuf = (void*)calloc(1, bufsize);
     outbuf = (void*)calloc(1, bufsize * 2);
-    
+
     size_t rbufsize = audinfo->spf * 6;
     rbuf_in.bufsize = rbufsize;
     rbuf_in.buffer = (void*)calloc(1, rbufsize * sizeof(int16_t));
     rbuf_out.bufsize = rbufsize;
     rbuf_out.buffer = (void*)calloc(1, rbufsize * sizeof(int16_t));
-    
+
     // Pass the core audio buffer into the emulator if needed
     audinfo->buf = corebuf;
-    
+
     SDL_PauseAudioDevice(dev, 1); // Setting to 0 unpauses
-    
+
     return 1;
 }
 
@@ -309,10 +309,10 @@ void jgrf_audio_unpause(void) {
 void jgrf_audio_deinit() {
     if (dev) SDL_CloseAudioDevice(dev);
     if (resampler) speex_resampler_destroy(resampler);
-    
+
     if (!(gdata->hints & JG_HINT_AUDIO_INTERNAL))
         if (corebuf) free(corebuf);
-    
+
     if (rbuf_in.buffer) free(rbuf_in.buffer);
     if (rbuf_out.buffer) free(rbuf_out.buffer);
     if (rsbuf) free(rsbuf);
