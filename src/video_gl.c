@@ -24,6 +24,8 @@
 #include "video_gl.h"
 #include "settings.h"
 
+extern int bmark;
+
 static jgrf_gdata_t *gdata = NULL;
 static settings_t *settings = NULL;
 
@@ -155,7 +157,7 @@ void jgrf_video_gl_create(void) {
     // Set the GL context
     glcontext = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, glcontext);
-    SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(!bmark); // Vsync off in Benchmark mode
 
     if (!glcontext)
         jgrf_log(JG_LOG_WRN, "Failed to create glcontext: %s\n",

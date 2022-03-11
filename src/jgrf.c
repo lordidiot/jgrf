@@ -99,15 +99,17 @@ jgrf_gdata_t *jgrf_gdata_ptr(void) {
 // Program should keep running (1) or, shut down (0)
 static int running = 1;
 
+// Benchmark mode
+int bmark = 0;
+
 // Number of extra frames to run for fast-forwarding purposes
 int fforward = 0;
 
 // Frame timing
 static int corefps = 60;
 static int basefps = 60;
-/*double screenfps = 60.0;
-uint32_t t0 = 0;
-uint32_t framecount = 0;*/
+size_t framecount = 0;
+size_t bmarkframes = 0;
 
 // Recursive mkdir (similar to mkdir -p)
 static void mkdirr(const char *dir) {
@@ -378,6 +380,12 @@ static void jgrf_hash_md5(void) {
         snprintf(&(gdata.md5[i * 2]), 16 * 2, "%02x", (unsigned)digest[i]);
     }
     gameinfo.md5 = gdata.md5;
+}
+
+// Set number of frames for Benchmark mode
+void jgrf_benchmark(size_t frames) {
+    bmarkframes = frames;
+    bmark = 1;
 }
 
 // Load an Auxiliary File
@@ -1109,7 +1117,7 @@ int main(int argc, char *argv[]) {
         // When sufficient remainder has been collected, run an extra frame
         // If corefps is smaller than basefps, this is the only way frames run
         if (collector >= basefps) {
-            runframes++;
+            ++runframes;
             collector -= basefps;
         }
 
@@ -1118,21 +1126,17 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < runframes + fforward; ++i)
             jgapi.jg_exec_frame();
 
+        framecount += (runframes + fforward);
+
         // Render and output the current video
         jgrf_video_render(runframes);
         jgrf_video_swapbuffers();
 
-        // Count frames per second (screen frames)
-        /*framecount++;
-        uint32_t t = SDL_GetTicks();
-        if (t - t0 >= 1000) {
-            double seconds = (t - t0) / 1000.0;
-            screenfps = framecount / seconds;
-            //printf("%d frames in %f seconds = %f FPS (%d)\n",
-            //  framecount, seconds, screenfps, (int)(screenfps + 0.5));
-            t0 = t;
-            framecount = 0;
-        }*/
+        if (bmark && framecount >= bmarkframes) {
+            jgrf_log(JG_LOG_INF, "Benchmark completed after %ld frames\n",
+                bmarkframes);
+            jgrf_quit(EXIT_SUCCESS);
+        }
 
         // Poll for events
         while (SDL_PollEvent(&event)) {

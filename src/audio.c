@@ -51,6 +51,7 @@ static int corefps = 0; // Emulator core's framerate rounded to nearest int
 static int ma_offset = 0; // Offset the input moving average chunk size
 static int out_offset = 0; // Offset the output rate
 
+extern int bmark; // External benchmark mode variable
 extern int fforward; // External fast-forward level
 
 // Add a new sample chunk size to the moving average and recalculate
@@ -115,6 +116,10 @@ static inline void jgrf_rbuf_enqf(ringbuf_t *rbuf, float *data, size_t size) {
     }
 }
 
+void jgrf_audio_set_bmark(void) {
+    bmark = 1;
+}
+
 // Set timing information to align audio processing with core framerate
 void jgrf_audio_timing(double frametime) {
     int spf = (audinfo->rate / (int)(frametime + 0.5)) * audinfo->channels;
@@ -131,8 +136,10 @@ void jgrf_audio_timing(double frametime) {
 
 // Callback used by core to tell the frontend how many samples are ready
 void jgrf_audio_cb_core(size_t in_size) {
-    // If the core calls this function with no samples ready, do nothing
-    if (!in_size)
+    /* If Benchmark mode is set, or the  core calls this function with no
+       samples ready, do nothing.
+    */
+    if (bmark || !in_size)
         return;
 
     // Adjust input moving average calculation to reflect this input size

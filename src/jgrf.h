@@ -43,6 +43,8 @@ void jgrf_log(int, const char*, ...);
 
 void jgrf_auxfile_load(const char*, int);
 
+void jgrf_benchmark(size_t);
+
 void jgrf_state_load(int);
 void jgrf_state_save(int);
 

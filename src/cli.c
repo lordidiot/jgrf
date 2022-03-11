@@ -19,9 +19,10 @@
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "a:c:fhr:s:vwx:";
+static const char *os_def = "a:b:c:fhr:s:vwx:";
 static const struct parg_option po_def[] = {
     { "video", PARG_REQARG, NULL, 'a' },
+    { "benchmark", PARG_REQARG, NULL, 'b' },
     { "core", PARG_REQARG, NULL, 'c' },
     { "fullscreen", PARG_NOARG, NULL, 'f' },
     { "help", PARG_NOARG, NULL, 'h' },
@@ -105,6 +106,9 @@ void jgrf_cli_parse(int argc, char *argv[]) {
             case 'a': // Video API
                 video = atoi(ps.optarg);
                 break;
+            case 'b': // Benchmark
+                jgrf_benchmark(atoll(ps.optarg));
+                break;
             case 'c': // Core selection
                 corename = ps.optarg;
                 break;
@@ -147,6 +151,8 @@ void jgrf_cli_usage(void) {
     fprintf(stdout, "                              0 = OpenGL Core Profile\n");
     fprintf(stdout, "                              1 = OpenGL Compatibility "
         "Profile\n");
+    fprintf(stdout, "    -b, --bmark <frames>    "
+        "Run N frames in Benchmark mode\n");
     fprintf(stdout, "    -c, --core <corename>   "
         "Specify which core to use\n");
     fprintf(stdout, "    -f, --fullscreen        "
