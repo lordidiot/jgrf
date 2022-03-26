@@ -5,17 +5,17 @@ CC ?= cc
 CFLAGS ?= -O2
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -Wmissing-prototypes -pedantic
 
-PKGCONF ?= pkg-config
-CFLAGS_JG := $(shell $(PKGCONF) --cflags jg)
+PKG_CONFIG ?= pkg-config
+CFLAGS_JG := $(shell $(PKG_CONFIG) --cflags jg)
 
-CFLAGS_EPOXY := $(shell $(PKGCONF) --cflags epoxy)
-LIBS_EPOXY := $(shell $(PKGCONF) --libs epoxy)
+CFLAGS_EPOXY := $(shell $(PKG_CONFIG) --cflags epoxy)
+LIBS_EPOXY := $(shell $(PKG_CONFIG) --libs epoxy)
 
-CFLAGS_SDL2 := $(shell $(PKGCONF) --cflags sdl2)
-LIBS_SDL2 := $(shell $(PKGCONF) --libs sdl2)
+CFLAGS_SDL2 := $(shell $(PKG_CONFIG) --cflags sdl2)
+LIBS_SDL2 := $(shell $(PKG_CONFIG) --libs sdl2)
 
-CFLAGS_SPEEX := $(shell $(PKGCONF) --cflags speexdsp)
-LIBS_SPEEX := $(shell $(PKGCONF) --libs speexdsp)
+CFLAGS_SPEEX := $(shell $(PKG_CONFIG) --cflags speexdsp)
+LIBS_SPEEX := $(shell $(PKG_CONFIG) --libs speexdsp)
 
 INCLUDES := -I$(SOURCEDIR)/deps $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
 	$(CFLAGS_SPEEX)
