@@ -261,6 +261,9 @@ void jgrf_video_gl_fullscreen(void) {
     SDL_SetWindowFullscreen(window,
         SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP ?
         0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+    // Fullscreen toggle does not trigger SDL_WINDOWEVENT_RESIZED
+    jgrf_video_gl_resize();
 }
 
 // Refresh any video settings that may have changed
@@ -447,7 +450,7 @@ void jgrf_video_gl_render_compat(int render) {
 }
 
 // Handle viewport resizing
-void jgrf_video_gl_resize() {
+void jgrf_video_gl_resize(void) {
     SDL_GL_GetDrawableSize(window, &dimensions.ww, &dimensions.wh);
     dimensions.rw = dimensions.ww;
     dimensions.rh = dimensions.wh;
