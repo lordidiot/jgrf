@@ -337,8 +337,11 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             */
             confbtnactive = 1;
 
+            SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jbutton.which);
+            int port = SDL_JoystickGetPlayerIndex(js);
+
             snprintf(defbuf, sizeof(defbuf), "j%db%d",
-                event->jbutton.which, event->jbutton.button);
+                port, event->jbutton.button);
 
             ini_table_create_entry(iconf, inputinfo[confport]->name,
                 inputinfo[confport]->defs[confindex], defbuf);
@@ -357,8 +360,11 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             if (confbtnactive || confhatactive)
                 break;
 
+            SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jaxis.which);
+            int port = SDL_JoystickGetPlayerIndex(js);
+
             // Triggers require special handling
-            if (trigger[event->jaxis.which] & (1 << event->jaxis.axis)) {
+            if (trigger[port] & (1 << event->jaxis.axis)) {
                 // Axes set to axis input
                 if (confindex < inputinfo[confport]->numaxes) {
                     if (event->jaxis.value >= BDEADZONE) {
@@ -417,7 +423,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                         axisnoise = 0;
 
                         snprintf(defbuf, sizeof(defbuf), "j%da%d",
-                            event->jaxis.which, event->jaxis.axis);
+                            port, event->jaxis.axis);
 
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
                             inputinfo[confport]->defs[confindex], defbuf);
@@ -432,7 +438,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     if (!axisnoise && abs(event->jaxis.value) >= 32767) {
                         // Handle the case of hat switches pretending to be axes
                         snprintf(defbuf, sizeof(defbuf), "j%da%d%c",
-                            event->jaxis.which, event->jaxis.axis,
+                            port, event->jaxis.axis,
                             event->jaxis.value > 0 ? '+' : '-');
 
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
@@ -455,7 +461,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                         axisnoise = 0;
 
                         snprintf(defbuf, sizeof(defbuf), "j%da%d%c",
-                            event->jaxis.which, event->jaxis.axis,
+                            port, event->jaxis.axis,
                             event->jaxis.value > 0 ? '+' : '-');
 
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
@@ -484,21 +490,20 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             */
             confhatactive = event->jhat.value;
 
+            SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jhat.which);
+            int port = SDL_JoystickGetPlayerIndex(js);
+
             if (event->jhat.value & SDL_HAT_UP)
-                snprintf(defbuf, sizeof(defbuf), "j%dh00",
-                    event->jaxis.which);
+                snprintf(defbuf, sizeof(defbuf), "j%dh00", port);
 
             else if (event->jhat.value & SDL_HAT_DOWN)
-                snprintf(defbuf, sizeof(defbuf), "j%dh01",
-                    event->jaxis.which);
+                snprintf(defbuf, sizeof(defbuf), "j%dh01", port);
 
             else if (event->jhat.value & SDL_HAT_LEFT)
-                snprintf(defbuf, sizeof(defbuf), "j%dh02",
-                    event->jaxis.which);
+                snprintf(defbuf, sizeof(defbuf), "j%dh02", port);
 
             else if (event->jhat.value & SDL_HAT_RIGHT)
-                snprintf(defbuf, sizeof(defbuf), "j%dh03",
-                    event->jaxis.which);
+                snprintf(defbuf, sizeof(defbuf), "j%dh03", port);
 
             if (event->jhat.value != 0) {
                 jgrf_input_map_button(confport,
