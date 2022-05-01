@@ -56,6 +56,10 @@ static jgrf_gdata_t *gdata; // Global data pointer
 static SDL_Joystick *joystick[MAXPORTS];
 static SDL_Haptic *haptic[MAXPORTS];
 
+// Arrays to keep track of what joystick ports have a device plugged in
+static int jsports[MAXPORTS];
+static int jsiid[MAXPORTS]; // Joystick Instance ID
+
 // Array to keep track of what axes are triggers vs regular "stick" axes
 static uint8_t trigger[MAXPORTS];
 
@@ -174,19 +178,6 @@ int jgrf_input_init(void) {
     for (int j = 0; j < JG_BUTTONS_MAX; ++j)
         msmap.button[j] = &undef8;
 
-    // Initialize joysticks
-    jgrf_log(JG_LOG_INF, "%d joystick(s) found:\n", SDL_NumJoysticks());
-    for (int i = 0; i < SDL_NumJoysticks(); i++) {
-        joystick[i] = SDL_JoystickOpen(i);
-        jgrf_log(JG_LOG_INF, "%s\n", SDL_JoystickName(joystick[i]));
-        if (SDL_JoystickIsHaptic(joystick[i])) {
-            haptic[i] = SDL_HapticOpenFromJoystick(joystick[i]);
-            SDL_HapticRumbleInit(haptic[i]) < 0 ?
-            jgrf_log(JG_LOG_DBG, "Force Feedback Enable Failed\n"):
-            jgrf_log(JG_LOG_DBG, "Force Feedback Enabled\n");
-        }
-    }
-
     // Initialize the input configuration structure
     char path[256];
     snprintf(path, sizeof(path), "%sinput_%s.ini",
@@ -231,7 +222,7 @@ void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
         inputinfo[i] = get_inputinfo(i);
         if (inputinfo[i]->name) {
             jgrf_log(JG_LOG_INF,
-                "Core Input Port %d: %s, %s, %d axes, %d buttons\n",
+                "Emulated Input %d: %s, %s, %d axes, %d buttons\n",
                 i + 1, inputinfo[i]->name, inputinfo[i]->fname,
                 inputinfo[i]->numaxes, inputinfo[i]->numbuttons);
             jgrf_inputcfg_read(inputinfo[i]);
@@ -651,37 +642,41 @@ void jgrf_input_handler(SDL_Event *event) {
             break;
         }
         case SDL_JOYBUTTONUP: {
-            *jsmap[event->jbutton.which].button[event->jbutton.button] = 0;
+            SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jbutton.which);
+            int port = SDL_JoystickGetPlayerIndex(js);
+            *jsmap[port].button[event->jbutton.button] = 0;
             break;
         }
         case SDL_JOYBUTTONDOWN: {
-            *jsmap[event->jbutton.which].button[event->jbutton.button] = 1;
+            SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jbutton.which);
+            int port = SDL_JoystickGetPlayerIndex(js);
+            *jsmap[port].button[event->jbutton.button] = 1;
             break;
         }
         case SDL_JOYAXISMOTION: {
-            *jsmap[event->jaxis.which].axis[event->jaxis.axis] =
+            SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jaxis.which);
+            int port = SDL_JoystickGetPlayerIndex(js);
+            *jsmap[port].axis[event->jaxis.axis] =
                 abs(event->jaxis.value) > DEADZONE ? event->jaxis.value : 0;
             if (abs(event->jaxis.value) > BDEADZONE) {
-                *jsmap[event->jaxis.which].abtn[event->jaxis.axis * 2] =
+                *jsmap[port].abtn[event->jaxis.axis * 2] =
                     event->jaxis.value < 0;
-                *jsmap[event->jaxis.which].abtn[(event->jaxis.axis * 2) + 1] =
+                *jsmap[port].abtn[(event->jaxis.axis * 2) + 1] =
                     event->jaxis.value > 0;
             }
             else {
-                *jsmap[event->jaxis.which].abtn[event->jaxis.axis * 2] = 0;
-                *jsmap[event->jaxis.which].abtn[(event->jaxis.axis * 2) +1] = 0;
+                *jsmap[port].abtn[event->jaxis.axis * 2] = 0;
+                *jsmap[port].abtn[(event->jaxis.axis * 2) + 1] = 0;
             }
             break;
         }
         case SDL_JOYHATMOTION: {
-            *jsmap[event->jhat.which].hatpos[0] =
-                event->jhat.value & SDL_HAT_UP;
-            *jsmap[event->jhat.which].hatpos[1] =
-                event->jhat.value & SDL_HAT_DOWN;
-            *jsmap[event->jhat.which].hatpos[2] =
-                event->jhat.value & SDL_HAT_LEFT;
-            *jsmap[event->jhat.which].hatpos[3] =
-                event->jhat.value & SDL_HAT_RIGHT;
+            SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jhat.which);
+            int port = SDL_JoystickGetPlayerIndex(js);
+            *jsmap[port].hatpos[0] = event->jhat.value & SDL_HAT_UP;
+            *jsmap[port].hatpos[1] = (event->jhat.value & SDL_HAT_DOWN) >> 2;
+            *jsmap[port].hatpos[2] = (event->jhat.value & SDL_HAT_LEFT) >> 3;
+            *jsmap[port].hatpos[3] = (event->jhat.value & SDL_HAT_RIGHT) >> 1;
             break;
         }
         case SDL_MOUSEMOTION: {
@@ -698,6 +693,50 @@ void jgrf_input_handler(SDL_Event *event) {
         }
         case SDL_MOUSEBUTTONDOWN: {
             *msmap.button[event->button.button] = 1;
+            break;
+        }
+        case SDL_JOYDEVICEADDED: {
+            int port = 0;
+
+            for (int i = 0; i < MAXPORTS; ++i) {
+                if (!jsports[i]) {
+                    joystick[i] = SDL_JoystickOpen(event->jdevice.which);
+                    SDL_JoystickSetPlayerIndex(joystick[i], i);
+                    jsports[i] = 1;
+                    jsiid[i] = SDL_JoystickInstanceID(joystick[i]);
+                    port = i;
+
+                    jgrf_log(JG_LOG_INF, "Joystick %d Connected: %s\n",
+                        port + 1, SDL_JoystickName(joystick[port]));
+
+                    if (SDL_JoystickIsHaptic(joystick[port])) {
+                        haptic[port] =
+                            SDL_HapticOpenFromJoystick(joystick[port]);
+                        SDL_HapticRumbleInit(haptic[port]) < 0 ?
+                        jgrf_log(JG_LOG_DBG, "Force Feedback Enable Failed\n"):
+                        jgrf_log(JG_LOG_DBG, "Force Feedback Enabled\n");
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case SDL_JOYDEVICEREMOVED: {
+            for (int i = 0; i < MAXPORTS; ++i) {
+                // If it's the one that got disconnected...
+                if (jsiid[i] == event->jdevice.which) {
+                    if (SDL_JoystickIsHaptic(joystick[i]))
+                        SDL_HapticClose(haptic[i]);
+
+                    jsports[i] = 0; // This is unplugged
+                    jgrf_log(JG_LOG_INF, "Joystick %d Disconnected\n", i + 1);
+                    SDL_JoystickClose(joystick[i]);
+                    joystick[i] = NULL;
+                    jsports[i] = 0;
+
+                    break;
+                }
+            }
             break;
         }
         default: {
