@@ -224,3 +224,7 @@ parson
 tconfig
   Copyright (c) 2019 Justin Kinnaird (MIT)
   See deps/tconfig.c
+
+Wave Writer
+  Public Domain (CC0-1.0)
+  See deps/wave_writer.c
