@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <sys/stat.h>
 
 #include <jg/jg.h>
 
@@ -19,13 +20,14 @@
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "a:b:c:fhr:s:vwx:";
+static const char *os_def = "a:b:c:fho:r:s:vwx:";
 static const struct parg_option po_def[] = {
     { "video", PARG_REQARG, NULL, 'a' },
     { "benchmark", PARG_REQARG, NULL, 'b' },
     { "core", PARG_REQARG, NULL, 'c' },
     { "fullscreen", PARG_NOARG, NULL, 'f' },
     { "help", PARG_NOARG, NULL, 'h' },
+    { "wave", PARG_REQARG, NULL, 'o' },
     { "rsqual", PARG_REQARG, NULL, 'r' },
     { "shader", PARG_REQARG, NULL, 's' },
     { "verbose", PARG_NOARG, NULL, 'v' },
@@ -127,6 +129,19 @@ void jgrf_cli_parse(int argc, char *argv[]) {
             case 'f': // Start in fullscreen mode
                 fullscreen = 1;
                 break;
+            case 'o': // Wave File Output
+                wavfile = ps.optarg;
+                struct stat fbuf;
+                if (stat(wavfile, &fbuf) == 0) {
+                    jgrf_log(JG_LOG_WRN,
+                        "WAV Writer: Refusing to overwrite %s!\n", wavfile);
+                }
+                else {
+                    jgrf_log(JG_LOG_WRN, "WAV Writer: Writing WAV to %s\n",
+                        wavfile);
+                    waveout = 1;
+                }
+                break;
             case 'r': // Resampler Quality
                 rsqual = atoi(ps.optarg);
                 break;
@@ -167,6 +182,8 @@ void jgrf_cli_usage(void) {
         "Start in Fullscreen mode\n");
     fprintf(stdout, "    -h, --help              "
         "Show Usage\n");
+    fprintf(stdout, "    -o, --wave <filename>   "
+        "Specify WAV output file\n");
     fprintf(stdout, "    -r, --rsqual <value>    "
         "Resampler Quality (0 to 10)\n");
     fprintf(stdout, "    -s, --shader <value>    "
