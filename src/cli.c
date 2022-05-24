@@ -34,6 +34,7 @@ static const struct parg_option po_def[] = {
 };
 
 static const char *corename = NULL;
+static const char *wavfile = NULL;
 
 static int video = 0;
 static int fullscreen = 0;
@@ -43,9 +44,16 @@ static int shader = -1;
 static int verbose = 0;
 static int windowed = 0;
 
+int waveout = 0;
+
 // Return the core name specified at the command line
 const char *jgrf_cli_core(void) {
     return corename;
+}
+
+// Return the wave file name specified at the command line
+const char *jgrf_cli_wave(void) {
+    return wavfile;
 }
 
 // Override settings with command line arguments

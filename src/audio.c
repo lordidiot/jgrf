@@ -23,7 +23,9 @@ void memset_pattern4(void *__b, const void *__pattern4, size_t __len);
 
 #include "jgrf.h"
 #include "audio.h"
+#include "cli.h"
 #include "settings.h"
+#include "wave_writer.h"
 
 #define SPFTOLERANCE 28 // Divergence tolerance between current and average SPF
 
@@ -37,6 +39,10 @@ static SDL_AudioDeviceID dev;
 
 static SpeexResamplerState *resampler = NULL;
 static int err;
+
+static wave_writer *ww;
+static wave_writer_format wwformat;
+static wave_writer_error wwerror;
 
 static void *corebuf = NULL; // Audio buffer for the core
 static int16_t *rsbuf = NULL; // Buffer for audio data to be resampled
@@ -53,6 +59,7 @@ static int out_offset = 0; // Offset the output rate
 
 extern int bmark; // External benchmark mode variable
 extern int fforward; // External fast-forward level
+extern int waveout; // Wave File Output
 
 // Add a new sample chunk size to the moving average and recalculate
 static inline void jgrf_audio_mavg(mavg_t *mavg, size_t newval) {
@@ -243,9 +250,29 @@ static void jgrf_audio_cb_int16(void *userdata, uint8_t *stream, int len) {
         ostream[i] = jgrf_rbuf_deq(&rbuf_out);
 }
 
+// SDL Audio Callback for 16-bit signed integer samples plus wave output
+static void jgrf_audio_cb_waveout(void *userdata, uint8_t *stream, int len) {
+    if (userdata) {}
+    int16_t *ostream = (int16_t*)stream;
+
+    for (size_t i = 0; i < len / sizeof(int16_t); ++i)
+        ostream[i] = jgrf_rbuf_deq(&rbuf_out);
+
+    wave_writer_put_samples(ww, len / (sizeof(int16_t) * audinfo->channels),
+        (void*)stream);
+}
+
 // Initialize the audio device and allocate buffers
 int jgrf_audio_init(void) {
     settings_t *settings = jgrf_get_settings();
+
+    // Set up Wave Writer
+    if (waveout) {
+        wwformat.num_channels = audinfo->channels;
+        wwformat.sample_rate = audinfo->rate;
+        wwformat.sample_bits = 16;
+        ww = wave_writer_open(jgrf_cli_wave(), &wwformat, &wwerror);
+    }
 
     spec.channels = audinfo->channels;
     spec.freq = audinfo->rate;
@@ -257,7 +284,7 @@ int jgrf_audio_init(void) {
     #else
     spec.format = AUDIO_S16LSB;
     #endif
-    spec.callback = jgrf_audio_cb_int16;
+    spec.callback = waveout ? jgrf_audio_cb_waveout : jgrf_audio_cb_int16;
 
     // Open the Audio Device
     dev = SDL_OpenAudioDevice(NULL, 0, &spec, &obtained,
@@ -314,6 +341,7 @@ void jgrf_audio_unpause(void) {
 
 // Deinitialize the audio device and free buffers
 void jgrf_audio_deinit() {
+    if (waveout) wave_writer_close(ww, &wwerror);
     if (dev) SDL_CloseAudioDevice(dev);
     if (resampler) speex_resampler_destroy(resampler);
 
