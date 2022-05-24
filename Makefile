@@ -58,7 +58,8 @@ CSRCS := jgrf.c \
 	deps/musl_memmem.c \
 	deps/parg.c \
 	deps/parson.c \
-	deps/tconfig.c
+	deps/tconfig.c \
+	deps/wave_writer.c
 
 OBJDIR := objs
 
