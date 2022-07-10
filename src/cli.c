@@ -111,25 +111,31 @@ void jgrf_cli_parse(int argc, char *argv[]) {
 
     while ((c = parg_getopt_long(&ps, argc, argv, os_def, po_def, &l)) != -1) {
         switch (c) {
-            case 1:
+            case 1: {
                 break;
-            case 'a': // Video API
+            }
+            case 'a': { // Video API
                 video = atoi(ps.optarg);
                 break;
-            case 'b': // Benchmark
+            }
+            case 'b': { // Benchmark
                 jgrf_benchmark(atoll(ps.optarg));
                 break;
-            case 'c': // Core selection
+            }
+            case 'c': { // Core selection
                 corename = ps.optarg;
                 break;
-            case 'h': // Show usage
+            }
+            case 'h': { // Show usage
                 jgrf_cli_usage();
                 jgrf_quit(EXIT_SUCCESS);
                 break;
-            case 'f': // Start in fullscreen mode
+            }
+            case 'f': { // Start in fullscreen mode
                 fullscreen = 1;
                 break;
-            case 'o': // Wave File Output
+            }
+            case 'o': { // Wave File Output
                 wavfile = ps.optarg;
                 struct stat fbuf;
                 if (stat(wavfile, &fbuf) == 0) {
@@ -142,26 +148,34 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                     waveout = 1;
                 }
                 break;
-            case 'r': // Resampler Quality
+            }
+            case 'r': { // Resampler Quality
                 rsqual = atoi(ps.optarg);
                 break;
-            case 's': // Shader
+            }
+            case 's': { // Shader
                 shader = atoi(ps.optarg);
                 break;
-            case 'v': // Enable verbose log output for core and frontend
+            }
+            case 'v': { // Enable verbose log output for core and frontend
                 verbose = 1;
                 break;
-            case 'w': // Start in windowed mode
+            }
+            case 'w': { // Start in windowed mode
                 windowed = 1;
                 break;
-            case 'x': // Scale
+            }
+            case 'x': { // Scale
                 scale = atoi(ps.optarg);
                 break;
-            case '?':
+            }
+            case '?': {
                 jgrf_log(JG_LOG_WRN, "Unknown option '-%c'\n", ps.optopt);
                 break;
-            default:
+            }
+            default: {
                 break;
+            }
         }
     }
 }
