@@ -123,10 +123,6 @@ static inline void jgrf_rbuf_enqf(ringbuf_t *rbuf, float *data, size_t size) {
     }
 }
 
-void jgrf_audio_set_bmark(void) {
-    bmark = 1;
-}
-
 // Set timing information to align audio processing with core framerate
 void jgrf_audio_timing(double frametime) {
     int spf = (audinfo->rate / (int)(frametime + 0.5)) * audinfo->channels;

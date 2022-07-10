@@ -28,7 +28,6 @@ typedef struct ringbuf_t {
 } ringbuf_t;
 
 void jgrf_audio_set_info(jg_audioinfo_t*);
-void jgrf_audio_set_bmark(void);
 void jgrf_audio_timing(double);
 void jgrf_audio_cb_core(size_t);
 void jgrf_audio_unpause(void);
