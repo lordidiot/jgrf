@@ -907,11 +907,8 @@ void jgrf_state_load(int slot) {
     success ? jgrf_log(JG_LOG_INF, "State Loaded: %s\n", statepath):
         jgrf_log(JG_LOG_WRN, "State Load failed: %s\n", statepath);
 
-    char msg[32];
-    snprintf(msg, sizeof(msg), "State %d %s",
+    jgrf_log(JG_LOG_SCR, "State %d %s",
         slot, success ? "loaded." : "load failed.");
-
-    jgrf_video_text(0, 45, msg);
 }
 
 // Save state
@@ -925,11 +922,8 @@ void jgrf_state_save(int slot) {
     success ? jgrf_log(JG_LOG_INF, "State Saved: %s\n", statepath):
         jgrf_log(JG_LOG_WRN, "State Save failed: %s\n", statepath);
 
-    char msg[32];
-    snprintf(msg, sizeof(msg), "State %d %s",
+    jgrf_log(JG_LOG_SCR, "State %d %s",
         slot, success ? "saved." : "save failed.");
-
-    jgrf_video_text(0, 45, msg);
 }
 
 void jgrf_set_basefps(int fps) {
