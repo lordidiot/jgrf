@@ -121,8 +121,8 @@ static void mkdirr(const char *dir) {
     if (tmp[len - 1] == '/')
         tmp[len - 1] = 0;
 
-    for(p = tmp + 1; *p; ++p) {
-        if(*p == '/') {
+    for (p = tmp + 1; *p; ++p) {
+        if (*p == '/') {
             *p = 0;
             #if defined(__MINGW32__) || defined(__MINGW64__)
             mkdir(tmp);
@@ -245,7 +245,8 @@ static void jgrf_core_load(const char *corepath) {
     memset(&jgapi, 0, sizeof(jgapi));
     jgapi.handle = dlopen(corepath, RTLD_LAZY);
 
-    if (!jgapi.handle) jgrf_log(JG_LOG_ERR, "%s\n", dlerror());
+    if (!jgapi.handle)
+        jgrf_log(JG_LOG_ERR, "%s\n", dlerror());
 
     dlerror();
 
@@ -376,9 +377,9 @@ static void jgrf_hash_md5(void) {
     MD5_Update(&c, dataptr, md5len);
     MD5_Final(digest, &c);
 
-    for (int i = 0; i < 16; ++i) {
+    for (int i = 0; i < 16; ++i)
         snprintf(&(gdata.md5[i * 2]), 16 * 2, "%02x", (unsigned)digest[i]);
-    }
+
     gameinfo.md5 = gdata.md5;
 }
 
@@ -482,6 +483,7 @@ static int jgrf_game_load_archive(const char *filename) {
     }
 
     mz_zip_reader_end(&zip_archive);
+
     return 0;
 }
 
@@ -521,6 +523,7 @@ static void jgrf_game_load(const char *filename) {
 
     // This item is set mostly so there can be a clean shutdown
     loaded.game = 1;
+
     return;
 }
 
@@ -550,6 +553,7 @@ static int jgrf_game_detect_zip(const char *filename) {
     }
 
     mz_zip_reader_end(&zip_archive);
+
     return 0;
 }
 
@@ -575,7 +579,8 @@ static int jgrf_game_detect_bincue(const char *filename) {
     FILE *file;
     file = fopen(filename, "r");
 
-    if (!file) return 0;
+    if (!file)
+        return 0;
 
     // Check heuristically for each system, least complex first
     // PSX
@@ -630,6 +635,7 @@ static int jgrf_game_detect_bincue(const char *filename) {
     #endif
 
     fclose(file);
+
     return 0;
 }
 
@@ -670,6 +676,7 @@ static int jgrf_game_detect_cue(const char *filename) {
     }
 
     fclose(file);
+
     return 0;
 }
 
@@ -678,7 +685,8 @@ static int jgrf_game_detect_m3u(const char *filename) {
     FILE *file;
     file = fopen(filename, "r");
 
-    if (!file) return 0;
+    if (!file)
+        return 0;
 
     char line[256];
     char cuepath[384]; // Cue paths are a bit larger than their containing M3U
@@ -702,6 +710,7 @@ static int jgrf_game_detect_m3u(const char *filename) {
     }
 
     fclose(file);
+
     return 0;
 }
 
@@ -954,7 +963,7 @@ int main(int argc, char *argv[]) {
     // Allow joystick input when the window is not focused
     SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
 
-    // Allow window to stay fullscreen if the window manager tries to iconify it
+    // Keep window fullscreen if the window manager tries to iconify it
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 
     // Initialize SDL
@@ -1135,25 +1144,33 @@ int main(int argc, char *argv[]) {
         // Poll for events
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
-                case SDL_QUIT:
+                case SDL_QUIT: {
                     running = 0;
                     break;
-                case SDL_WINDOWEVENT:
+                }
+                case SDL_WINDOWEVENT: {
                     switch (event.window.event) {
                         case SDL_WINDOWEVENT_MOVED:
-                        case SDL_WINDOWEVENT_RESIZED:
-                            jgrf_video_resize(); break;
-                        default: break;
+                        case SDL_WINDOWEVENT_RESIZED: {
+                            jgrf_video_resize();
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
                     }
                     break;
-                default:
+                }
+                default: {
                     jgrf_input_handler(&event);
                     break;
+                }
             }
         }
     }
 
     // Clean up before exiting
     jgrf_quit(EXIT_SUCCESS);
+
     return 0;
 }
