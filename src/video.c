@@ -99,8 +99,9 @@ void jgrf_video_icon_load(SDL_Window *window) {
     uint32_t x, y;
     uint8_t *png_icon = 0;
     uint8_t error = lodepng_decode32_file(&png_icon, &x, &y, iconpath);
-    if (error) jgrf_log(JG_LOG_WRN, "lodepng code %u: %s\n",
-        error, lodepng_error_text(error));
+    if (error)
+        jgrf_log(JG_LOG_WRN, "lodepng code %u: %s\n",
+            error, lodepng_error_text(error));
 
     SDL_Surface *icon;
     // pixels, width, height, depth, pitch, rmask, gmask, bmask, amask
@@ -128,8 +129,9 @@ void jgrf_video_screenshot(void) {
     uint8_t error = lodepng_encode32_file(ssname, (const uint8_t*)ssdata,
         rw, rh);
 
-    if (error) jgrf_log(JG_LOG_WRN,
-        "lodepng code %u: %s\n", error, lodepng_error_text(error));
+    if (error)
+        jgrf_log(JG_LOG_WRN, "lodepng code %u: %s\n",
+            error, lodepng_error_text(error));
 
     free(ssdata);
 }
