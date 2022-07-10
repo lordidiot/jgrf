@@ -181,6 +181,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
 }
 
 void jgrf_cli_usage(void) {
+    fprintf(stdout, "The Jolly Good Reference Frontend %s\n", VERSION);
     fprintf(stdout, "usage: jollygood [options] [auxiliary files] game\n");
     fprintf(stdout, "  options:\n");
     fprintf(stdout, "    -a, --video <value>     "

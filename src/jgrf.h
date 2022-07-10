@@ -9,6 +9,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#define VERSION "1.0.0-pre1"
+
 #define JGRF_AUXFILE_MAX 3
 
 typedef struct jgrf_gdata_t { // Global Data
