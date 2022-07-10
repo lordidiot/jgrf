@@ -55,6 +55,7 @@ static struct _jgapi {
     void (*jg_media_insert)(void);
     void (*jg_cheat_clear)(void);
     void (*jg_cheat_set)(const char *);
+    void (*jg_rehash)(void);
     // Callback Setup
     void (*jg_set_cb_log)(jg_cb_log_t);
     void (*jg_set_cb_audio)(jg_cb_audio_t);
@@ -262,6 +263,7 @@ static void jgrf_core_load(const char *corepath) {
     *(void**)(&jgapi.jg_media_insert) = dlsym(jgapi.handle, "jg_media_insert");
     *(void**)(&jgapi.jg_cheat_clear) = dlsym(jgapi.handle, "jg_cheat_clear");
     *(void**)(&jgapi.jg_cheat_set) = dlsym(jgapi.handle, "jg_cheat_set");
+    *(void**)(&jgapi.jg_rehash) = dlsym(jgapi.handle, "jg_rehash");
 
     *(void**)(&jgapi.jg_get_coreinfo) = dlsym(jgapi.handle,
         "jg_get_coreinfo");
@@ -872,6 +874,11 @@ void jgrf_media_select() {
 // Insert/eject media
 void jgrf_media_insert() {
     jgapi.jg_media_insert();
+}
+
+// Rehash
+void jgrf_rehash(void) {
+    jgapi.jg_rehash();
 }
 
 // Call to stop and shut down at the end of the current iteration
