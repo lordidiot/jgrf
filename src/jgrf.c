@@ -61,12 +61,12 @@ static struct _jgapi {
     void (*jg_set_cb_audio)(jg_cb_audio_t);
     void (*jg_set_cb_frametime)(jg_cb_frametime_t);
     void (*jg_set_cb_rumble)(jg_cb_rumble_t);
-    void (*jg_set_cb_settings_read)(jg_cb_settings_read_t);
     // Retrieve "info" structs from the core
     jg_coreinfo_t* (*jg_get_coreinfo)(const char *);
     jg_videoinfo_t* (*jg_get_videoinfo)(void);
     jg_audioinfo_t* (*jg_get_audioinfo)(void);
     jg_inputinfo_t* (*jg_get_inputinfo)(int);
+    jg_setting_t* (*jg_get_settings)(size_t*);
     // Core setup
     void (*jg_setup_video)(void);
     void (*jg_setup_audio)(void);
@@ -238,7 +238,6 @@ static void jgrf_callbacks_set(void) {
     jgapi.jg_set_cb_audio(&jgrf_audio_cb_core);
     jgapi.jg_set_cb_frametime(&jgrf_frametime);
     jgapi.jg_set_cb_rumble(&jgrf_input_rumble);
-    jgapi.jg_set_cb_settings_read(&jgrf_settings_emu);
 }
 
 // Load and set up the core
@@ -273,6 +272,8 @@ static void jgrf_core_load(const char *corepath) {
         "jg_get_videoinfo");
     *(void**)(&jgapi.jg_get_inputinfo) = dlsym(jgapi.handle,
         "jg_get_inputinfo");
+    *(void**)(&jgapi.jg_get_settings) = dlsym(jgapi.handle,
+        "jg_get_settings");
 
     *(void**)(&jgapi.jg_setup_video) = dlsym(jgapi.handle,
         "jg_setup_video");
@@ -295,11 +296,12 @@ static void jgrf_core_load(const char *corepath) {
         "jg_set_cb_frametime");
     *(void**)(&jgapi.jg_set_cb_rumble) = dlsym(jgapi.handle,
         "jg_set_cb_rumble");
-    *(void**)(&jgapi.jg_set_cb_settings_read) = dlsym(jgapi.handle,
-        "jg_set_cb_settings_read");
 
     // Set up values in global data struct
     jg_coreinfo_t *coreinfo = jgapi.jg_get_coreinfo(gdata.sys);
+
+    // Read emulator settings
+    jgrf_settings_emu(jgapi.jg_get_settings);
 
     // Set hints from the core
     gdata.hints = coreinfo->hints;

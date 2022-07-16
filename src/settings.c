@@ -23,6 +23,9 @@ static int confchanged = 0;
 
 static settings_t settings;
 
+static jg_setting_t *emusettings = NULL;
+static size_t numemusettings = 0;
+
 static jgrf_gdata_t *gdata;
 
 settings_t *jgrf_get_settings() {
@@ -85,7 +88,7 @@ static void jgrf_settings_read(void) {
 }
 
 // Initialize the settings to defaults and grab global data pointer
-int jgrf_settings_init() {
+int jgrf_settings_init(void) {
     gdata = jgrf_gdata_ptr();
 
     // Set defaults
@@ -132,7 +135,16 @@ void jgrf_settings_override(const char *name) {
 }
 
 // Read core-specific settings - "Emulator Settings"
-void jgrf_settings_emu(jg_setting_t *emusettings, int numsettings) {
+void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
+    // Get number of settings and set local pointer to core settings array
+    emusettings = get_settings(&numemusettings);
+
+    if (!numemusettings) {
+        jgrf_log(JG_LOG_DBG, "No Emulator Settings\n");
+        return;
+    }
+
+    // Build the .ini path for emulator-specific settings
     char path[256];
     snprintf(path, sizeof(path), "%s%s.ini",
         gdata->configpath, gdata->corename);
@@ -142,7 +154,7 @@ void jgrf_settings_emu(jg_setting_t *emusettings, int numsettings) {
     if (!ini_table_read_from_file(conf, path))
         jgrf_log(JG_LOG_DBG, "Core configuration file not found: %s\n", path);
 
-    for (int i = 0; i < numsettings; ++i) {
+    for (size_t i = 0; i < numemusettings; ++i) {
         if (ini_table_check_entry(conf, gdata->corename,
             emusettings[i].name)) {
 
