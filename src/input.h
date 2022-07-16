@@ -14,8 +14,8 @@
 
 int jgrf_input_init(void);
 void jgrf_input_deinit(void);
-void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int));
-void jgrf_input_set_states(void (*set_inputstate)(jg_inputstate_t*, int));
+void jgrf_input_query(jg_inputinfo_t *(*)(int));
+void jgrf_input_set_states(void (*)(jg_inputstate_t*, int));
 void jgrf_input_handler(SDL_Event*);
 void jgrf_input_rumble(int, float, size_t);
 
