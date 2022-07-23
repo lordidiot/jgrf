@@ -592,12 +592,8 @@ void jgrf_input_handler(SDL_Event *event) {
                 if (event->type == SDL_KEYUP) jgrf_video_screenshot();
                 break;
             }
-            case SDL_SCANCODE_F11: {
-                if (event->type == SDL_KEYUP) jgrf_cheats_activate();
-                break;
-            }
             case SDL_SCANCODE_F12: {
-                if (event->type == SDL_KEYUP) jgrf_cheats_deactivate();
+                if (event->type == SDL_KEYUP) jgrf_cheats_toggle();
                 break;
             }
             case SDL_SCANCODE_F: {

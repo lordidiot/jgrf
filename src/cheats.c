@@ -25,13 +25,17 @@ static int chtactive = 0;
 static int chtloaded = 0;
 
 // Parse the cheat file and activate any cheats
-void jgrf_cheats_activate(void) {
+void jgrf_cheats_toggle(void) {
     // If cheats are not loaded, simply return
     if (!chtloaded) {
-        jgrf_log(JG_LOG_WRN, "No cheats to activate\n");
+        jgrf_log(JG_LOG_WRN, "No cheats to toggle\n");
         return;
     }
-    else if (chtactive) {
+
+    if (chtactive) {
+        jgrf_cheat_clear();
+        chtactive = 0;
+        jgrf_log(JG_LOG_SCR, "Cheats Deactivated");
         return;
     }
 
@@ -55,6 +59,7 @@ void jgrf_cheats_activate(void) {
 
         // Apply any cheats set to "enabled"
         if (json_object_get_boolean(cheat, "enabled")) {
+            chtactive = 1;
             jgrf_log(JG_LOG_DBG,
                 "Cheat: %s\n", json_object_get_string(cheat, "desc"));
 
@@ -65,30 +70,16 @@ void jgrf_cheats_activate(void) {
         }
     }
 
-    chtactive = 1;
-    jgrf_log(JG_LOG_SCR, "Cheats Activated");
+    if (chtactive)
+        jgrf_log(JG_LOG_SCR, "Cheats Activated");
 
     // Free resources associated with parsing the JSON string
     json_value_free(root_value);
 }
 
-void jgrf_cheats_deactivate(void) {
-    // If cheats are not loaded, simply return
-    if (!chtloaded) {
-        jgrf_log(JG_LOG_WRN, "No cheats to deactivate\n");
-        return;
-    }
-    else if (!chtactive) {
-        return;
-    }
-
-    jgrf_cheat_clear();
-    chtactive = 0;
-    jgrf_log(JG_LOG_SCR, "Cheats Deactivated");
-}
-
 void jgrf_cheats_deinit(void) {
-    if (chtfile) free(chtfile);
+    if (chtfile)
+        free(chtfile);
 }
 
 void jgrf_cheats_init(void (*chtclear)(void), void (*chtset)(const char *)) {
@@ -127,5 +118,5 @@ void jgrf_cheats_init(void (*chtclear)(void), void (*chtset)(const char *)) {
 
     // Activate any cheats
     chtloaded = 1;
-    jgrf_cheats_activate();
+    jgrf_cheats_toggle();
 }

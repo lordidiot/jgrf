@@ -72,8 +72,7 @@ F6                       - Save State (Slot 1)
 F7                       - Load State (Slot 0)
 F8                       - Load State (Slot 1)
 F9                       - Screenshot
-F11                      - Activate Cheats
-F12                      - Deactivate Cheats
+F12                      - Toggle Cheats On/Off
 F                        - Toggle Fullscreen/Windowed Mode
 
 Input for games is not preconfigured. To configure a device:

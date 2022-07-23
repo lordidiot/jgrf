@@ -9,8 +9,7 @@
 #ifndef CHEATS_H
 #define CHEATS_H
 
-void jgrf_cheats_activate(void);
-void jgrf_cheats_deactivate(void);
+void jgrf_cheats_toggle(void);
 void jgrf_cheats_deinit(void);
 void jgrf_cheats_init(void (*)(void), void (*)(const char *));
 
