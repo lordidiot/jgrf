@@ -17,8 +17,8 @@ LIBS_SDL2 := $(shell $(PKG_CONFIG) --libs sdl2)
 CFLAGS_SPEEX := $(shell $(PKG_CONFIG) --cflags speexdsp)
 LIBS_SPEEX := $(shell $(PKG_CONFIG) --libs speexdsp)
 
-INCLUDES := -I$(SOURCEDIR)/deps $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
-	$(CFLAGS_SPEEX)
+INCLUDES := -I$(SOURCEDIR)/deps -I$(SOURCEDIR)/deps/miniz $(CFLAGS_JG) \
+	$(CFLAGS_EPOXY) $(CFLAGS_SDL2) $(CFLAGS_SPEEX)
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -54,7 +54,7 @@ CSRCS := jgrf.c \
 	video_gl.c \
 	deps/lodepng.c \
 	deps/md5.c \
-	deps/miniz.c \
+	deps/miniz/miniz.c \
 	deps/musl_memmem.c \
 	deps/parg.c \
 	deps/parson.c \
@@ -91,7 +91,7 @@ $(OBJDIR)/deps/%.o: $(SOURCEDIR)/deps/%.c $(OBJDIR)/.tag
 	@$(BUILD_DEPS)
 
 $(OBJDIR)/.tag:
-	@mkdir -p $(OBJDIR)/deps
+	@mkdir -p $(OBJDIR)/deps/miniz
 	@touch $@
 
 $(TARGET): $(OBJS)
@@ -116,6 +116,7 @@ install: all
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
 	cp $(TARGET) $(DESTDIR)$(BINDIR)
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
+	cp $(SOURCEDIR)/deps/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders

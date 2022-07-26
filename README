@@ -206,7 +206,7 @@ MD5 Message-Digest Algorithm (RFC 1321) Implementation
 miniz
   Copyright 2013-2014 RAD Game Tools and Valve Software (MIT)
   Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC (MIT)
-  See deps/miniz.c
+  See deps/miniz/miniz.c (https://github.com/richgel999/miniz)
 
 musl memmem Implementation
   Copyright © 2005-2020 Rich Felker, et al. (MIT)
