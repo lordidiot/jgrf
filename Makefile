@@ -17,8 +17,8 @@ LIBS_SDL2 := $(shell $(PKG_CONFIG) --libs sdl2)
 CFLAGS_SPEEX := $(shell $(PKG_CONFIG) --cflags speexdsp)
 LIBS_SPEEX := $(shell $(PKG_CONFIG) --libs speexdsp)
 
-INCLUDES := -I$(SOURCEDIR)/deps -I$(SOURCEDIR)/deps/miniz $(CFLAGS_JG) \
-	$(CFLAGS_EPOXY) $(CFLAGS_SDL2) $(CFLAGS_SPEEX)
+INCLUDES := -I$(SOURCEDIR)/deps $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
+	$(CFLAGS_SPEEX)
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
@@ -27,6 +27,8 @@ DATADIR ?= $(DATAROOTDIR)
 DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
 LIBDIR ?= $(PREFIX)/lib
 TARGET := jollygood
+
+USE_VENDORED_MINIZ ?= 1
 
 UNAME := $(shell uname -s)
 
@@ -54,12 +56,25 @@ CSRCS := jgrf.c \
 	video_gl.c \
 	deps/lodepng.c \
 	deps/md5.c \
-	deps/miniz/miniz.c \
 	deps/musl_memmem.c \
 	deps/parg.c \
 	deps/parson.c \
 	deps/tconfig.c \
 	deps/wave_writer.c
+
+ifneq ($(USE_VENDORED_MINIZ), 0)
+	Q_MINIZ :=
+	CFLAGS_MINIZ := -I$(SOURCEDIR)/deps/miniz
+	LIBS_MINIZ :=
+	CSRCS += deps/miniz/miniz.c
+else
+	Q_MINIZ := @
+	CFLAGS_MINIZ := $(shell $(PKG_CONFIG) --cflags miniz)
+	LIBS_MINIZ := $(shell $(PKG_CONFIG) --libs miniz)
+endif
+
+INCLUDES += $(CFLAGS_MINIZ)
+LIBS += $(LIBS_MINIZ)
 
 OBJDIR := objs
 
@@ -116,7 +131,6 @@ install: all
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
 	cp $(TARGET) $(DESTDIR)$(BINDIR)
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
-	cp $(SOURCEDIR)/deps/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
@@ -137,6 +151,10 @@ install: all
 	cp $(SOURCEDIR)/icons/jollygood1024.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/jollygood.svg
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/jollygood.svg
+	$(Q_MINIZ)if test $(USE_VENDORED_MINIZ) != 0; then \
+		cp $(SOURCEDIR)/deps/miniz/LICENSE \
+			$(DESTDIR)$(DOCDIR)/LICENSE-miniz; \
+	fi
 
 install-strip: install
 	strip $(DESTDIR)$(BINDIR)/$(TARGET)
