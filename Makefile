@@ -28,6 +28,8 @@ DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
 LIBDIR ?= $(PREFIX)/lib
 TARGET := jollygood
 
+USE_VENDORED_MINIZ ?= 1
+
 UNAME := $(shell uname -s)
 
 # Conditions for DEFS
@@ -54,12 +56,25 @@ CSRCS := jgrf.c \
 	video_gl.c \
 	deps/lodepng.c \
 	deps/md5.c \
-	deps/miniz.c \
 	deps/musl_memmem.c \
 	deps/parg.c \
 	deps/parson.c \
 	deps/tconfig.c \
 	deps/wave_writer.c
+
+ifneq ($(USE_VENDORED_MINIZ), 0)
+	Q_MINIZ :=
+	CFLAGS_MINIZ := -I$(SOURCEDIR)/deps/miniz
+	LIBS_MINIZ :=
+	CSRCS += deps/miniz/miniz.c
+else
+	Q_MINIZ := @
+	CFLAGS_MINIZ := $(shell $(PKG_CONFIG) --cflags miniz)
+	LIBS_MINIZ := $(shell $(PKG_CONFIG) --libs miniz)
+endif
+
+INCLUDES += $(CFLAGS_MINIZ)
+LIBS += $(LIBS_MINIZ)
 
 OBJDIR := objs
 
@@ -91,7 +106,7 @@ $(OBJDIR)/deps/%.o: $(SOURCEDIR)/deps/%.c $(OBJDIR)/.tag
 	@$(BUILD_DEPS)
 
 $(OBJDIR)/.tag:
-	@mkdir -p $(OBJDIR)/deps
+	@mkdir -p $(OBJDIR)/deps/miniz
 	@touch $@
 
 $(TARGET): $(OBJS)
@@ -136,6 +151,10 @@ install: all
 	cp $(SOURCEDIR)/icons/jollygood1024.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/jollygood.svg
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/jollygood.svg
+	$(Q_MINIZ)if test $(USE_VENDORED_MINIZ) != 0; then \
+		cp $(SOURCEDIR)/deps/miniz/LICENSE \
+			$(DESTDIR)$(DOCDIR)/LICENSE-miniz; \
+	fi
 
 install-strip: install
 	strip $(DESTDIR)$(BINDIR)/$(TARGET)
