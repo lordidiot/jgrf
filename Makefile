@@ -17,6 +17,7 @@ LIBS_SDL2 := $(shell $(PKG_CONFIG) --libs sdl2)
 CFLAGS_SPEEX := $(shell $(PKG_CONFIG) --cflags speexdsp)
 LIBS_SPEEX := $(shell $(PKG_CONFIG) --libs speexdsp)
 
+DEFINES :=
 INCLUDES := -I$(SOURCEDIR)/deps $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
 	$(CFLAGS_SPEEX)
 
@@ -28,13 +29,14 @@ DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
 LIBDIR ?= $(PREFIX)/lib
 TARGET := jollygood
 
+USE_VENDORED_MD5 ?= 1
 USE_VENDORED_MINIZ ?= 1
 
 UNAME := $(shell uname -s)
 
-# Conditions for DEFS
+# Conditions for DEFINES
 ifneq ($(OS), Windows_NT)
-	DEFS := -DDATADIR=\"$(DATADIR)\" -DLIBDIR=\"$(LIBDIR)\"
+	DEFINES += -DDATADIR="\"$(DATADIR)\"" -DLIBDIR="\"$(LIBDIR)\""
 endif
 
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
@@ -55,12 +57,21 @@ CSRCS := jgrf.c \
 	video.c \
 	video_gl.c \
 	deps/lodepng.c \
-	deps/md5.c \
 	deps/musl_memmem.c \
 	deps/parg.c \
 	deps/parson.c \
 	deps/tconfig.c \
 	deps/wave_writer.c
+
+ifneq ($(USE_VENDORED_MD5), 0)
+	CFLAGS_MD5 :=
+	LIBS_MD5 :=
+	CSRCS += deps/md5.c
+else
+	DEFINES += -DHAVE_OPENSSL
+	CFLAGS_MD5 := $(shell $(PKG_CONFIG) --cflags libcrypto)
+	LIBS_MD5 := $(shell $(PKG_CONFIG) --libs libcrypto)
+endif
 
 ifneq ($(USE_VENDORED_MINIZ), 0)
 	Q_MINIZ :=
@@ -73,8 +84,8 @@ else
 	LIBS_MINIZ := $(shell $(PKG_CONFIG) --libs miniz)
 endif
 
-INCLUDES += $(CFLAGS_MINIZ)
-LIBS += $(LIBS_MINIZ)
+INCLUDES += $(CFLAGS_MD5) $(CFLAGS_MINIZ)
+LIBS += $(LIBS_MD5) $(LIBS_MINIZ)
 
 OBJDIR := objs
 
@@ -91,7 +102,7 @@ COMPILE_INFO = $(info $(subst $(SOURCEDIR)/,,$(1)))
 BUILD_DEPS = $(call COMPILE_C, $(FLAGS))
 
 # Core command
-BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(DEFS) $(INCLUDES))
+BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(DEFINES) $(INCLUDES))
 
 .PHONY: all clean install install-strip uninstall
 
