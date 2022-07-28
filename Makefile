@@ -119,6 +119,7 @@ install: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
 	@mkdir -p $(DESTDIR)$(DOCDIR)
 	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/applications
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps
@@ -132,6 +133,7 @@ install: all
 	cp $(TARGET) $(DESTDIR)$(BINDIR)
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
+	cp $(SOURCEDIR)/jollygood.desktop $(DESTDIR)$(DATAROOTDIR)/applications
 	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
@@ -149,8 +151,8 @@ install: all
 	cp $(SOURCEDIR)/icons/jollygood256.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/256x256/apps/jollygood.png
 	cp $(SOURCEDIR)/icons/jollygood512.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/512x512/apps/jollygood.png
 	cp $(SOURCEDIR)/icons/jollygood1024.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
-	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/jollygood.svg
-	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/jollygood.svg
+	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
+	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps
 	$(Q_MINIZ)if test $(USE_VENDORED_MINIZ) != 0; then \
 		cp $(SOURCEDIR)/deps/miniz/LICENSE \
 			$(DESTDIR)$(DOCDIR)/LICENSE-miniz; \
@@ -163,6 +165,7 @@ uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
 	rm -rf $(DESTDIR)$(DOCDIR)
 	rm -rf $(DESTDIR)$(DATADIR)/jollygood/jgrf
+	rm -f $(DESTDIR)$(DATAROOTDIR)/applications/jollygood.desktop
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/jollygood.png
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/jollygood.png
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps/jollygood.png
