@@ -13,6 +13,10 @@ not install them, you will be required to include their path in CFLAGS.
 You will also require pkgconf/pkg-config, and development packages for SDL2,
 SpeexDSP, and libepoxy.
 
+Options:
+  USE_VENDORED_MD5 - Set zero to use the system libcrypto
+  USE_VENDORED_MINIZ - Set zero to use the system miniz
+
 Linux:
   make
 
