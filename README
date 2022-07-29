@@ -51,6 +51,7 @@ User data is located in:
 The User data directory contains the following subdirectories:
   assets/corename/       - User assets such as sample data for Nestopia JG
   bios/                  - Directory the frontend will load BIOS images from
+  cheats/corename/       - Directory the frontend will load Cheat files from
   save/corename/         - SRAM, Memory Card, or other types of save data
   screenshots/           - Screenshots with a timestamp and random number
   state/corename/        - Save States
@@ -106,7 +107,7 @@ Below is an example of the General Settings configuration file, with defaults:
 ; 0 = OpenGL Core Profile, 1 = OpenGL Compatibility Profile
 api = 0
 
-;N = Scale video output by N
+;N = Scale video output by N (1-8)
 scale = 3
 
 ;0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, 3 = AANN,

@@ -27,6 +27,7 @@ DATAROOTDIR ?= $(PREFIX)/share
 DATADIR ?= $(DATAROOTDIR)
 DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
 LIBDIR ?= $(PREFIX)/lib
+MANDIR ?= $(DATAROOTDIR)/man
 TARGET := jollygood
 
 USE_VENDORED_MD5 ?= 1
@@ -141,9 +142,11 @@ install: all
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
+	@mkdir -p $(DESTDIR)$(MANDIR)/man6
 	cp $(TARGET) $(DESTDIR)$(BINDIR)
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
+	cp $(SOURCEDIR)/jollygood.6 $(DESTDIR)$(MANDIR)/man6
 	cp $(SOURCEDIR)/jollygood.desktop $(DESTDIR)$(DATAROOTDIR)/applications
 	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
@@ -187,3 +190,4 @@ uninstall:
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/jollygood.svg
 	rm -f $(DESTDIR)$(DATAROOTDIR)/pixmaps/jollygood.svg
+	rm -f $(DESTDIR)$(MANDIR)/man6/jollygood.6
