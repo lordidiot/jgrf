@@ -25,12 +25,10 @@ SOFTWARE.
 
 #version 330
 
-uniform sampler2D source[];
-uniform vec4 sourceSize[];
+uniform sampler2D source;
+uniform vec4 sourceSize;
 
-in Vertex {
-    vec2 texCoord;
-};
+in vec2 texCoord;
 out vec4 fragColor;
 
 vec3 mask_weights(vec2 coord, float mask_intensity) {
@@ -42,18 +40,18 @@ vec3 mask_weights(vec2 coord, float mask_intensity) {
     vec3 blue    = vec3(off, off, on );
     vec3 black   = vec3(off, off, off);
     int w, z = 0;
-    
+
     vec3 lcdmask_x1[4] = vec3[](red, green, blue, black);
     vec3 lcdmask_x2[4] = vec3[](red, green, blue, black);
     vec3 lcdmask_x3[4] = vec3[](red, green, blue, black);
     vec3 lcdmask_x4[4] = vec3[](black, black, black, black);
-    
+
     // find the vertical index
     w = int(floor(mod(coord.y, 4.0)));
-    
+
     // find the horizontal index
     z = int(floor(mod(coord.x, 4.0)));
-    
+
     // do a comparison
     weights =
         (w == 1) ? lcdmask_x1[z] :
@@ -66,6 +64,6 @@ vec3 mask_weights(vec2 coord, float mask_intensity) {
 
 void main() {
     vec2 tcoord = texCoord * 1.00001;
-    fragColor = vec4(pow(texture(source[0], tcoord).rgb, vec3(1.+mask_str)) *
-        mask_weights(tcoord.xy * sourceSize[0].xy * 4., mask_str), 1.0);
+    fragColor = vec4(pow(texture(source, tcoord).rgb, vec3(1.+mask_str)) *
+        mask_weights(tcoord.xy * sourceSize.xy * 4., mask_str), 1.0);
 }

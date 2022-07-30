@@ -26,17 +26,15 @@ SOFTWARE.
 
 #version 330 core
 
-uniform sampler2D source[];
-uniform vec4 sourceSize[];
+uniform sampler2D source;
+uniform vec4 sourceSize;
 
-in Vertex {
-    vec2 texCoord;
-};
+in vec2 texCoord;
 
 out vec4 fragColor;
 
 // Emulated input resolution
-vec2 res = sourceSize[0].xy;
+vec2 res = sourceSize.xy;
 
 // Hardness of scanline
 // -4.0 = ultrasoft, -8.0 = soft, -16.0 = medium, -24.0 = hard
@@ -74,7 +72,7 @@ vec3 ToSrgb(vec3 c) {
 // Also zeros off screen.
 vec3 Fetch(vec2 pos,vec2 off){
     pos = (floor(pos * res + off) + vec2(0.5, 0.5)) / res;
-    return ToLinear(1.2 * texture(source[0], pos.xy, -16.0).rgb);
+    return ToLinear(1.2 * texture(source, pos.xy, -16.0).rgb);
 }
 
 // Distance in emulated pixels to nearest texel

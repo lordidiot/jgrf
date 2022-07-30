@@ -644,7 +644,7 @@ static void jgrf_video_gl_shader_setup(void) {
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    GLint texAttrib = glGetAttribLocation(shaderProgram, "texCoord");
+    GLint texAttrib = glGetAttribLocation(shaderProgram, "vtxCoord");
     glEnableVertexAttribArray(texAttrib);
     glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE,
         0, (void*)(8 * sizeof(GLfloat)));
@@ -702,7 +702,7 @@ static void jgrf_video_gl_shader_setup(void) {
     glEnableVertexAttribArray(posAttrib_out);
     glVertexAttribPointer(posAttrib_out, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    GLint texAttrib_out = glGetAttribLocation(shaderProgram_out, "texCoord");
+    GLint texAttrib_out = glGetAttribLocation(shaderProgram_out, "vtxCoord");
     glEnableVertexAttribArray(texAttrib_out);
     glVertexAttribPointer(texAttrib_out, 2, GL_FLOAT, GL_FALSE,
         0, (void*)(8 * sizeof(GLfloat)));

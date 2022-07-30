@@ -26,8 +26,8 @@ SOFTWARE.
 
 #version 330 core
 
-uniform sampler2D source[];
-uniform vec4 sourceSize[];
+uniform sampler2D source;
+uniform vec4 sourceSize;
 uniform vec4 targetSize;
 
 uniform int masktype; // Mask Type
@@ -38,9 +38,8 @@ uniform float curve; // Screen Curvature
 uniform float corner; // Screen Curvature
 uniform float tcurve; // Trinitron Curve
 
-in Vertex {
-    vec2 texCoord;
-};
+in vec2 texCoord;
+
 out vec4 FragColor;
 
 //#define CRTS_DEBUG 1 // Define to see on/off split screen
@@ -50,8 +49,8 @@ out vec4 FragColor;
 #define INPUT_MASK (1.0 - maskstr)
 #define INPUT_SCAN (0.5 + (0.5 * scanstr))
 #define INPUT_SHRP (-1.0 * sharpness)
-#define INPUT_X sourceSize[0].x
-#define INPUT_Y sourceSize[0].y
+#define INPUT_X sourceSize.x
+#define INPUT_Y sourceSize.y
 
 #define CURVATURE curve
 #define TRINITRON_CURVE tcurve
@@ -85,8 +84,8 @@ vec3 ToSrgb(vec3 c) {
 // Fetch the input image colour
 vec3 CrtsFetch(vec2 uv) {
     // Scale to get native texels in the image
-    uv *= vec2(INPUT_X, INPUT_Y) / sourceSize[0].xy;
-    return FromSrgb(texture(source[0], uv.xy, -16.0).rgb);
+    uv *= vec2(INPUT_X, INPUT_Y) / sourceSize.xy;
+    return FromSrgb(texture(source, uv.xy, -16.0).rgb);
 }
 
 // Get the maximum of 3 floats
@@ -97,13 +96,13 @@ float CrtsMax3F1(float a, float b, float c) {
 // Tonal Control
 vec4 CrtsTone(float contrast, float saturation, float thin, float mask) {
     if (masktype == 0) mask = 1.0;
-    
+
     if (masktype == 1) {
         // Normal R mask is {1.0,mask,mask}
         // LITE   R mask is {mask,1.0,1.0}
         mask = 0.5 + mask * 0.5;
     }
-    
+
     vec4 ret;
     float midOut = 0.18 / ((1.5 - thin) * (0.5 * mask + 0.5));
     float pMidIn = pow(0.18, contrast);
@@ -119,7 +118,7 @@ vec3 CrtsMask(vec2 pos, float dark) {
     if (masktype == 0) { // Scanlines (No Mask)
         return vec3(1.0, 1.0, 1.0);
     }
-    
+
     if (masktype == 1) { // Aperture Grille Lite
         vec3 m = vec3(1.0, 1.0, 1.0);
         float x = fract(pos.x * (1.0 / 3.0));
@@ -128,7 +127,7 @@ vec3 CrtsMask(vec2 pos, float dark) {
         else m.b = dark;
         return m;
     }
-    
+
     if (masktype == 2) { // Aperture Grille
         vec3 m = vec3(dark, dark, dark);
         float x = fract(pos.x * (1.0 / 3.0));
@@ -137,7 +136,7 @@ vec3 CrtsMask(vec2 pos, float dark) {
         else m.b = 1.0;
         return m;
     }
-    
+
     if (masktype == 3) { // Shadow Mask
         pos.x += pos.y * 2.9999;
         vec3 m = vec3(dark, dark, dark);
@@ -163,7 +162,7 @@ vec3 CrtsFilter(vec2 ipos, vec2 inputSizeDivOutputSize, vec2 halfInputSize,
     vec2 warp, vec4 tone) {
     #ifdef CRTS_DEBUG
     vec2 uv = ipos * rcpOutputSize;
-    
+
     // Show second half processed, and first half un-processed
     if (uv.x < 0.5) {
         // Force nearest to get squares
@@ -174,42 +173,42 @@ vec3 CrtsFilter(vec2 ipos, vec2 inputSizeDivOutputSize, vec2 halfInputSize,
         return color;
     }
     #endif
-    
+
     // Optional apply warp
     vec2 pos;
-    
+
     #ifdef CRTS_WARP
     // Convert to {-1 to 1} range
     pos = ipos * twoDivOutputSize - vec2(1.0, 1.0);
-    
+
     // Distort pushes image outside {-1 to 1} range
     pos *= vec2(1.0 + (pos.y * pos.y) * warp.x, 1.0 + (pos.x * pos.x) * warp.y);
-    
+
     // TODO: Vignette needs optimization
-    float vin = (1.0 - 
+    float vin = (1.0 -
         ((1.0 - CrtsSatF1(pos.x * pos.x)) * (1.0 - CrtsSatF1(pos.y * pos.y)))) *
         (0.998 + (0.001 * CORNER));
-    vin = CrtsSatF1((-vin) * sourceSize[0].y + sourceSize[0].y);
-    
+    vin = CrtsSatF1((-vin) * sourceSize.y + sourceSize.y);
+
     // Leave in {0 to inputSize}
-    pos = pos * halfInputSize + halfInputSize;     
+    pos = pos * halfInputSize + halfInputSize;
     #else
     pos = ipos * inputSizeDivOutputSize;
     #endif
-    
+
     // Snap to center of first scanline
     float y0 = floor(pos.y - 0.5) + 0.5;
-    
+
     #ifdef CRTS_2_TAP
     // Using Inigo's "Improved Texture Interpolation"
     // http://iquilezles.org/www/articles/texture/texture.htm
     pos.x += 0.5;
     float xi = floor(pos.x);
     float xf = pos.x - xi;
-    xf = xf * xf * xf * (xf * (xf * 6.0 - 15.0) + 10.0);  
+    xf = xf * xf * xf * (xf * (xf * 6.0 - 15.0) + 10.0);
     float x0 = xi + xf - 0.5;
-    vec2 p = vec2(x0 * rcpInputSize.x, y0 * rcpInputSize.y);     
-    
+    vec2 p = vec2(x0 * rcpInputSize.x, y0 * rcpInputSize.y);
+
     // Coordinate adjusted bilinear fetch from 2 nearest scanlines
     vec3 colA = CrtsFetch(p);
     p.y += rcpInputSize.y;
@@ -217,10 +216,10 @@ vec3 CrtsFilter(vec2 ipos, vec2 inputSizeDivOutputSize, vec2 halfInputSize,
     #else
     // Snap to center of one of four pixels
     float x0 = floor(pos.x - 1.5) + 0.5;
-    
+
     // Inital UV position
-    vec2 p = vec2(x0 * rcpInputSize.x, y0 * rcpInputSize.y);     
-    
+    vec2 p = vec2(x0 * rcpInputSize.x, y0 * rcpInputSize.y);
+
     // Fetch 4 nearest texels from 2 nearest scanlines
     vec3 colA0 = CrtsFetch(p);
     p.x += rcpInputSize.x;
@@ -238,7 +237,7 @@ vec3 CrtsFilter(vec2 ipos, vec2 inputSizeDivOutputSize, vec2 halfInputSize,
     p.x -= rcpInputSize.x;
     vec3 colB0 = CrtsFetch(p);
     #endif
-    
+
     // Vertical filter
     // Scanline intensity is using sine wave
     // Easy filter window and integral used later in exposure
@@ -248,7 +247,7 @@ vec3 CrtsFilter(vec2 ipos, vec2 inputSizeDivOutputSize, vec2 halfInputSize,
     float scanA = cos(min(0.5, off * INPUT_SCAN) * pi2) * hlf + hlf;
     float scanB = cos(min(0.5, (-off) * INPUT_SCAN + INPUT_SCAN) * pi2) *
         hlf + hlf;
-    
+
     #ifdef CRTS_2_TAP
         #ifdef CRTS_WARP
         // Get rid of wrong pixels on edge
@@ -274,36 +273,36 @@ vec3 CrtsFilter(vec2 ipos, vec2 inputSizeDivOutputSize, vec2 halfInputSize,
         #endif
     scanA *= pixT;
     scanB *= pixT;
-    
+
     // Apply horizontal and vertical filters
     vec3 color =
         (colA0 * pix0 + colA1 * pix1 + colA2 * pix2 + colA3 * pix3) * scanA +
         (colB0 * pix0 + colB1 * pix1 + colB2 * pix2 + colB3 * pix3) * scanB;
     #endif
-    
-    // Apply phosphor mask          
+
+    // Apply phosphor mask
     color *= CrtsMask(gl_FragCoord.xy, INPUT_MASK);
-    
+
     // Optional color processing
     #ifdef CRTS_TONE
     // Tonal control, start by protecting from /0
     float peak = max(1.0 / (256.0 * 65536.0),
         CrtsMax3F1(color.r, color.g, color.b));
-    
+
     // Compute the ratios of {R,G,B}
     vec3 ratio = color * CrtsRcpF1(peak);
-    
+
     // Apply tonal curve to peak value
     #ifdef CRTS_CONTRAST
         peak = pow(peak, tone.x);
     #endif
     peak = peak * CrtsRcpF1(peak * tone.y + tone.z);
-    
+
     // Apply saturation
     #ifdef CRTS_SATURATION
         ratio = pow(ratio, vec3(tone.w, tone.w, tone.w));
     #endif
-    
+
     // Reconstruct color
     return ratio * peak;
     #else
@@ -316,16 +315,16 @@ void main() {
     warp_factor.x = CURVATURE;
     warp_factor.y = (3.0 / 4.0) * warp_factor.x; // assume 4:3 aspect
     warp_factor.x *= (1.0 - TRINITRON_CURVE);
-    
+
     FragColor.rgb = CrtsFilter(texCoord.xy * targetSize.xy,
-        sourceSize[0].xy * targetSize.zw,
-        sourceSize[0].xy * vec2(0.5, 0.5),
-        sourceSize[0].zw,
+        sourceSize.xy * targetSize.zw,
+        sourceSize.xy * vec2(0.5, 0.5),
+        sourceSize.zw,
         targetSize.zw,
         2.0 * targetSize.zw,
         warp_factor,
         CrtsTone(1.0, 0.0, INPUT_SCAN, INPUT_MASK));
-    
+
     // Output non-linear color
     FragColor.rgb = ToSrgb(FragColor.rgb);
 }
