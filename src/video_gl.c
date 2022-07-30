@@ -175,7 +175,7 @@ void jgrf_video_gl_create(void) {
             SDL_GetError());
 
     // Initialize glText after setting GL context
-    if (!gltInit())
+    if (!gltInit(settings->video_api.val == 1))
         jgrf_log(JG_LOG_WRN, "Failed to initialize glText\n");
 
     for (int i = 0; i < 3; ++i)

@@ -1,9 +1,6 @@
 
 // Repository: https://github.com/MrVallentin/glText
 // License: https://github.com/MrVallentin/glText/blob/master/LICENSE.md
-//
-// Date Created: September 24, 2013
-// Last Modified: October 30, 2018
 
 // In one C or C++ file, define GLT_IMPLEMENTATION prior to inclusion to create the implementation.
 //   #define GLT_IMPLEMENTATION
@@ -36,9 +33,11 @@
 // additionally means they can be removed, renamed
 // or changed between minor updates without notice.
 
-// Modified by Rupert Carmichael, 2020
-// Commented unused functions, added transparency from github issues list:
+// Modified by Rupert Carmichael, 2020-2022
+// - Removed dates of creation and last update from comments
+// - Commented unused functions, added transparency from github issues list:
 //   https://github.com/vallentin/glText/issues/2#issuecomment-431558916
+// - Added support for GLES 3.0
 
 #ifndef GL_TEXT_H
 #define GL_TEXT_H
@@ -108,7 +107,7 @@ static GLboolean gltInitialized = GL_FALSE;
 
 typedef struct GLTtext GLTtext;
 
-GLT_API GLboolean gltInit(void);
+GLT_API GLboolean gltInit(int es);
 GLT_API void gltTerminate(void);
 
 GLT_API GLTtext* gltCreateText(void);
@@ -228,7 +227,7 @@ GLT_API void _gltMat4Mult(const GLfloat lhs[16], const GLfloat rhs[16], GLfloat 
 
 GLT_API void _gltUpdateBuffers(GLTtext *text);
 
-GLT_API GLboolean _gltCreateText2DShader(void);
+GLT_API GLboolean _gltCreateText2DShader(int es);
 GLT_API GLboolean _gltCreateText2DFontTexture(void);
 
 GLT_API GLTtext* gltCreateText(void)
@@ -814,12 +813,12 @@ GLT_API void _gltUpdateBuffers(GLTtext *text)
 	text->_dirty = GL_FALSE;
 }
 
-GLT_API GLboolean gltInit(void)
+GLT_API GLboolean gltInit(int es)
 {
 	if (gltInitialized)
 		return GL_TRUE;
 
-	if (!_gltCreateText2DShader())
+	if (!_gltCreateText2DShader(es))
 		return GL_FALSE;
 
 	if (!_gltCreateText2DFontTexture())
@@ -879,7 +878,32 @@ static const GLchar* _gltText2DFragmentShaderSource =
 "	fragColor = texture(diffuse, fTexCoord) * color;\n"
 "}\n";
 
-GLT_API GLboolean _gltCreateText2DShader(void)
+static const GLchar* _gltText2DVertexShaderSourceES =
+"#version 300 es\n"
+"precision highp float;\n"
+"in vec2 position;\n"
+"in vec2 texCoord;\n"
+"uniform mat4 mvp;\n"
+"out vec2 fTexCoord;\n"
+"void main()\n"
+"{\n"
+"	fTexCoord = texCoord;\n"
+"	gl_Position = mvp * vec4(position, 0.0, 1.0);\n"
+"}\n";
+
+static const GLchar* _gltText2DFragmentShaderSourceES =
+"#version 300 es\n"
+"precision highp float;\n"
+"out vec4 fragColor;\n"
+"uniform sampler2D diffuse;\n"
+"uniform vec4 color;\n"
+"in vec2 fTexCoord;\n"
+"void main()\n"
+"{\n"
+"	fragColor = texture(diffuse, fTexCoord) * color;\n"
+"}\n";
+
+GLT_API GLboolean _gltCreateText2DShader(int es)
 {
 	GLuint vertexShader, fragmentShader;
 	GLint compileStatus, linkStatus;
@@ -891,7 +915,9 @@ GLT_API GLboolean _gltCreateText2DShader(void)
 #endif
 
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &_gltText2DVertexShaderSource, NULL);
+	glShaderSource(vertexShader, 1, es ?
+		&_gltText2DVertexShaderSourceES : &_gltText2DVertexShaderSource,
+		NULL);
 	glCompileShader(vertexShader);
 
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &compileStatus);
@@ -928,7 +954,9 @@ GLT_API GLboolean _gltCreateText2DShader(void)
 	}
 
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &_gltText2DFragmentShaderSource, NULL);
+	glShaderSource(fragmentShader, 1, es ?
+		&_gltText2DFragmentShaderSourceES : &_gltText2DFragmentShaderSource,
+		NULL);
 	glCompileShader(fragmentShader);
 
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &compileStatus);
