@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2020-2021 Rupert Carmichael
+Copyright (c) 2020-2022 Rupert Carmichael
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,9 @@ SOFTWARE.
 */
 // Based on Public Domain work by hunterk
 
-#version 330
+#version 330 core
+
+precision highp float;
 
 uniform sampler2D source;
 uniform vec4 sourceSize;

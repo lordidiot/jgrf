@@ -35,7 +35,7 @@ in vec2 texCoord;
 
 out vec4 fragColor;
 
-#define NOT(fl) (1-fl)
+#define NOT(fl) (1.0-fl)
 #define YES(fl) fl
 
 vec4 vpow(vec4 n, float e)
@@ -83,16 +83,20 @@ void main() {
     float ykeep = ystuff[0];
 
     // get points to interpolate across, in linear rgb
-    vec4 a = getLQV(vpow(texture(source,vec2(xstuff[1],ystuff[1])), cheapsrgb).rgb);
-    vec4 b = getLQV(vpow(texture(source,vec2(xstuff[2],ystuff[1])), cheapsrgb).rgb);
-    vec4 c = getLQV(vpow(texture(source,vec2(xstuff[1],ystuff[2])), cheapsrgb).rgb);
-    vec4 d = getLQV(vpow(texture(source,vec2(xstuff[2],ystuff[2])), cheapsrgb).rgb);
+    vec4 a =
+        getLQV(vpow(texture(source,vec2(xstuff[1],ystuff[1])), cheapsrgb).rgb);
+    vec4 b =
+        getLQV(vpow(texture(source,vec2(xstuff[2],ystuff[1])), cheapsrgb).rgb);
+    vec4 c =
+        getLQV(vpow(texture(source,vec2(xstuff[1],ystuff[2])), cheapsrgb).rgb);
+    vec4 d =
+        getLQV(vpow(texture(source,vec2(xstuff[2],ystuff[2])), cheapsrgb).rgb);
 
     // use perceptual gamma for luminance component
-    a.w = pow(a.w, 1/gamma);
-    b.w = pow(b.w, 1/gamma);
-    c.w = pow(c.w, 1/gamma);
-    d.w = pow(d.w, 1/gamma);
+    a.w = pow(a.w, 1.0/gamma);
+    b.w = pow(b.w, 1.0/gamma);
+    c.w = pow(c.w, 1.0/gamma);
+    d.w = pow(d.w, 1.0/gamma);
 
     // interpolate
     vec4 gammaLQVresult =
@@ -106,7 +110,7 @@ void main() {
     LQVresult.w = pow(gammaLQVresult.w, gamma);
 
     // convert back to srgb; lqv -> lrgb -> srgb
-    vec4 c1 = vpow(vec4(fromLQV(LQVresult), 1), 1/cheapsrgb);
+    vec4 c1 = vpow(vec4(fromLQV(LQVresult), 1), 1.0/cheapsrgb);
 
     fragColor = c1;
 }

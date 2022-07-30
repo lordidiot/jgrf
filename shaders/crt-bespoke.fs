@@ -2,7 +2,7 @@
 MIT License
 
 CRT-Bespoke - Custom-tailored CRT Shader
-Copyright (c) 2020-2021 Rupert Carmichael
+Copyright (c) 2020-2022 Rupert Carmichael
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,15 +26,14 @@ SOFTWARE.
 
 #version 330 core
 
+precision highp float;
+
 uniform sampler2D source;
 uniform vec4 sourceSize;
 
 in vec2 texCoord;
 
 out vec4 fragColor;
-
-// Emulated input resolution
-vec2 res = sourceSize.xy;
 
 // Hardness of scanline
 // -4.0 = ultrasoft, -8.0 = soft, -16.0 = medium, -24.0 = hard
@@ -71,13 +70,13 @@ vec3 ToSrgb(vec3 c) {
 // Nearest emulated sample given floating point position and texel offset
 // Also zeros off screen.
 vec3 Fetch(vec2 pos,vec2 off){
-    pos = (floor(pos * res + off) + vec2(0.5, 0.5)) / res;
+    pos = (floor(pos * sourceSize.xy + off) + vec2(0.5, 0.5)) / sourceSize.xy;
     return ToLinear(1.2 * texture(source, pos.xy, -16.0).rgb);
 }
 
 // Distance in emulated pixels to nearest texel
 vec2 Dist(vec2 pos) {
-    pos=pos*res;
+    pos=pos*sourceSize.xy;
     return -((pos - floor(pos)) - vec2(0.5));
 }
 
