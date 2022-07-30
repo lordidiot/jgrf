@@ -51,7 +51,8 @@ The options are as follows:
 .It Fl a , -video Ar value
 Specify which Video API to use.
 .D1 0 = OpenGL Core Profile
-.D1 1 = OpenGL Compatibility Profile
+.D1 1 = OpenGL ES
+.D1 2 = OpenGL Compatibility Profile
 .It Fl b , -bmark Ar frames
 Run N frames in Benchmark mode.
 .It Fl c , -core Ar corename
@@ -193,7 +194,8 @@ The General Settings configuration file accepts the following sections.
 Video Driver Profile
 .Aq Default: 0
 .D1 0 = OpenGL Core Profile
-.D1 1 = OpenGL Compatibility Profile
+.D1 1 = OpenGL ES
+.D1 2 = OpenGL Compatibility Profile
 .It Ic scale = Cm N
 Video Scale Factor
 .Aq Default: 3

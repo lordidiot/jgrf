@@ -15,6 +15,8 @@
 #include <SDL.h>
 #include <jg/jg.h>
 
+#define SIZE_GLSLVER 20
+
 #define GLT_IMPLEMENTATION
 #define GLT_MANUAL_VIEWPORT
 #include "gltext.h"
@@ -111,6 +113,13 @@ void jgrf_video_gl_create(void) {
             break;
         }
         case 1: {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                SDL_GL_CONTEXT_PROFILE_ES);
+            break;
+        }
+        case 2: {
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
@@ -173,7 +182,7 @@ void jgrf_video_gl_create(void) {
         msgtext[i] = gltCreateText();
 
     // Do post window creation OpenGL setup
-    if (settings->video_api.val)
+    if (settings->video_api.val > 1)
         jgrf_video_gl_setup_compat();
     else
         jgrf_video_gl_setup();
@@ -550,15 +559,37 @@ static const GLchar* jgrf_video_gl_shader_load(const char *filename) {
     if (!file)
         jgrf_log(JG_LOG_ERR, "Could not open shader file, exiting...\n");
 
+    // Get the size of the shader source file
     fseek(file, 0, SEEK_END);
     size_t size = ftell(file);
     rewind(file);
 
-    GLchar *src = (GLchar*)calloc(size + 1, sizeof(GLchar));
-    if (!src || !fread(src, size, sizeof(GLchar), file))
-        jgrf_log(JG_LOG_ERR, "Could not open shader file, exiting...\n");
+    // Allocate memory to store the shader source including version string
+    GLchar *src = (GLchar*)calloc(size + SIZE_GLSLVER, sizeof(GLchar));
+    if (!src)
+        jgrf_log(JG_LOG_ERR, "Could not allocate memory, exiting...\n");
 
+    // Allocate memory for the shader source without version string
+    GLchar *shader = (GLchar*)calloc(size + 1, sizeof(GLchar));
+
+    // Write version string into the buffer for the full shader source
+    snprintf(src, SIZE_GLSLVER, "%s", settings->video_api.val ?
+        "#version 300 es\n" : "#version 330 core\n");
+
+    if (!shader || !fread(shader, size, sizeof(GLchar), file)) {
+        free(src);
+        jgrf_log(JG_LOG_ERR, "Could not open shader file, exiting...\n");
+    }
+
+    // Close file handle after reading
     fclose(file);
+
+    // Append shader source to version string
+    src = strncat(src, shader, size + SIZE_GLSLVER);
+
+    // Free the shader source without version string
+    free(shader);
+
     return src;
 }
 

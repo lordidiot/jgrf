@@ -187,7 +187,8 @@ void jgrf_cli_usage(void) {
     fprintf(stdout, "    -a, --video <value>     "
         "Specify which Video API to use\n");
     fprintf(stdout, "                              0 = OpenGL Core Profile\n");
-    fprintf(stdout, "                              1 = OpenGL Compatibility "
+    fprintf(stdout, "                              1 = OpenGL ES\n");
+    fprintf(stdout, "                              2 = OpenGL Compatibility "
         "Profile\n");
     fprintf(stdout, "    -b, --bmark <frames>    "
         "Run N frames in Benchmark mode\n");

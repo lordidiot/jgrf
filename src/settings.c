@@ -92,7 +92,7 @@ int jgrf_settings_init(void) {
     gdata = jgrf_gdata_ptr();
 
     // Set defaults
-    settings.video_api = (setting_t){ 0, 0, 1 };
+    settings.video_api = (setting_t){ 0, 0, 2 };
     settings.video_fullscreen = (setting_t){ 0, 0, 1 };
     settings.video_scale = (setting_t){ 3, 1, 8 };
     settings.video_shader = (setting_t){ 2, 0, 6 };

@@ -23,8 +23,6 @@ SOFTWARE.
 */
 // Based on Public Domain work by hunterk
 
-#version 330 core
-
 precision highp float;
 
 uniform sampler2D source;
