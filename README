@@ -81,7 +81,7 @@ F12                      - Toggle Cheats On/Off
 F                        - Toggle Fullscreen/Windowed Mode
 
 Input for games is not preconfigured. To configure a device:
-  SHIFT+ALT+[Port Number] ex. SHIFT+ALT+1, SHIFT+ALT+2
+  SHIFT+[Port Number] ex. SHIFT+1, SHIFT+2
 
 Effort has been made to ensure emulator cores know what devices must be plugged
 in. Console output will indicate which emulated device is plugged into which

@@ -610,7 +610,7 @@ void jgrf_input_handler(SDL_Event *event) {
             case SDL_SCANCODE_8: {
             // Want to play 12-player sports games? Hand-edit the config file.
                 if (event->type == SDL_KEYUP &&
-                    event->key.keysym.mod & (KMOD_SHIFT|KMOD_CTRL)) {
+                    (event->key.keysym.mod & KMOD_SHIFT)) {
                     confport =
                         atoi(SDL_GetScancodeName(event->key.keysym.scancode));
 
