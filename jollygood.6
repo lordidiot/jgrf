@@ -426,6 +426,20 @@ Y = j0b3
 L = j0b6
 R = j0b7
 .Ed
+.Pp
+Example
+.Pa cheats/bsnes/Super Castlevania IV (USA).json
+cheat file for the
+.Pa Super Castlevania IV (USA).sfc
+rom and the BSNES core.
+.Bd -literal -offset indent
+{"cheats":[
+  {"codes":["DD24-AFD7"], "enabled":true, "desc":"Fully Powered Up Whip With First Power Up"},
+//  {"codes":["bbb3-d40f"], "enabled":true, "desc":"99 Hearts"}
+//  {"codes":["0094EAFF"], "enabled":true, "desc":"1st heart = 99 Hearts"},
+  {"codes":["028005=80"], "enabled":true, "desc":"Stop Timer"}
+]}
+.Ed
 .Sh AUTHORS
 .An -nosplit
 The Jolly Good API and Reference Frontend was written by
