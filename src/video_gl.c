@@ -305,8 +305,8 @@ static void jgrf_video_gl_refresh(void) {
 
     // Resize the offscreen texture
     glBindTexture(GL_TEXTURE_2D, texGame);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax, 0,
-        pixfmt.format, pixfmt.type, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->wmax, vidinfo->hmax,
+        0, pixfmt.format, pixfmt.type, NULL);
 
     // Set row length
     glUseProgram(shaderProgram);
@@ -315,8 +315,8 @@ static void jgrf_video_gl_refresh(void) {
     // Resize the output texture
     glUseProgram(shaderProgram_out);
     glBindTexture(GL_TEXTURE_2D, texOutput);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->w, vidinfo->h, 0,
-        pixfmt.format, pixfmt.type, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->w, vidinfo->h,
+        0, pixfmt.format, pixfmt.type, NULL);
 
     // Update uniforms for post-processing
     glUniform4f(glGetUniformLocation(shaderProgram_out, "sourceSize"),
@@ -873,7 +873,7 @@ void jgrf_video_gl_setup_compat(void) {
     glBindTexture(GL_TEXTURE_2D, texGame);
 
     // The full sized source image before any clipping
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax,
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->wmax, vidinfo->hmax,
         0, pixfmt.format, pixfmt.type, vidinfo->buf);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
