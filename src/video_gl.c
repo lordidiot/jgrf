@@ -862,8 +862,10 @@ void jgrf_video_gl_setup_compat(void) {
             texfilter_in = GL_LINEAR;
             break;
         default:
+            texfilter_in = GL_LINEAR;
             jgrf_log(JG_LOG_WRN, "Post-processing shaders are not available in "
                 "OpenGL Compatibility Profile, defaulting to Linear\n");
+            break;
     }
 
     // Generate texture for raw game output
