@@ -249,17 +249,21 @@ The file must be formatted as such:
 The format for the cheat codes is different for each system, and some systems
 support multiple types of codes.
 All codes are represented as JSON strings.
-.Ss ENVIRONMENT VARIABLES
+.Sh ENVIRONMENT
 .Nm
 supports the following environment variables.
 .Pp
 .Bl -tag -width <TAB><TAB><TAB> -offset indent -compact
 .It Ev XDG_CONFIG_HOME
-XDG base directory.
-.D1 Default: Pa $HOME/.config/jollygood/ .
+The XDG base directory.
+This is the path is used to find the frontend and core configuration files.
+Set by default to
+.Pa $HOME/.config/jollygood/ .
 .It Ev XDG_DATA_HOME
-Directory for user-specific data files.
-.D1 Default: Pa $HOME/.local/share/jollygood/ .
+The directory for user-specific data files.
+This path is used to find data files used by the cores.
+Set by default to
+.Pa $HOME/.local/share/jollygood/ .
 .El
 .Sh OPTIONS
 A summary of the options is included below.
