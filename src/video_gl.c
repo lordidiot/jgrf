@@ -520,35 +520,40 @@ void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
 
     // Also set the GL pixel format at this time
     switch (vidinfo->pixfmt) {
-        case JG_PIXFMT_XRGB8888:
+        case JG_PIXFMT_XRGB8888: {
             pixfmt.format = GL_BGRA;
             pixfmt.type = GL_UNSIGNED_BYTE;
             pixfmt.size = sizeof(uint32_t);
             jgrf_log(JG_LOG_DBG, "Pixel format: GL_UNSIGNED_BYTE\n");
             break;
-        case JG_PIXFMT_XBGR8888:
+        }
+        case JG_PIXFMT_XBGR8888: {
             pixfmt.format = GL_RGBA;
             pixfmt.type = GL_UNSIGNED_BYTE;
             pixfmt.size = sizeof(uint32_t);
             jgrf_log(JG_LOG_DBG, "Pixel format: GL_UNSIGNED_BYTE\n");
             break;
-        case JG_PIXFMT_RGB5551:
+        }
+        case JG_PIXFMT_RGB5551: {
             pixfmt.format = GL_RGBA;
             pixfmt.type = GL_UNSIGNED_SHORT_5_5_5_1;
             pixfmt.size = sizeof(uint16_t);
             jgrf_log(JG_LOG_DBG,
                 "Pixel format: GL_UNSIGNED_SHORT_5_5_5_1\n");
             break;
-        case JG_PIXFMT_RGB565:
+        }
+        case JG_PIXFMT_RGB565: {
             pixfmt.format = GL_RGB;
             pixfmt.type = GL_UNSIGNED_SHORT_5_6_5;
             pixfmt.size = sizeof(uint16_t);
             jgrf_log(JG_LOG_DBG,
                 "Pixel format: GL_UNSIGNED_SHORT_5_6_5\n");
             break;
-        default:
+        }
+        default: {
             jgrf_log(JG_LOG_ERR, "Unknown pixel format, exiting...\n");
             break;
+        }
     }
 }
 
@@ -685,37 +690,44 @@ static void jgrf_video_gl_shader_setup(void) {
     glUniform1i(glGetUniformLocation(shaderProgram, "source"), 0);
 
     switch (settings->video_shader.val) {
-        default: case 0: // Nearest Neighbour
+        default: case 0: { // Nearest Neighbour
             shaderProgram_out =
                 jgrf_video_gl_prog_create("default.vs", "default.fs");
             break;
-        case 1: // Linear
+        }
+        case 1: { // Linear
             shaderProgram_out =
                 jgrf_video_gl_prog_create("default.vs", "default.fs");
             texfilter_out = GL_LINEAR;
             break;
-        case 2: // Sharp Bilinear
+        }
+        case 2: { // Sharp Bilinear
             shaderProgram_out =
                 jgrf_video_gl_prog_create("default.vs", "sharp-bilinear.fs");
             texfilter_in = GL_LINEAR;
             texfilter_out = GL_LINEAR;
             break;
-        case 3: // AANN
+        }
+        case 3: { // AANN
             shaderProgram_out =
                 jgrf_video_gl_prog_create("default.vs", "aann.fs");
             break;
-        case 4: // CRT-Bespoke
+        }
+        case 4: { // CRT-Bespoke
             shaderProgram_out =
                 jgrf_video_gl_prog_create("default.vs", "crt-bespoke.fs");
             break;
-        case 5: // CRTea
+        }
+        case 5: { // CRTea
             shaderProgram_out =
                 jgrf_video_gl_prog_create("default.vs", "crtea.fs");
             break;
-        case 6: // LCD
+        }
+        case 6: { // LCD
             shaderProgram_out =
                 jgrf_video_gl_prog_create("default.vs", "lcd.fs");
             break;
+        }
     }
 
     // Set texture parameters for input texture
@@ -756,24 +768,29 @@ static void jgrf_video_gl_shader_setup(void) {
         tcurve = settings->video_crtea_tcurve.val;
 
     switch (settings->video_crtea_mode.val) {
-        default: case 0: // Scanlines
+        default: case 0: { // Scanlines
             masktype = 0; maskstr = 0; scanstr = 10; sharpness = 10;
             break;
-        case 1: // Aperture Grille Lite
+        }
+        case 1: { // Aperture Grille Lite
             masktype = 1; maskstr = 5; scanstr = 6; sharpness = 7;
             break;
-        case 2: // Aperture Grille
+        }
+        case 2: { // Aperture Grille
             masktype = 2; maskstr = 5; scanstr = 6; sharpness = 7;
             break;
-        case 3: // Shadow Mask
+        }
+        case 3: { // Shadow Mask
             masktype = 3; maskstr = 5; scanstr = 2; sharpness = 4;
             break;
-        case 4: // Custom
+        }
+        case 4: { // Custom
             masktype = settings->video_crtea_masktype.val;
             maskstr = settings->video_crtea_maskstr.val;
             scanstr = settings->video_crtea_scanstr.val;
             sharpness = settings->video_crtea_sharpness.val;
             break;
+        }
     }
     glUniform1i(glGetUniformLocation(shaderProgram_out, "masktype"),
         masktype);
@@ -855,17 +872,20 @@ void jgrf_video_gl_setup(void) {
 // Set up OpenGL - Compatibility Profile
 void jgrf_video_gl_setup_compat(void) {
     switch (settings->video_shader.val) {
-        case 0: // Nearest Neighbour
+        case 0: { // Nearest Neighbour
             texfilter_in = GL_NEAREST;
             break;
-        case 1: // Linear
+        }
+        case 1: { // Linear
             texfilter_in = GL_LINEAR;
             break;
-        default:
+        }
+        default: {
             texfilter_in = GL_LINEAR;
             jgrf_log(JG_LOG_WRN, "Post-processing shaders are not available in "
                 "OpenGL Compatibility Profile, defaulting to Linear\n");
             break;
+        }
     }
 
     // Generate texture for raw game output
