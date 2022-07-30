@@ -190,7 +190,7 @@ The General Settings configuration file accepts the following sections.
 .Bl -tag -width <TAB><TAB> -offset indent -compact
 .It Ic [video]
 .Bl -tag -width <TAB> -offset indent -compact
-.It Ic api = Aq Cm 0-1
+.It Ic api = Aq Cm 0-2
 Video Driver Profile
 .Aq Default: 0
 .D1 0 = OpenGL Core Profile
@@ -346,7 +346,7 @@ configuration file for the
 frontend.
 .Bd -literal -offset indent
 [video]
-; 0 = OpenGL Core Profile, 1 = OpenGL Compatibility Profile
+; 0 = OpenGL Core Profile, 1 = OpenGL ES, 2 = OpenGL Compatibility Profile
 api = 0
 
 ;N = Scale video output by N
