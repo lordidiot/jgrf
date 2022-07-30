@@ -827,7 +827,7 @@ void jgrf_video_gl_setup(void) {
     glBindTexture(GL_TEXTURE_2D, texGame);
 
     // The full sized source image before any clipping
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->wmax, vidinfo->hmax,
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->wmax, vidinfo->hmax,
         0, pixfmt.format, pixfmt.type, vidinfo->buf);
 
     // Create framebuffer
@@ -840,7 +840,7 @@ void jgrf_video_gl_setup(void) {
     glBindTexture(GL_TEXTURE_2D, texOutput);
 
     // The framebuffer texture that is being rendered to offscreen, after clip
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, vidinfo->w, vidinfo->h, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->w, vidinfo->h, 0,
         pixfmt.format, pixfmt.type, NULL);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
