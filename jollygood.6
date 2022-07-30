@@ -39,6 +39,46 @@
 .Sh DESCRIPTION
 The Jolly Good Reference Frontend is the simplest possible frontend for The
 Jolly Good API.
+It is intended to remain this way, and to avoid unnecessary feature creep,
+ensuring that it is easy to learn from.
+In order to deliver a smooth and enjoyable experience, a few slightly more
+advanced features are required.
+In these instances, effort has been taken to ensure readability and
+understandability of the code that implements these concepts.
+.Pp
+The options are as follows:
+.Bl -tag -width indent
+.It Fl a , -video Ar value
+Specify which Video API to use.
+.D1 0 = OpenGL Core Profile
+.D1 1 = OpenGL Compatibility Profile
+.It Fl b , -bmark Ar frames
+Run N frames in Benchmark mode.
+.It Fl c , -core Ar corename
+Specify which core to use.
+.It Fl f , -fullscreen
+Start in Fullscreen mode.
+.It Fl h , -help
+Show Usage.
+.It Fl o , -wave Ar file
+.It Fl r , -rsqual Ar value
+Resampler Quality (0 to 10).
+.It Fl s , -shader Ar value
+Select a Post-processing shader.
+.D1 0 = Nearest Neighbour (None)
+.D1 1 = Linear
+.D1 2 = Sharp Bilinear
+.D1 3 = Anti-Aliased Nearest Neighbour
+.D1 4 = CRT-Bespoke
+.D1 5 = CRTea
+.D1 6 = LCD
+.It Fl v , -verbose
+Enable verbose log output for core and frontend.
+.It Fl w , -window
+Start in Windowed mode.
+.It Fl x , -scale Ar value
+Video Scale Factor (1 to 8).
+.El
 .Ss CONFIGURATION FILES
 Configuration files are located in
 .Pa $XDG_CONFIG_HOME/jollygood/ .
@@ -249,51 +289,21 @@ The file must be formatted as such:
 The format for the cheat codes is different for each system, and some systems
 support multiple types of codes.
 All codes are represented as JSON strings.
-.Ss ENVIRONMENT VARIABLES
+.Sh ENVIRONMENT
 .Nm
 supports the following environment variables.
 .Pp
 .Bl -tag -width <TAB><TAB><TAB> -offset indent -compact
 .It Ev XDG_CONFIG_HOME
-XDG base directory.
-.D1 Default: Pa $HOME/.config/jollygood/ .
+The XDG base directory.
+This is the path is used to find the frontend and core configuration files.
+Set by default to
+.Pa $HOME/.config/jollygood/ .
 .It Ev XDG_DATA_HOME
-Directory for user-specific data files.
-.D1 Default: Pa $HOME/.local/share/jollygood/ .
-.El
-.Sh OPTIONS
-A summary of the options is included below.
-.Bl -tag -width indent
-.It Fl a , -video Ar value
-Specify which Video API to use.
-.D1 0 = OpenGL Core Profile
-.D1 1 = OpenGL Compatibility Profile
-.It Fl b , -bmark Ar frames
-Run N frames in Benchmark mode.
-.It Fl c , -core Ar corename
-Specify which core to use.
-.It Fl f , -fullscreen
-Start in Fullscreen mode.
-.It Fl h , -help
-Show Usage.
-.It Fl o , -wave Ar file
-.It Fl r , -rsqual Ar value
-Resampler Quality (0 to 10).
-.It Fl s , -shader Ar value
-Select a Post-processing shader.
-.D1 0 = Nearest Neighbour (None)
-.D1 1 = Linear
-.D1 2 = Sharp Bilinear
-.D1 3 = Anti-Aliased Nearest Neighbour
-.D1 4 = CRT-Bespoke
-.D1 5 = CRTea
-.D1 6 = LCD
-.It Fl v , -verbose
-Enable verbose log output for core and frontend.
-.It Fl w , -window
-Start in Windowed mode.
-.It Fl x , -scale Ar value
-Video Scale Factor (1 to 8).
+The directory for user-specific data files.
+This path is used to find data files used by the cores.
+Set by default to
+.Pa $HOME/.local/share/jollygood/ .
 .El
 .Sh EXAMPLES
 .Bl -tag -width indent
@@ -415,6 +425,20 @@ X = j0b0
 Y = j0b3
 L = j0b6
 R = j0b7
+.Ed
+.Pp
+Example
+.Pa cheats/bsnes/Super Castlevania IV (USA).json
+cheat file for the
+.Pa Super Castlevania IV (USA).sfc
+rom and the BSNES core.
+.Bd -literal -offset indent
+{"cheats":[
+  {"codes":["DD24-AFD7"], "enabled":true, "desc":"Fully Powered Up Whip With First Power Up"},
+//  {"codes":["bbb3-d40f"], "enabled":true, "desc":"99 Hearts"}
+//  {"codes":["0094EAFF"], "enabled":true, "desc":"1st heart = 99 Hearts"},
+  {"codes":["028005=80"], "enabled":true, "desc":"Stop Timer"}
+]}
 .Ed
 .Sh AUTHORS
 .An -nosplit
