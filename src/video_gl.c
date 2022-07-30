@@ -532,12 +532,12 @@ void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
             pixfmt.size = sizeof(uint32_t);
             jgrf_log(JG_LOG_DBG, "Pixel format: GL_UNSIGNED_BYTE\n");
             break;
-        case JG_PIXFMT_RGB1555:
-            pixfmt.format = GL_BGRA;
-            pixfmt.type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+        case JG_PIXFMT_RGB5551:
+            pixfmt.format = GL_RGBA;
+            pixfmt.type = GL_UNSIGNED_SHORT_5_5_5_1;
             pixfmt.size = sizeof(uint16_t);
             jgrf_log(JG_LOG_DBG,
-                "Pixel format: GL_UNSIGNED_SHORT_1_5_5_5_REV\n");
+                "Pixel format: GL_UNSIGNED_SHORT_5_5_5_1\n");
             break;
         case JG_PIXFMT_RGB565:
             pixfmt.format = GL_RGB;
