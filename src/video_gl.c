@@ -86,9 +86,10 @@ static GLfloat vertices_out[] = {
 // Pixel Format
 static struct pixfmt {
     GLuint format;
+    GLuint format_internal;
     GLuint type;
     size_t size;
-} pixfmt = { GL_BGRA, GL_UNSIGNED_BYTE, sizeof(uint32_t) };
+} pixfmt = { GL_BGRA, GL_RGBA, GL_UNSIGNED_BYTE, sizeof(uint32_t) };
 
 // Dimensions
 static struct dimensions {
@@ -305,8 +306,8 @@ static void jgrf_video_gl_refresh(void) {
 
     // Resize the offscreen texture
     glBindTexture(GL_TEXTURE_2D, texGame);
-    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->wmax, vidinfo->hmax,
-        0, pixfmt.format, pixfmt.type, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
+        vidinfo->wmax, vidinfo->hmax, 0, pixfmt.format, pixfmt.type, NULL);
 
     // Set row length
     glUseProgram(shaderProgram);
@@ -315,8 +316,8 @@ static void jgrf_video_gl_refresh(void) {
     // Resize the output texture
     glUseProgram(shaderProgram_out);
     glBindTexture(GL_TEXTURE_2D, texOutput);
-    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->w, vidinfo->h,
-        0, pixfmt.format, pixfmt.type, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
+        vidinfo->w, vidinfo->h, 0, pixfmt.format, pixfmt.type, NULL);
 
     // Update uniforms for post-processing
     glUniform4f(glGetUniformLocation(shaderProgram_out, "sourceSize"),
@@ -522,6 +523,7 @@ void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
     switch (vidinfo->pixfmt) {
         case JG_PIXFMT_XRGB8888: {
             pixfmt.format = GL_BGRA;
+            pixfmt.format_internal = GL_RGBA;
             pixfmt.type = GL_UNSIGNED_BYTE;
             pixfmt.size = sizeof(uint32_t);
             jgrf_log(JG_LOG_DBG, "Pixel format: GL_UNSIGNED_BYTE\n");
@@ -529,6 +531,7 @@ void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
         }
         case JG_PIXFMT_XBGR8888: {
             pixfmt.format = GL_RGBA;
+            pixfmt.format_internal = GL_RGBA;
             pixfmt.type = GL_UNSIGNED_BYTE;
             pixfmt.size = sizeof(uint32_t);
             jgrf_log(JG_LOG_DBG, "Pixel format: GL_UNSIGNED_BYTE\n");
@@ -536,6 +539,7 @@ void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
         }
         case JG_PIXFMT_RGB5551: {
             pixfmt.format = GL_RGBA;
+            pixfmt.format_internal = GL_RGBA;
             pixfmt.type = GL_UNSIGNED_SHORT_5_5_5_1;
             pixfmt.size = sizeof(uint16_t);
             jgrf_log(JG_LOG_DBG,
@@ -544,6 +548,7 @@ void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
         }
         case JG_PIXFMT_RGB565: {
             pixfmt.format = GL_RGB;
+            pixfmt.format_internal = GL_RGB;
             pixfmt.type = GL_UNSIGNED_SHORT_5_6_5;
             pixfmt.size = sizeof(uint16_t);
             jgrf_log(JG_LOG_DBG,
@@ -844,8 +849,9 @@ void jgrf_video_gl_setup(void) {
     glBindTexture(GL_TEXTURE_2D, texGame);
 
     // The full sized source image before any clipping
-    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->wmax, vidinfo->hmax,
-        0, pixfmt.format, pixfmt.type, vidinfo->buf);
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
+        vidinfo->wmax, vidinfo->hmax, 0, pixfmt.format, pixfmt.type,
+        vidinfo->buf);
 
     // Create framebuffer
     glGenFramebuffers(1, &frameBuffer);
@@ -857,8 +863,8 @@ void jgrf_video_gl_setup(void) {
     glBindTexture(GL_TEXTURE_2D, texOutput);
 
     // The framebuffer texture that is being rendered to offscreen, after clip
-    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->w, vidinfo->h, 0,
-        pixfmt.format, pixfmt.type, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
+        vidinfo->w, vidinfo->h, 0, pixfmt.format, pixfmt.type, NULL);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
         texOutput, 0);
@@ -895,8 +901,9 @@ void jgrf_video_gl_setup_compat(void) {
     glBindTexture(GL_TEXTURE_2D, texGame);
 
     // The full sized source image before any clipping
-    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format, vidinfo->wmax, vidinfo->hmax,
-        0, pixfmt.format, pixfmt.type, vidinfo->buf);
+    glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
+        vidinfo->wmax, vidinfo->hmax, 0, pixfmt.format, pixfmt.type,
+        vidinfo->buf);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
