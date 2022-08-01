@@ -24,6 +24,7 @@ void memset_pattern4(void *__b, const void *__pattern4, size_t __len);
 #include "jgrf.h"
 #include "audio.h"
 #include "cli.h"
+#include "input.h"
 #include "settings.h"
 #include "wave_writer.h"
 
@@ -34,16 +35,24 @@ static jgrf_gdata_t *gdata = NULL;
 // Pointer to audio information from the emulator core
 static jg_audioinfo_t *audinfo = NULL;
 
+// Audio Output
 static SDL_AudioSpec spec, obtained;
 static SDL_AudioDeviceID dev;
 
+// Audio Input
+static SDL_AudioSpec spec_in, obtained_in;
+static SDL_AudioDeviceID dev_in;
+
+// Speex Resampler
 static SpeexResamplerState *resampler = NULL;
 static int err;
 
+// Wave Writer
 static wave_writer *ww;
 static wave_writer_format wwformat;
 static wave_writer_error wwerror;
 
+// Buffers for audio samples
 static void *corebuf = NULL; // Audio buffer for the core
 static int16_t *rsbuf = NULL; // Buffer for audio data to be resampled
 static int16_t *outbuf = NULL; // Buffer for final output samples
@@ -258,9 +267,16 @@ static void jgrf_audio_cb_waveout(void *userdata, uint8_t *stream, int len) {
         (void*)stream);
 }
 
+// SDL Audio Callback for Captured audio samples to be input into the core
+static void jgrf_audio_cb_input(void *userdata, uint8_t *stream, int len) {
+    if (userdata) {}
+    jgrf_input_audio(0, (const int16_t*)stream, len / sizeof(int16_t));
+}
+
 // Initialize the audio device and allocate buffers
 int jgrf_audio_init(void) {
     settings_t *settings = jgrf_get_settings();
+    gdata = jgrf_gdata_ptr();
 
     // Set up Wave Writer
     if (waveout) {
@@ -269,6 +285,17 @@ int jgrf_audio_init(void) {
         wwformat.sample_bits = 16;
         ww = wave_writer_open(jgrf_cli_wave(), &wwformat, &wwerror);
     }
+
+    // Discover any audio recording devices
+    int miccount = SDL_GetNumAudioDevices(1);
+    char micname[128];
+
+    /* Set the name of the device to record from to the last in the list. This
+       is probably the one you want, especially if you've plugged in a USB
+       microphone or headset.
+    */
+    for (int i = 0; i < miccount; ++i)
+        snprintf(micname, sizeof(micname), "%s", SDL_GetAudioDeviceName(i, 1));
 
     spec.channels = audinfo->channels;
     spec.freq = audinfo->rate;
@@ -286,6 +313,23 @@ int jgrf_audio_init(void) {
     dev = SDL_OpenAudioDevice(NULL, 0, &spec, &obtained,
         SDL_AUDIO_ALLOW_ANY_CHANGE);
 
+    // Set up Audio Capture capabilities
+    if (gdata->hints & JG_HINT_INPUT_AUDIO && miccount) {
+        spec_in.channels = 1;
+        spec_in.freq = 48000;
+        spec_in.silence = 0;
+        spec_in.samples = 512;
+        spec_in.userdata = 0;
+        #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        spec_in.format = AUDIO_S16MSB;
+        #else
+        spec_in.format = AUDIO_S16LSB;
+        #endif
+        spec_in.callback = jgrf_audio_cb_input;
+        dev_in = SDL_OpenAudioDevice(micname, 1,
+            &spec_in, &obtained_in, SDL_AUDIO_ALLOW_ANY_CHANGE);
+    }
+
     // Set up the Resampler
     resampler = speex_resampler_init(audinfo->channels,
         audinfo->rate, audinfo->rate, settings->audio_rsqual.val, &err);
@@ -295,6 +339,9 @@ int jgrf_audio_init(void) {
             spec.channels == 1 ? "Mono" : "Stereo", settings->audio_rsqual.val);
     else
         jgrf_log(JG_LOG_WRN, "Audio: Error opening audio device.\n");
+
+    if (dev_in)
+        jgrf_log(JG_LOG_INF, "Audio Capture: %s\n", micname);
 
     // Seed the moving averages
     jgrf_audio_mavg_seed(&mavg_in, audinfo->spf);
@@ -306,8 +353,6 @@ int jgrf_audio_init(void) {
     req.tv_nsec = 100000; // 1/10th of a millisecond
 
     // Allocate audio buffers
-    gdata = jgrf_gdata_ptr();
-
     size_t bufsize = audinfo->spf * sizeof(int16_t) * 4;
 
     if (!(gdata->hints & JG_HINT_AUDIO_INTERNAL))
@@ -326,6 +371,8 @@ int jgrf_audio_init(void) {
     audinfo->buf = corebuf;
 
     SDL_PauseAudioDevice(dev, 1); // Setting to 0 unpauses
+    if (dev_in)
+        SDL_PauseAudioDevice(dev_in, 1); // Setting to 0 unpauses
 
     return 1;
 }
@@ -333,12 +380,15 @@ int jgrf_audio_init(void) {
 // Unpause the audio device
 void jgrf_audio_unpause(void) {
     SDL_PauseAudioDevice(dev, 0);
+    if (dev_in)
+        SDL_PauseAudioDevice(dev_in, 0);
 }
 
 // Deinitialize the audio device and free buffers
 void jgrf_audio_deinit() {
     if (waveout) wave_writer_close(ww, &wwerror);
     if (dev) SDL_CloseAudioDevice(dev);
+    if (dev_in) SDL_CloseAudioDevice(dev_in);
     if (resampler) speex_resampler_destroy(resampler);
 
     if (!(gdata->hints & JG_HINT_AUDIO_INTERNAL))

@@ -56,6 +56,7 @@ static struct _jgapi {
     void (*jg_cheat_clear)(void);
     void (*jg_cheat_set)(const char *);
     void (*jg_rehash)(void);
+    void (*jg_input_audio)(int, const int16_t*, size_t);
     // Callback Setup
     void (*jg_set_cb_log)(jg_cb_log_t);
     void (*jg_set_cb_audio)(jg_cb_audio_t);
@@ -263,6 +264,7 @@ static void jgrf_core_load(const char *corepath) {
     *(void**)(&jgapi.jg_cheat_clear) = dlsym(jgapi.handle, "jg_cheat_clear");
     *(void**)(&jgapi.jg_cheat_set) = dlsym(jgapi.handle, "jg_cheat_set");
     *(void**)(&jgapi.jg_rehash) = dlsym(jgapi.handle, "jg_rehash");
+    *(void**)(&jgapi.jg_input_audio) = dlsym(jgapi.handle, "jg_input_audio");
 
     *(void**)(&jgapi.jg_get_coreinfo) = dlsym(jgapi.handle,
         "jg_get_coreinfo");
@@ -1094,6 +1096,10 @@ int main(int argc, char *argv[]) {
     // Initialize audio output
     loaded.audio = jgrf_audio_init();
     jgapi.jg_setup_audio();
+
+    // Initialize audio capture
+    if (gdata.hints & JG_HINT_INPUT_AUDIO)
+        jgrf_input_set_audio(jgapi.jg_input_audio);
 
     // Initialize input
     loaded.input = jgrf_input_init();
