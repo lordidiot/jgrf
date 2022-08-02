@@ -49,12 +49,15 @@ static struct _jgapi {
     void (*jg_exec_frame)(void);
     int (*jg_game_load)(void);
     int (*jg_game_unload)(void);
-    int (*jg_state_load)(const char *);
-    int (*jg_state_save)(const char *);
+    int (*jg_state_load)(const char*);
+    void (*jg_state_load_raw)(const void*);
+    int (*jg_state_save)(const char*);
+    const void* (*jg_state_save_raw)(void);
+    size_t (*jg_state_size)(void);
     void (*jg_media_select)(void);
     void (*jg_media_insert)(void);
     void (*jg_cheat_clear)(void);
-    void (*jg_cheat_set)(const char *);
+    void (*jg_cheat_set)(const char*);
     void (*jg_rehash)(void);
     void (*jg_input_audio)(int, const int16_t*, size_t);
     // Callback Setup
@@ -63,7 +66,7 @@ static struct _jgapi {
     void (*jg_set_cb_frametime)(jg_cb_frametime_t);
     void (*jg_set_cb_rumble)(jg_cb_rumble_t);
     // Retrieve "info" structs from the core
-    jg_coreinfo_t* (*jg_get_coreinfo)(const char *);
+    jg_coreinfo_t* (*jg_get_coreinfo)(const char*);
     jg_videoinfo_t* (*jg_get_videoinfo)(void);
     jg_audioinfo_t* (*jg_get_audioinfo)(void);
     jg_inputinfo_t* (*jg_get_inputinfo)(int);
@@ -258,7 +261,12 @@ static void jgrf_core_load(const char *corepath) {
     *(void**)(&jgapi.jg_game_load) = dlsym(jgapi.handle, "jg_game_load");
     *(void**)(&jgapi.jg_game_unload) = dlsym(jgapi.handle, "jg_game_unload");
     *(void**)(&jgapi.jg_state_load) = dlsym(jgapi.handle, "jg_state_load");
+    *(void**)(&jgapi.jg_state_load_raw) = dlsym(jgapi.handle,
+        "jg_state_load_raw");
     *(void**)(&jgapi.jg_state_save) = dlsym(jgapi.handle, "jg_state_save");
+    *(void**)(&jgapi.jg_state_save_raw) = dlsym(jgapi.handle,
+        "jg_state_save_raw");
+    *(void**)(&jgapi.jg_state_size) = dlsym(jgapi.handle, "jg_state_size");
     *(void**)(&jgapi.jg_media_select) = dlsym(jgapi.handle, "jg_media_select");
     *(void**)(&jgapi.jg_media_insert) = dlsym(jgapi.handle, "jg_media_insert");
     *(void**)(&jgapi.jg_cheat_clear) = dlsym(jgapi.handle, "jg_cheat_clear");
