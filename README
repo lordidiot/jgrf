@@ -14,8 +14,8 @@ You will also require pkgconf/pkg-config, and development packages for SDL2,
 SpeexDSP, and libepoxy.
 
 Options:
-  USE_VENDORED_MD5 - Set zero to use the system libcrypto
-  USE_VENDORED_MINIZ - Set zero to use the system miniz
+  USE_EXTERNAL_MD5 - Set non-zero to use an external libcrypto
+  USE_EXTERNAL_MINIZ -  Set non-zero to use an external miniz
 
 Linux:
   make

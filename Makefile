@@ -30,8 +30,8 @@ LIBDIR ?= $(PREFIX)/lib
 MANDIR ?= $(DATAROOTDIR)/man
 TARGET := jollygood
 
-USE_VENDORED_MD5 ?= 1
-USE_VENDORED_MINIZ ?= 1
+USE_EXTERNAL_MD5 ?= 0
+USE_EXTERNAL_MINIZ ?= 0
 
 UNAME := $(shell uname -s)
 
@@ -64,7 +64,7 @@ CSRCS := jgrf.c \
 	deps/tconfig.c \
 	deps/wave_writer.c
 
-ifneq ($(USE_VENDORED_MD5), 0)
+ifeq ($(USE_EXTERNAL_MD5), 0)
 	CFLAGS_MD5 :=
 	LIBS_MD5 :=
 	CSRCS += deps/md5.c
@@ -74,7 +74,7 @@ else
 	LIBS_MD5 := $(shell $(PKG_CONFIG) --libs libcrypto)
 endif
 
-ifneq ($(USE_VENDORED_MINIZ), 0)
+ifeq ($(USE_EXTERNAL_MINIZ), 0)
 	Q_MINIZ :=
 	CFLAGS_MINIZ := -I$(SOURCEDIR)/deps/miniz
 	LIBS_MINIZ :=
