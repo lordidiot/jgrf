@@ -125,7 +125,7 @@ $(TARGET): $(OBJS)
 	$(CC) $^ $(LDFLAGS) $(LIBS) -o $@
 
 clean:
-	rm -rf $(OBJDIR)/ $(TARGET)
+	rm -rf $(OBJDIR) $(TARGET)
 
 install: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
