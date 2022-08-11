@@ -102,7 +102,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
     gdata->filename = argv[argc - 1];
 
     // Count the number of auxiliary files
-    gdata->numauxfiles = argc - optend - 1;
+    gdata->numauxfiles = (unsigned)argc - optend - 1;
     if (gdata->numauxfiles > JGRF_AUXFILE_MAX)
         gdata->numauxfiles = JGRF_AUXFILE_MAX;
 
@@ -143,8 +143,8 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                         "WAV Writer: Refusing to overwrite %s!\n", wavfile);
                 }
                 else {
-                    jgrf_log(JG_LOG_WRN, "WAV Writer: Writing WAV to %s\n",
-                        wavfile);
+                    jgrf_log(JG_LOG_WRN,
+                        "WAV Writer: Writing WAV to %s\n", wavfile);
                     waveout = 1;
                 }
                 break;
