@@ -160,9 +160,9 @@ void jgrf_video_gl_create(void) {
         jgrf_log(JG_LOG_ERR, "Failed to create window: %s\n", SDL_GetError());
 
     // Store the DPI scale
-    int xdpi;
-    SDL_GL_GetDrawableSize(window, &xdpi, NULL);
-    dimensions.dpiscale = (float)xdpi/dimensions.ww;
+    int x, y;
+    SDL_GL_GetDrawableSize(window, &x, &y);
+    dimensions.dpiscale = (float)x/dimensions.ww;
 
     jgrf_video_icon_load(window);
 
