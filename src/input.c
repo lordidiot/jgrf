@@ -73,11 +73,9 @@ static int16_t undef16;
 static ini_table_s *iconf;
 static int confactive = 0;
 static int confchanged = 0;
-static int confbtnactive = 0;
-static int confhatactive = 0;
 static int confindex = 0;
 static int confport = 0;
-static int axis = 0, axisnoise = 0;
+static uint64_t conftimer = 0;
 
 // Map a core input axis definition
 void jgrf_input_map_axis(int index, uint32_t dnum, const char* value) {
@@ -90,6 +88,8 @@ void jgrf_input_map_axis(int index, uint32_t dnum, const char* value) {
             rumblemap[inum] = index; // Synchronize force feedback with axes
         }
     }
+
+    conftimer = SDL_GetTicks64();
 }
 
 // Map a core input button definition
@@ -126,6 +126,8 @@ void jgrf_input_map_button(int index, uint32_t dnum, const char* value) {
         kbmap.key[knum] = &(coreinput[index].button[dnum]);
         *kbmap.key[knum] = 0;
     }
+
+    conftimer = SDL_GetTicks64();
 }
 
 // Read an input config file and assign inputs
@@ -233,17 +235,6 @@ void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
             jgrf_video_set_cursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
         }
     }
-
-    // Handle analog input seed values - fixes trigger input values at startup
-    for (int i = 0; i < SDL_NumJoysticks(); ++i) {
-        for (int j = 0; j < SDL_JoystickNumAxes(joystick[i]); ++j) {
-            int16_t aval = SDL_JoystickGetAxis(joystick[i], j);
-            if (aval <= -(DEADZONE)) {
-                *jsmap[i].axis[j] = aval;
-                trigger[i] |= 1 << j; // it's a trigger
-            }
-        }
-    }
 }
 
 // Pass function pointer to input audio samples into the core
@@ -273,13 +264,13 @@ static inline void jgrf_input_coords_scaled(int32_t x, int32_t y,
 static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
     if (confindex >= (iinfo->numaxes + iinfo->numbuttons)) {
         confactive = 0; // Turn off input config mode
-        confbtnactive = 0;
-        confhatactive = 0;
         jgrf_video_text(2, 0, ""); // Disable display of input config info
         return;
     }
-    else
+    else {
         confactive = 1;
+        conftimer = SDL_GetTicks64();
+    }
 
     // Display input config information on screen
     if (iinfo->name) {
@@ -328,21 +319,12 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             jgrf_inputcfg(inputinfo[confport]);
             break;
         }
-        case SDL_JOYBUTTONUP: {
-            confbtnactive = 0; // Set "button active" flag off
-            break;
-        }
         case SDL_JOYBUTTONDOWN: {
             if (confindex < inputinfo[confport]->numaxes) {
                 jgrf_log(JG_LOG_WRN, "Trying to assign digital inputs to axes"
                     " is a losing endeavour. ESC to skip.\n");
                 break;
             }
-
-            /* Set the "button active" flag so that axis input associated with
-               the button can be ignored
-            */
-            confbtnactive = 1;
 
             SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jbutton.which);
             int port = SDL_JoystickGetPlayerIndex(js);
@@ -361,12 +343,6 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             break;
         }
         case SDL_JOYAXISMOTION: {
-            /* Some gamepads report button + axis or hat + axis for the same
-               input. Do not assign axis input for these cases.
-            */
-            if (confbtnactive || confhatactive)
-                break;
-
             SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jaxis.which);
             int port = SDL_JoystickGetPlayerIndex(js);
 
@@ -375,13 +351,6 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                 // Axes set to axis input
                 if (confindex < inputinfo[confport]->numaxes) {
                     if (event->jaxis.value >= BDEADZONE) {
-                        axisnoise = 1;
-                        axis = event->jaxis.axis;
-                    }
-                    else if (event->jaxis.value < -(BDEADZONE) && axisnoise &&
-                        event->jaxis.axis == axis) {
-                        axisnoise = 0;
-
                         snprintf(defbuf, sizeof(defbuf), "j%da%d",
                             event->jaxis.which, event->jaxis.axis);
 
@@ -396,13 +365,6 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                 }
                 else { // Axes set to button input
                     if (event->jaxis.value >= BDEADZONE) {
-                        axisnoise = 1;
-                        axis = event->jaxis.axis;
-                    }
-                    else if (event->jaxis.value < -(BDEADZONE) && axisnoise &&
-                        event->jaxis.axis == axis) {
-                        axisnoise = 0;
-
                         snprintf(defbuf, sizeof(defbuf), "j%da%d+",
                             event->jaxis.which, event->jaxis.axis);
 
@@ -422,13 +384,6 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                 // Axes set to axis input
                 if (confindex < inputinfo[confport]->numaxes) {
                     if (abs(event->jaxis.value) >= BDEADZONE) {
-                        axisnoise = 1;
-                        axis = event->jaxis.axis;
-                    }
-                    else if (abs(event->jaxis.value) < BDEADZONE && axisnoise &&
-                        event->jaxis.axis == axis) {
-                        axisnoise = 0;
-
                         snprintf(defbuf, sizeof(defbuf), "j%da%d",
                             port, event->jaxis.axis);
 
@@ -442,7 +397,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     }
                 }
                 else { // Axes set to button input
-                    if (!axisnoise && abs(event->jaxis.value) >= 32767) {
+                    if (abs(event->jaxis.value) >= 32767) {
                         // Handle the case of hat switches pretending to be axes
                         snprintf(defbuf, sizeof(defbuf), "j%da%d%c",
                             port, event->jaxis.axis,
@@ -460,13 +415,6 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                         break;
                     }
                     if (abs(event->jaxis.value) >= BDEADZONE) {
-                        axisnoise = 1;
-                        axis = event->jaxis.axis;
-                    }
-                    else if (abs(event->jaxis.value) < BDEADZONE && axisnoise &&
-                        event->jaxis.axis == axis) {
-                        axisnoise = 0;
-
                         snprintf(defbuf, sizeof(defbuf), "j%da%d%c",
                             port, event->jaxis.axis,
                             event->jaxis.value > 0 ? '+' : '-');
@@ -491,11 +439,6 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                     " is a losing endeavour. ESC to skip.\n");
                 break;
             }
-
-            /* Set the "hat active" flag so that axis input associated with
-               the hat switch can be ignored if necessary
-            */
-            confhatactive = event->jhat.value;
 
             SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jhat.which);
             int port = SDL_JoystickGetPlayerIndex(js);
@@ -549,7 +492,12 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
 // Main input event handler
 void jgrf_input_handler(SDL_Event *event) {
     if (confactive) {
-        jgrf_inputcfg_handler(event);
+        // Determine ticks since the last input definition was configured
+        uint64_t delta = SDL_GetTicks64() - conftimer;
+
+        // If the delta is large enough, pass the event to input config
+        if (delta > (event->type == SDL_JOYAXISMOTION ? 420 : 120))
+            jgrf_inputcfg_handler(event);
         return;
     }
     // This needs to be fixed and worked into the rest of the system one day...
@@ -723,6 +671,17 @@ void jgrf_input_handler(SDL_Event *event) {
                         SDL_HapticRumbleInit(haptic[port]) < 0 ?
                         jgrf_log(JG_LOG_DBG, "Force Feedback Enable Failed\n"):
                         jgrf_log(JG_LOG_DBG, "Force Feedback Enabled\n");
+                    }
+
+                    /* Handle analog input seed values - fixes trigger input
+                       values at startup
+                    */
+                    for (int j = 0; j < SDL_JoystickNumAxes(joystick[i]); ++j) {
+                        int16_t aval = SDL_JoystickGetAxis(joystick[i], j);
+                        if (aval <= -(DEADZONE)) {
+                            *jsmap[i].axis[j] = aval;
+                            trigger[i] |= 1 << j; // it's a trigger
+                        }
                     }
                     break;
                 }
