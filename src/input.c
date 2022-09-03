@@ -220,6 +220,63 @@ void jgrf_input_deinit(void) {
     ini_table_destroy(iconf);
 }
 
+// Handle joystick hotplug additions
+static void jgrf_input_hotplug_add(SDL_Event *event) {
+    int port = 0;
+
+    for (int i = 0; i < MAXPORTS; ++i) {
+        if (!jsports[i]) {
+            joystick[i] = SDL_JoystickOpen(event->jdevice.which);
+            SDL_JoystickSetPlayerIndex(joystick[i], i);
+            jsports[i] = 1;
+            jsiid[i] = SDL_JoystickInstanceID(joystick[i]);
+            port = i;
+
+            jgrf_log(JG_LOG_INF, "Joystick %d Connected: %s\n",
+                port + 1, SDL_JoystickName(joystick[port]));
+
+            if (SDL_JoystickIsHaptic(joystick[port])) {
+                haptic[port] =
+                    SDL_HapticOpenFromJoystick(joystick[port]);
+                SDL_HapticRumbleInit(haptic[port]) < 0 ?
+                jgrf_log(JG_LOG_DBG, "Force Feedback Enable Failed\n"):
+                jgrf_log(JG_LOG_DBG, "Force Feedback Enabled\n");
+            }
+
+            /* Handle analog input seed values - fixes trigger input
+               values at startup
+            */
+            for (int j = 0; j < SDL_JoystickNumAxes(joystick[i]); ++j) {
+                int16_t aval = SDL_JoystickGetAxis(joystick[i], j);
+                if (aval <= -(DEADZONE)) {
+                    *jsmap[i].axis[j] = aval;
+                    trigger[i] |= 1 << j; // it's a trigger
+                }
+            }
+            break;
+        }
+    }
+}
+
+// Handle joystick hotplug removals
+static void jgrf_input_hotplug_remove(SDL_Event *event) {
+    for (int i = 0; i < MAXPORTS; ++i) {
+        // If it's the one that got disconnected...
+        if (jsiid[i] == event->jdevice.which) {
+            if (SDL_JoystickIsHaptic(joystick[i]))
+                SDL_HapticClose(haptic[i]);
+
+            jsports[i] = 0; // This is unplugged
+            jgrf_log(JG_LOG_INF, "Joystick %d Disconnected\n", i + 1);
+            SDL_JoystickClose(joystick[i]);
+            joystick[i] = NULL;
+            jsports[i] = 0;
+
+            break;
+        }
+    }
+}
+
 // Retrieve inputinfo data so the frontend knows what the core has plugged in
 void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
     for(int i = 0; i < gdata->numinputs; ++i) {
@@ -486,6 +543,14 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
         default: {
             break;
         }
+        case SDL_JOYDEVICEADDED: {
+            jgrf_input_hotplug_add(event);
+            break;
+        }
+        case SDL_JOYDEVICEREMOVED: {
+            jgrf_input_hotplug_remove(event);
+            break;
+        }
     }
 }
 
@@ -670,58 +735,11 @@ void jgrf_input_handler(SDL_Event *event) {
             break;
         }
         case SDL_JOYDEVICEADDED: {
-            int port = 0;
-
-            for (int i = 0; i < MAXPORTS; ++i) {
-                if (!jsports[i]) {
-                    joystick[i] = SDL_JoystickOpen(event->jdevice.which);
-                    SDL_JoystickSetPlayerIndex(joystick[i], i);
-                    jsports[i] = 1;
-                    jsiid[i] = SDL_JoystickInstanceID(joystick[i]);
-                    port = i;
-
-                    jgrf_log(JG_LOG_INF, "Joystick %d Connected: %s\n",
-                        port + 1, SDL_JoystickName(joystick[port]));
-
-                    if (SDL_JoystickIsHaptic(joystick[port])) {
-                        haptic[port] =
-                            SDL_HapticOpenFromJoystick(joystick[port]);
-                        SDL_HapticRumbleInit(haptic[port]) < 0 ?
-                        jgrf_log(JG_LOG_DBG, "Force Feedback Enable Failed\n"):
-                        jgrf_log(JG_LOG_DBG, "Force Feedback Enabled\n");
-                    }
-
-                    /* Handle analog input seed values - fixes trigger input
-                       values at startup
-                    */
-                    for (int j = 0; j < SDL_JoystickNumAxes(joystick[i]); ++j) {
-                        int16_t aval = SDL_JoystickGetAxis(joystick[i], j);
-                        if (aval <= -(DEADZONE)) {
-                            *jsmap[i].axis[j] = aval;
-                            trigger[i] |= 1 << j; // it's a trigger
-                        }
-                    }
-                    break;
-                }
-            }
+            jgrf_input_hotplug_add(event);
             break;
         }
         case SDL_JOYDEVICEREMOVED: {
-            for (int i = 0; i < MAXPORTS; ++i) {
-                // If it's the one that got disconnected...
-                if (jsiid[i] == event->jdevice.which) {
-                    if (SDL_JoystickIsHaptic(joystick[i]))
-                        SDL_HapticClose(haptic[i]);
-
-                    jsports[i] = 0; // This is unplugged
-                    jgrf_log(JG_LOG_INF, "Joystick %d Disconnected\n", i + 1);
-                    SDL_JoystickClose(joystick[i]);
-                    joystick[i] = NULL;
-                    jsports[i] = 0;
-
-                    break;
-                }
-            }
+            jgrf_input_hotplug_remove(event);
             break;
         }
         default: {
