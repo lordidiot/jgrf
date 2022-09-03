@@ -352,7 +352,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                 if (confindex < inputinfo[confport]->numaxes) {
                     if (event->jaxis.value >= BDEADZONE) {
                         snprintf(defbuf, sizeof(defbuf), "j%da%d",
-                            event->jaxis.which, event->jaxis.axis);
+                            port, event->jaxis.axis);
 
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
                             inputinfo[confport]->defs[confindex], defbuf);
@@ -366,7 +366,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
                 else { // Axes set to button input
                     if (event->jaxis.value >= BDEADZONE) {
                         snprintf(defbuf, sizeof(defbuf), "j%da%d+",
-                            event->jaxis.which, event->jaxis.axis);
+                            port, event->jaxis.axis);
 
                         ini_table_create_entry(iconf, inputinfo[confport]->name,
                             inputinfo[confport]->defs[confindex], defbuf);
@@ -501,7 +501,9 @@ void jgrf_input_handler(SDL_Event *event) {
                from 0 and axes typically come in pairs.
                Reference: https://github.com/atar-axis/xpadneo/issues/334
             */
-            int extra = SDL_JoystickNumAxes(joystick[event->jaxis.which]) - 1;
+            SDL_Joystick *js = SDL_JoystickFromInstanceID(event->jaxis.which);
+            int port = SDL_JoystickGetPlayerIndex(js);
+            int extra = SDL_JoystickNumAxes(joystick[port]) - 1;
             if ((event->jaxis.axis == extra) && !(extra & 1))
                 return;
 
