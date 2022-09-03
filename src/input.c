@@ -492,11 +492,27 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
 // Main input event handler
 void jgrf_input_handler(SDL_Event *event) {
     if (confactive) {
+        unsigned delay = 60; // Delay consecutive inputs by 60 ticks
+        if (event->type == SDL_JOYAXISMOTION) {
+            /* In some cases, there is an extra axis which takes input from
+               two other axes (triggers), which shows up in the SDL event queue
+               before the legitimate axes. This is a hack to ignore events on
+               the extra axis, which will have an even index, since we count
+               from 0 and axes typically come in pairs.
+               Reference: https://github.com/atar-axis/xpadneo/issues/334
+            */
+            int extra = SDL_JoystickNumAxes(joystick[event->jaxis.which]) - 1;
+            if ((event->jaxis.axis == extra) && !(extra & 1))
+                return;
+
+            delay = 420; // Larger delay required for axes
+        }
+
         // Determine ticks since the last input definition was configured
         uint64_t delta = SDL_GetTicks64() - conftimer;
 
         // If the delta is large enough, pass the event to input config
-        if (delta > (event->type == SDL_JOYAXISMOTION ? 420 : 120))
+        if (delta > delay)
             jgrf_inputcfg_handler(event);
         return;
     }
