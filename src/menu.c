@@ -176,7 +176,7 @@ static void jgrf_menu_select_emu(int item) {
             jgrf_rehash();
         }
         else {
-            jgrf_log(JG_LOG_SCR, "No Emulator Settings\n");
+            jgrf_log(JG_LOG_SCR, "No Emulator Settings");
         }
     }
 }
@@ -244,7 +244,7 @@ void jgrf_menu_input_handler(SDL_Event *event) {
                 menumode = ezm.sel;
 
             switch (menumode) {
-                case FRONTEND: break;
+                case FRONTEND: jgrf_log(JG_LOG_SCR, "Unavailable"); break;
                 case EMULATOR: jgrf_menu_select_emu(ezm.sel); break;
                 case INPUT: break;
             }
