@@ -23,7 +23,7 @@
 #include "menu.h"
 
 #define DESCSIZE 256
-#define LINESIZE 64
+#define NUMLINES 64
 #define TEXTSIZE 1024
 
 enum _menumode {
@@ -43,11 +43,13 @@ typedef struct _menunode_t {
 static struct ezmenu ezm;
 
 static jg_setting_t *emusettings = NULL;
+static size_t numemusettings = 0;
+
 static menunode_t *menuroot = NULL;
 static menunode_t *menulevel = NULL;
 
 static char textbuf[TEXTSIZE]; // Buffer for all text on screen
-static char *linebuf[LINESIZE]; // 64 lines of 63 + '\0' characters
+static char *linebuf[NUMLINES]; // 64 lines of 255 + '\0' characters
 
 static int menumode = 0;
 
@@ -90,7 +92,6 @@ static void jgrf_menu_node_free(menunode_t *node) {
 // Generate the nodes for Emulator Settings
 static void jgrf_menu_emusettings_generate(menunode_t *node) {
     // Grab the emulator settings
-    size_t numemusettings = 0;
     emusettings = jgrf_settings_emu_ptr(&numemusettings);
 
     // Generate the text to be displayed
@@ -122,8 +123,8 @@ static void jgrf_menu_emusettings_generate(menunode_t *node) {
             else { // Regular nodes
                 menunode_t *setting = jgrf_menu_node_add_child(menuitem);
                 snprintf(setting->desc, DESCSIZE, "%s", token);
-                char vbuf[LINESIZE];
-                snprintf(vbuf, LINESIZE, "%s", token);
+                char vbuf[DESCSIZE];
+                snprintf(vbuf, DESCSIZE, "%s", token);
                 char *vbufptr;
                 char *vtoken = strtok_r(vbuf, " =", &vbufptr);
                 setting->value = atoi(vtoken);
@@ -139,7 +140,7 @@ static void jgrf_menu_level(void) {
     unsigned numlines = 0;
     ezmenu_setheader(&ezm, node->parent->desc);
     while (node) {
-        snprintf(linebuf[numlines++], LINESIZE, "%s", node->desc);
+        snprintf(linebuf[numlines++], DESCSIZE, "%s", node->desc);
         node = node->next;
     }
     ezmenu_setlines(&ezm, linebuf, numlines);
@@ -169,9 +170,14 @@ static void jgrf_menu_select_emu(int item) {
         menulevel = node->child;
         jgrf_menu_level();
     }
-    else { // No child, means it has a value to set
-        emusettings[node->parent->value].value = node->value;
-        jgrf_rehash();
+    else { // No child, means it has a value to set or there are no settings
+        if (numemusettings) {
+            emusettings[node->parent->value].value = node->value;
+            jgrf_rehash();
+        }
+        else {
+            jgrf_log(JG_LOG_SCR, "No Emulator Settings\n");
+        }
     }
 }
 
@@ -191,8 +197,8 @@ void jgrf_menu_display(void) {
     /*node = jgrf_menu_node_add_child(menuroot);
     snprintf(node->desc, DESCSIZE, "Map Inputs");*/
 
-    for (unsigned i = 0; i < LINESIZE; ++i)
-        linebuf[i] = (char*)calloc(LINESIZE, 1);
+    for (unsigned i = 0; i < NUMLINES; ++i)
+        linebuf[i] = (char*)calloc(DESCSIZE, 1);
 
     menulevel = menuroot->child;
     ezmenu_init(&ezm, 400, 320, 20, 24); // FIXME arbitrary values...
@@ -218,7 +224,7 @@ void jgrf_menu_input_handler(SDL_Event *event) {
             jgrf_menu_node_free(menuroot);
             jgrf_video_text(2, 0, "");
             free(ezm.vislines);
-            for (unsigned i = 0; i < LINESIZE; ++i)
+            for (unsigned i = 0; i < NUMLINES; ++i)
                 free(linebuf[i]);
             jgrf_input_menu_enable(0);
             break;
