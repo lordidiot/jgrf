@@ -36,6 +36,7 @@ typedef struct settings_t {
 settings_t *jgrf_get_settings(void);
 
 int jgrf_settings_init(void);
+jg_setting_t* jgrf_settings_emu_ptr(size_t*);
 void jgrf_settings_emu(jg_setting_t* (*)(size_t*));
 void jgrf_settings_override(const char *);
 void jgrf_settings_deinit(void);

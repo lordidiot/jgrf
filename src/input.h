@@ -23,6 +23,8 @@ void jgrf_input_rumble(int, float, size_t);
 void jgrf_input_map_axis(int, uint32_t, const char*);
 void jgrf_input_map_button(int, uint32_t, const char*);
 
+void jgrf_input_menu_enable(int);
+
 extern void (*jgrf_input_audio)(int, const int16_t*, size_t);
 
 #endif

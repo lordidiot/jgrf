@@ -134,6 +134,11 @@ void jgrf_settings_override(const char *name) {
     ini_table_destroy(conf);
 }
 
+jg_setting_t* jgrf_settings_emu_ptr(size_t *num) {
+    *num = numemusettings;
+    return emusettings;
+}
+
 // Read core-specific settings - "Emulator Settings"
 void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
     // Get number of settings and set local pointer to core settings array

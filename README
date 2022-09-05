@@ -67,6 +67,7 @@ Input
 -----
 Frontend Key Definitions:
 ESC                      - Quit
+TAB                      - Open Menu/Return from Menu
 `                        - Fast-forward
 F1                       - Soft Reset
 F2                       - Hard Reset
@@ -195,6 +196,9 @@ The Jolly Good Reference Frontend
 
 AntiAliased Nearest Neighbor Fragment Shader
   Copyright (c) 2015 nyanpasu64 and wareya (MIT)
+
+ezmenu
+  Copyright (c) 2022 rofl0r (MIT)
 
 glText
   Copyright (c) 2013-2018 Christian Vallentin (Zlib)

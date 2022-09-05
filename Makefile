@@ -54,6 +54,7 @@ CSRCS := jgrf.c \
 	cheats.c \
 	cli.c \
 	input.c \
+	menu.c \
 	settings.c \
 	video.c \
 	video_gl.c \

@@ -413,8 +413,8 @@ void jgrf_video_gl_render(int render) {
         gltBeginDraw();
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[2],
-            dimensions.rw / 2, dimensions.rh / 2,
-            dimensions.dpiscale * 2.0f, GLT_CENTER, GLT_CENTER);
+            dimensions.rw / 20, dimensions.rh / 20,
+            dimensions.dpiscale * 2.0f, GLT_LEFT, GLT_TOP);
         gltEndDraw();
     }
 }

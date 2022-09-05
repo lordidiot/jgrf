@@ -19,6 +19,7 @@
 
 #include "jgrf.h"
 #include "cheats.h"
+#include "menu.h"
 #include "video.h"
 #include "input.h"
 
@@ -76,6 +77,11 @@ static int confchanged = 0;
 static int confindex = 0;
 static int confport = 0;
 static uint64_t conftimer = 0;
+static int menuactive = 0;
+
+void jgrf_input_menu_enable(int e) {
+    menuactive = e;
+}
 
 // Map a core input axis definition
 void jgrf_input_map_axis(int index, uint32_t dnum, const char* value) {
@@ -583,6 +589,12 @@ void jgrf_input_handler(SDL_Event *event) {
             jgrf_inputcfg_handler(event);
         return;
     }
+    else if (menuactive) {
+        if (event->type == SDL_KEYUP)
+            jgrf_menu_input_handler(event);
+        return;
+    }
+
     // This needs to be fixed and worked into the rest of the system one day...
     if (event->type == SDL_KEYUP || event->type == SDL_KEYDOWN) {
         switch (event->key.keysym.scancode) {
@@ -661,6 +673,13 @@ void jgrf_input_handler(SDL_Event *event) {
                     jgrf_input_undef_port(confport);
                     jgrf_inputcfg(inputinfo[confport]);
                     confchanged = 1;
+                }
+                break;
+            }
+            case SDL_SCANCODE_TAB: {
+                if (event->type == SDL_KEYUP) {
+                    jgrf_input_menu_enable(1);
+                    jgrf_menu_display();
                 }
                 break;
             }
