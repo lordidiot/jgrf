@@ -25,6 +25,12 @@
 
 #define MAXPORTS 12
 
+#if SDL_VERSION_ATLEAST(2,0,18)
+    #define jgrf_getticks SDL_GetTicks64
+#else
+    #define jgrf_getticks SDL_GetTicks
+#endif
+
 // Pointers to members of core input state
 typedef struct jgrf_jsmap_t {
     int16_t *axis[JG_AXES_MAX];
@@ -95,7 +101,7 @@ void jgrf_input_map_axis(int index, uint32_t dnum, const char* value) {
         }
     }
 
-    conftimer = SDL_GetTicks64();
+    conftimer = jgrf_getticks();
 }
 
 // Map a core input button definition
@@ -133,7 +139,7 @@ void jgrf_input_map_button(int index, uint32_t dnum, const char* value) {
         *kbmap.key[knum] = 0;
     }
 
-    conftimer = SDL_GetTicks64();
+    conftimer = jgrf_getticks();
 }
 
 // Read an input config file and assign inputs
@@ -332,7 +338,7 @@ static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
     }
     else {
         confactive = 1;
-        conftimer = SDL_GetTicks64();
+        conftimer = jgrf_getticks();
     }
 
     // Display input config information on screen
@@ -582,7 +588,7 @@ void jgrf_input_handler(SDL_Event *event) {
         }
 
         // Determine ticks since the last input definition was configured
-        uint64_t delta = SDL_GetTicks64() - conftimer;
+        uint64_t delta = jgrf_getticks() - conftimer;
 
         // If the delta is large enough, pass the event to input config
         if (delta > delay)
