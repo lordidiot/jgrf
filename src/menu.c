@@ -37,7 +37,7 @@ typedef struct _menunode_t {
     struct _menunode_t *child;
     struct _menunode_t *next;
     char desc[DESCSIZE];
-    int value;
+    int val;
 } menunode_t;
 
 static struct ezmenu ezm;
@@ -99,7 +99,7 @@ static void jgrf_menu_emusettings_generate(menunode_t *node) {
         // Create a menu item node
         menunode_t *menuitem = jgrf_menu_node_add_child(node);
         snprintf(menuitem->desc, DESCSIZE, "%s", emusettings[i].name);
-        menuitem->value = i;
+        menuitem->val = i;
 
         // Add child nodes containing the settings for each menu item
         char buf[DESCSIZE];
@@ -117,7 +117,7 @@ static void jgrf_menu_emusettings_generate(menunode_t *node) {
                     menunode_t *setting = jgrf_menu_node_add_child(menuitem);
                     snprintf(setting->desc, DESCSIZE, "%d",
                         j + emusettings[i].min);
-                    setting->value = j + emusettings[i].min;
+                    setting->val = j + emusettings[i].min;
                 }
             }
             else { // Regular nodes
@@ -127,7 +127,7 @@ static void jgrf_menu_emusettings_generate(menunode_t *node) {
                 snprintf(vbuf, DESCSIZE, "%s", token);
                 char *vbufptr;
                 char *vtoken = strtok_r(vbuf, " =", &vbufptr);
-                setting->value = atoi(vtoken);
+                setting->val = atoi(vtoken);
             }
             token = strtok_r(NULL, ",", &bufptr);
         }
@@ -172,7 +172,7 @@ static void jgrf_menu_select_emu(int item) {
     }
     else { // No child, means it has a value to set or there are no settings
         if (numemusettings) {
-            emusettings[node->parent->value].value = node->value;
+            emusettings[node->parent->val].val = node->val;
             jgrf_rehash();
         }
         else {

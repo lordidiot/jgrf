@@ -163,15 +163,15 @@ void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
         if (ini_table_check_entry(conf, gdata->corename,
             emusettings[i].name)) {
 
-            int value;
+            int val;
             ini_table_get_entry_as_int(conf, gdata->corename,
-                emusettings[i].name, &value);
+                emusettings[i].name, &val);
 
-            if (value <= emusettings[i].max && value >= emusettings[i].min)
-                emusettings[i].value = value;
+            if (val <= emusettings[i].max && val >= emusettings[i].min)
+                emusettings[i].val = val;
             else
                 jgrf_log(JG_LOG_WRN, "Setting out of range: %s = %d\n",
-                    emusettings[i].name, value);
+                    emusettings[i].name, val);
         }
     }
 
