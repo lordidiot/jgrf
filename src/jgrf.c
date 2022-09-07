@@ -87,8 +87,7 @@ static struct _loaded {
     int audio;
     int video;
     int input;
-    int settings;
-} loaded = { 0, 0, 0, 0, 0, 0 };
+} loaded = { 0, 0, 0, 0, 0 };
 
 // Frontend knows the game and path info and passes this to the core
 static jg_fileinfo_t gameinfo;
@@ -1017,7 +1016,7 @@ int main(int argc, char *argv[]) {
         "%sscreenshots/", gdata.datapath);
 
     // Load settings
-    loaded.settings = jgrf_settings_init();
+    jgrf_settings_init();
 
     // Set up function pointers for video
     jgrf_video_setfuncs();

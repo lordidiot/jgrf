@@ -19,7 +19,6 @@
 #include "settings.h"
 
 static ini_table_s *conf;
-static int confchanged = 0;
 
 static jgrf_gdata_t *gdata;
 
@@ -142,10 +141,8 @@ static void jgrf_settings_read(void) {
 
     conf = ini_table_create();
 
-    if (!ini_table_read_from_file(conf, path)) {
+    if (!ini_table_read_from_file(conf, path))
         jgrf_log(JG_LOG_DBG, "Main configuration file not found: %s\n", path);
-        confchanged = 1;
-    }
     else
         jgrf_settings_handler();
 
@@ -154,15 +151,9 @@ static void jgrf_settings_read(void) {
 }
 
 // Initialize the settings to defaults and grab global data pointer
-int jgrf_settings_init(void) {
+void jgrf_settings_init(void) {
     gdata = jgrf_gdata_ptr();
     jgrf_settings_read();
-    return 1;
-}
-
-void jgrf_settings_deinit(void) {
-    if (confchanged)
-        jgrf_settings_write();
 }
 
 // Read core-specific overrides for frontend settings

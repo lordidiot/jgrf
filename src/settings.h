@@ -28,8 +28,7 @@ enum _jgrf_settings {
     JGRF_SETTINGS_MAX
 };
 
-int jgrf_settings_init(void);
-void jgrf_settings_deinit(void);
+void jgrf_settings_init(void);
 jg_setting_t* jgrf_settings_ptr(void);
 jg_setting_t* jgrf_settings_emu_ptr(size_t*);
 void jgrf_settings_emu(jg_setting_t* (*)(size_t*));
