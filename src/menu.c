@@ -29,7 +29,8 @@
 enum _menumode {
     FRONTEND,
     EMULATOR,
-    INPUT
+    INPUT,
+    SAVESETTINGS
 };
 
 typedef struct _menunode_t {
@@ -147,8 +148,11 @@ static void jgrf_menu_level(void) {
 static void jgrf_menu_text_redraw(void) {
     textbuf[0] = '\0';
     for (int i = 0; i < ezm.h; ++i) {
-        if (i != ezm.vissel && i > 1)
-            strcat(textbuf, " ");
+        if (i == ezm.vissel)
+            strcat(textbuf, "+ ");
+        else if (i > 1 && strlen(ezm.vislines[i]))
+            strcat(textbuf, "- ");
+
         strcat(textbuf, ezm.vislines[i]);
         strcat(textbuf, "\n");
     }
@@ -158,9 +162,8 @@ static void jgrf_menu_text_redraw(void) {
 static void jgrf_menu_select_frontend(int item) {
     menunode_t *node = menulevel;
     // Seek to the correct node
-    for (int i = 0; i < item; ++i) {
+    for (int i = 0; i < item; ++i)
         node = node->next;
-    }
 
     // Check if there is a level below
     if (node->child) {
@@ -170,15 +173,19 @@ static void jgrf_menu_select_frontend(int item) {
     else { // No child, means it has a value to set
         settings[node->parent->val].val = node->val;
         jgrf_rehash_frontend();
+        jgrf_log(JG_LOG_SCR, "%s: %s%s",
+            node->parent->desc, node->desc,
+            settings[node->parent->val].restart ?
+            " (restart required)" : ""
+        );
     }
 }
 
 static void jgrf_menu_select_emu(int item) {
     menunode_t *node = menulevel;
     // Seek to the correct node
-    for (int i = 0; i < item; ++i) {
+    for (int i = 0; i < item; ++i)
         node = node->next;
-    }
 
     // Check if there is a level below
     if (node->child) {
@@ -189,6 +196,11 @@ static void jgrf_menu_select_emu(int item) {
         if (numemusettings) {
             emusettings[node->parent->val].val = node->val;
             jgrf_rehash_core();
+            jgrf_log(JG_LOG_SCR, "%s: %s%s",
+                node->parent->desc, node->desc,
+                emusettings[node->parent->val].restart ?
+                " (restart required)" : ""
+            );
         }
         else {
             jgrf_log(JG_LOG_SCR, "No Emulator Settings");
@@ -219,6 +231,9 @@ void jgrf_menu_display(void) {
     node = jgrf_menu_node_add_child(menuroot);
     snprintf(node->desc, DESCSIZE, "Map Inputs");
 
+    node = jgrf_menu_node_add_child(menuroot);
+    snprintf(node->desc, DESCSIZE, "Save Settings");
+
     for (unsigned i = 0; i < NUMLINES; ++i)
         linebuf[i] = (char*)calloc(DESCSIZE, 1);
 
@@ -234,14 +249,17 @@ void jgrf_menu_display(void) {
 
 void jgrf_menu_input_handler(SDL_Event *event) {
     switch (event->key.keysym.scancode) {
-        case SDL_SCANCODE_TAB: case SDL_SCANCODE_ESCAPE: {
+        case SDL_SCANCODE_TAB: {
             if (menulevel != menuroot->child) {
                 menulevel = menulevel->parent->parent->child;
                 jgrf_menu_level();
                 ezmenu_update(&ezm);
                 jgrf_menu_text_redraw();
-                return;
+                break;
             }
+        }
+        // fallthrough
+        case SDL_SCANCODE_ESCAPE: {
             // Free the memory allocated for the menu tree
             jgrf_menu_node_free(menuroot);
             jgrf_video_text(2, 0, "");
@@ -269,6 +287,11 @@ void jgrf_menu_input_handler(SDL_Event *event) {
                 case FRONTEND: jgrf_menu_select_frontend(ezm.sel); break;
                 case EMULATOR: jgrf_menu_select_emu(ezm.sel); break;
                 case INPUT: jgrf_log(JG_LOG_SCR, "Unavailable"); break;
+                case SAVESETTINGS: {
+                    jgrf_settings_write();
+                    jgrf_log(JG_LOG_SCR, "Saved Frontend Settings");
+                    break;
+                }
             }
 
             ezmenu_update(&ezm);
