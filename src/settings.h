@@ -10,6 +10,7 @@
 #define SETTINGS_H
 
 enum _jgrf_settings {
+    AUDIO_RSQUAL,
     VIDEO_API,
     VIDEO_FULLSCREEN,
     VIDEO_SCALE,
@@ -22,7 +23,6 @@ enum _jgrf_settings {
     VIDEO_CRTEA_CURVE,
     VIDEO_CRTEA_CORNER,
     VIDEO_CRTEA_TCURVE,
-    AUDIO_RSQUAL,
     MISC_CORELOG,
     MISC_FRONTENDLOG,
     JGRF_SETTINGS_MAX

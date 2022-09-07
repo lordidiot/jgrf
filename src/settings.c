@@ -27,70 +27,70 @@ static size_t numemusettings = 0;
 static jg_setting_t *emusettings = NULL;
 
 static jg_setting_t settings[] = {
-    { "video_api",
-      "0 = OpenGL 3.3, 1 = OpenGL ES 3.0, 2 = OpenGL 2.1",
+    { "Audio: Resampler Quality", "N = Resampler Quality",
+      "",
+      3, 0, 10, 1
+    },
+    { "Video: API",
+      "0 = OpenGL Core, 1 = OpenGL ES, 2 = OpenGL Compatibility",
       "",
       0, 0, 2, 1
     },
-    { "video_fullscreen", "0 = Disabled, 1 = Enabled",
+    { "Video: Fullscreen", "0 = Disabled, 1 = Enabled",
       "",
       0, 0, 1, 0
     },
-    { "video_scale", "N = Video Scale Factor",
+    { "Video: Scale", "N = Video Scale Factor",
       "",
       3, 1, 8, 0
     },
-    { "video_shader",
+    { "Video: Shader",
       "0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, "
       "3 = Anti-Aliased Nearest Neighbour, 4 = CRT-Bespoke, 5 = CRTea, 6 = LCD",
       "",
       2, 0, 6, 0
     },
-    { "video_crtea_mode",
+    { "Video: CRTea Mode",
       "0 = Scanlines, 1 = Aperture Grille Lite, 2 = Aperture Grille, "
       "3 = Shadow Mask, 4 = Custom",
       "",
       2, 0, 4, 0
     },
-    { "video_crtea_masktype",
+    { "CRTea: Custom Mask Type",
       "0 = No Mask, 1 = Aperture Grille Lite, 2 = Aperture Grille, "
       "3 = Shadow Mask",
       "",
       2, 0, 3, 0
     },
-    { "video_crtea_maskstr", "N = CRTea Mask Strength",
+    { "CRTea: Custom Mask Strength", "N = CRTea Mask Strength",
       "",
       5, 0, 10, 0
     },
-    { "video_crtea_scanstr", "N = CRTea Scanline Strength",
+    { "CRTea: Custom Scanline Strength", "N = CRTea Scanline Strength",
       "",
       6, 0, 10, 0
     },
-    { "video_crtea_sharpness", "N = CRTea Sharpness",
+    { "CRTea: Custom Sharpness", "N = CRTea Sharpness",
       "",
       7, 0, 10, 0
     },
-    { "video_crtea_curve", "N = CRTea Curvature",
+    { "CRTea: Custom Curvature", "N = CRTea Curvature",
       "",
       2, 0, 10, 0
     },
-    { "video_crtea_corner", "N = CRTea Corner",
+    { "CRTea: Custom Corner", "N = CRTea Corner",
       "",
       3, 0, 10, 0
     },
-    { "video_crtea_tcurve", "N = CRTea Trinitron Curvature",
+    { "CRTea: Custom Trinitron Curvature", "N = CRTea Trinitron Curvature",
       "",
       10, 0, 10, 0
     },
-    { "audio_rsqual", "N = Resampler Quality",
-      "",
-      3, 0, 10, 0
-    },
-    { "misc_corelog", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
+    { "Log Level: Core", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
       "",
       1, 0, 3, 0
     },
-    { "misc_frontendlog", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
+    { "Log Level: Frontend", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
       "",
       1, 0, 3, 0
     },
@@ -111,6 +111,9 @@ static void jgrf_setting_rd(const char *s, const char *n, jg_setting_t *t) {
 
 // Handle reading of settings
 static void jgrf_settings_handler(void) {
+    // Audio
+    jgrf_setting_rd("audio", "rsqual", &settings[AUDIO_RSQUAL]);
+
     // Video
     jgrf_setting_rd("video", "api", &settings[VIDEO_API]);
     jgrf_setting_rd("video", "fullscreen", &settings[VIDEO_FULLSCREEN]);
@@ -126,9 +129,6 @@ static void jgrf_settings_handler(void) {
     jgrf_setting_rd("video", "crtea_curve", &settings[VIDEO_CRTEA_CURVE]);
     jgrf_setting_rd("video", "crtea_corner", &settings[VIDEO_CRTEA_CORNER]);
     jgrf_setting_rd("video", "crtea_tcurve", &settings[VIDEO_CRTEA_TCURVE]);
-
-    // Audio
-    jgrf_setting_rd("audio", "rsqual", &settings[AUDIO_RSQUAL]);
 
     // Misc
     jgrf_setting_rd("misc", "corelog", &settings[MISC_CORELOG]);
@@ -242,6 +242,10 @@ void jgrf_settings_write(void) {
     char path[192];
     snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
 
+    // Audio
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[AUDIO_RSQUAL].val);
+    ini_table_create_entry(conf, "audio", "rsqual", ibuf);
+
     // Video
     snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_API].val);
     ini_table_create_entry(conf, "video", "api", ibuf);
@@ -278,10 +282,6 @@ void jgrf_settings_write(void) {
 
     snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_TCURVE].val);
     ini_table_create_entry(conf, "video", "crtea_tcurve", ibuf);
-
-    // Audio
-    snprintf(ibuf, sizeof(ibuf), "%d", settings[AUDIO_RSQUAL].val);
-    ini_table_create_entry(conf, "audio", "rsqual", ibuf);
 
     // Misc
     snprintf(ibuf, sizeof(ibuf), "%d", settings[MISC_CORELOG].val);
