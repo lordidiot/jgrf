@@ -195,11 +195,11 @@ void jgrf_log(int level, const char *fmt, ...) {
 
     FILE *fout = level == 1 ? stdout : stderr;
 
-    settings_t *settings = jgrf_get_settings();
+    jg_setting_t *settings = jgrf_settings_ptr();
     if (level == JG_LOG_SCR) {
         jgrf_video_text(0, corefps, buffer);
     }
-    else if (level >= settings->misc_frontendlog.val) {
+    else if (level >= settings[MISC_FRONTENDLOG].val) {
         fprintf(fout, "%s%c: %s\033[0m", lcol[level], lchr[level], buffer);
         fflush(fout);
     }
@@ -223,11 +223,11 @@ static void jgrf_core_log(int level, const char *fmt, ...) {
 
     FILE *fout = level == 1 ? stdout : stderr;
 
-    settings_t *settings = jgrf_get_settings();
+    jg_setting_t *settings = jgrf_settings_ptr();
     if (level == JG_LOG_SCR) {
         jgrf_video_text(1, corefps, buffer);
     }
-    else if (level >= settings->misc_corelog.val) {
+    else if (level >= settings[MISC_CORELOG].val) {
         fprintf(fout, "%s%c: %s\033[0m", lcol[level], lchr[level], buffer);
         fflush(fout);
     }
@@ -888,9 +888,14 @@ void jgrf_media_insert() {
     jgapi.jg_media_insert();
 }
 
-// Rehash
-void jgrf_rehash(void) {
+// Rehash the emulator core's settings
+void jgrf_rehash_core(void) {
     jgapi.jg_rehash();
+}
+
+// Rehash the frontend's settings
+void jgrf_rehash_frontend(void) {
+    jgrf_video_rehash(); // A subset of video settings allow live changes
 }
 
 // Call to stop and shut down at the end of the current iteration
@@ -905,7 +910,6 @@ void jgrf_quit(int status) {
     if (loaded.audio) jgrf_audio_deinit();
     if (loaded.video) jgrf_video_deinit();
     if (loaded.input) jgrf_input_deinit();
-    if (loaded.settings) jgrf_settings_deinit();
     if (gameinfo.data) free(gameinfo.data);
     for (int i = 0; i < gdata.numauxfiles; ++i)
         if (auxinfo[i].data) free(auxinfo[i].data);

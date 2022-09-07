@@ -21,6 +21,7 @@ extern jg_videoinfo_t* (*jgrf_video_get_info)(void);
 extern void (*jgrf_video_set_info)(jg_videoinfo_t*);
 extern void (*jgrf_video_swapbuffers)(void);
 extern void (*jgrf_video_text)(int, int, const char*);
+extern void (*jgrf_video_rehash)(void);
 
 void jgrf_video_setfuncs(void);
 void jgrf_video_icon_load(SDL_Window*);

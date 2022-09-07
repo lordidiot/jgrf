@@ -21,23 +21,87 @@
 static ini_table_s *conf;
 static int confchanged = 0;
 
-static settings_t settings;
-
-static jg_setting_t *emusettings = NULL;
-static size_t numemusettings = 0;
-
 static jgrf_gdata_t *gdata;
 
-settings_t *jgrf_get_settings() {
-    return &settings;
-}
+static size_t numemusettings = 0;
+static jg_setting_t *emusettings = NULL;
+
+static jg_setting_t settings[] = {
+    { "video_api",
+      "0 = OpenGL 3.3, 1 = OpenGL ES 3.0, 2 = OpenGL 2.1",
+      "",
+      0, 0, 2, 1
+    },
+    { "video_fullscreen", "0 = Disabled, 1 = Enabled",
+      "",
+      0, 0, 1, 0
+    },
+    { "video_scale", "N = Video Scale Factor",
+      "",
+      3, 1, 8, 0
+    },
+    { "video_shader",
+      "0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, "
+      "3 = Anti-Aliased Nearest Neighbour, 4 = CRT-Bespoke, 5 = CRTea, 6 = LCD",
+      "",
+      2, 0, 6, 0
+    },
+    { "video_crtea_mode",
+      "0 = Scanlines, 1 = Aperture Grille Lite, 2 = Aperture Grille, "
+      "3 = Shadow Mask, 4 = Custom",
+      "",
+      2, 0, 4, 0
+    },
+    { "video_crtea_masktype",
+      "0 = No Mask, 1 = Aperture Grille Lite, 2 = Aperture Grille, "
+      "3 = Shadow Mask",
+      "",
+      2, 0, 3, 0
+    },
+    { "video_crtea_maskstr", "N = CRTea Mask Strength",
+      "",
+      5, 0, 10, 0
+    },
+    { "video_crtea_scanstr", "N = CRTea Scanline Strength",
+      "",
+      6, 0, 10, 0
+    },
+    { "video_crtea_sharpness", "N = CRTea Sharpness",
+      "",
+      7, 0, 10, 0
+    },
+    { "video_crtea_curve", "N = CRTea Curvature",
+      "",
+      2, 0, 10, 0
+    },
+    { "video_crtea_corner", "N = CRTea Corner",
+      "",
+      3, 0, 10, 0
+    },
+    { "video_crtea_tcurve", "N = CRTea Trinitron Curvature",
+      "",
+      10, 0, 10, 0
+    },
+    { "audio_rsqual", "N = Resampler Quality",
+      "",
+      3, 0, 10, 0
+    },
+    { "misc_corelog", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
+      "",
+      1, 0, 3, 0
+    },
+    { "misc_frontendlog", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
+      "",
+      1, 0, 3, 0
+    },
+};
 
 // Read a setting with boundary check
-static inline void jgrf_setting_rd(const char *s, const char *n, setting_t *t) {
+static void jgrf_setting_rd(const char *s, const char *n, jg_setting_t *t) {
     // section, name, setting
     if (ini_table_check_entry(conf, s, n)) {
         int val_orig = t->val; // Save the default value
-        ini_table_get_entry_as_int(conf, s, n, &(t->val)); // Read new the value
+        ini_table_get_entry_as_int(conf, s, n, &(t->val)); // Read the value
 
         // Reset to default if out of bounds
         if ((t->val > t->max) || (t->val < t->min))
@@ -48,25 +112,27 @@ static inline void jgrf_setting_rd(const char *s, const char *n, setting_t *t) {
 // Handle reading of settings
 static void jgrf_settings_handler(void) {
     // Video
-    jgrf_setting_rd("video", "api", &settings.video_api);
-    jgrf_setting_rd("video", "fullscreen", &settings.video_fullscreen);
-    jgrf_setting_rd("video", "scale", &settings.video_scale);
-    jgrf_setting_rd("video", "shader", &settings.video_shader);
-    jgrf_setting_rd("video", "crtea_mode", &settings.video_crtea_mode);
-    jgrf_setting_rd("video", "crtea_masktype", &settings.video_crtea_masktype);
-    jgrf_setting_rd("video", "crtea_maskstr", &settings.video_crtea_maskstr);
-    jgrf_setting_rd("video", "crtea_scanstr", &settings.video_crtea_scanstr);
-    jgrf_setting_rd("video", "crtea_sharpness",&settings.video_crtea_sharpness);
-    jgrf_setting_rd("video", "crtea_curve", &settings.video_crtea_curve);
-    jgrf_setting_rd("video", "crtea_corner", &settings.video_crtea_corner);
-    jgrf_setting_rd("video", "crtea_tcurve", &settings.video_crtea_tcurve);
+    jgrf_setting_rd("video", "api", &settings[VIDEO_API]);
+    jgrf_setting_rd("video", "fullscreen", &settings[VIDEO_FULLSCREEN]);
+    jgrf_setting_rd("video", "scale", &settings[VIDEO_SCALE]);
+    jgrf_setting_rd("video", "shader", &settings[VIDEO_SHADER]);
+    jgrf_setting_rd("video", "crtea_mode", &settings[VIDEO_CRTEA_MODE]);
+    jgrf_setting_rd("video", "crtea_masktype",
+        &settings[VIDEO_CRTEA_MASKTYPE]);
+    jgrf_setting_rd("video", "crtea_maskstr", &settings[VIDEO_CRTEA_MASKSTR]);
+    jgrf_setting_rd("video", "crtea_scanstr", &settings[VIDEO_CRTEA_SCANSTR]);
+    jgrf_setting_rd("video", "crtea_sharpness",
+        &settings[VIDEO_CRTEA_SHARPNESS]);
+    jgrf_setting_rd("video", "crtea_curve", &settings[VIDEO_CRTEA_CURVE]);
+    jgrf_setting_rd("video", "crtea_corner", &settings[VIDEO_CRTEA_CORNER]);
+    jgrf_setting_rd("video", "crtea_tcurve", &settings[VIDEO_CRTEA_TCURVE]);
 
     // Audio
-    jgrf_setting_rd("audio", "rsqual", &settings.audio_rsqual);
+    jgrf_setting_rd("audio", "rsqual", &settings[AUDIO_RSQUAL]);
 
     // Misc
-    jgrf_setting_rd("misc", "corelog", &settings.misc_corelog);
-    jgrf_setting_rd("misc", "frontendlog", &settings.misc_frontendlog);
+    jgrf_setting_rd("misc", "corelog", &settings[MISC_CORELOG]);
+    jgrf_setting_rd("misc", "frontendlog", &settings[MISC_FRONTENDLOG]);
 }
 
 // Read the general settings ini to override defaults
@@ -90,29 +156,13 @@ static void jgrf_settings_read(void) {
 // Initialize the settings to defaults and grab global data pointer
 int jgrf_settings_init(void) {
     gdata = jgrf_gdata_ptr();
-
-    // Set defaults
-    settings.video_api = (setting_t){ 0, 0, 2 };
-    settings.video_fullscreen = (setting_t){ 0, 0, 1 };
-    settings.video_scale = (setting_t){ 3, 1, 8 };
-    settings.video_shader = (setting_t){ 2, 0, 6 };
-    settings.video_crtea_mode = (setting_t){ 2, 0, 4 };
-    settings.video_crtea_masktype = (setting_t){ 2, 0, 3 };
-    settings.video_crtea_maskstr = (setting_t){ 5, 0, 10 };
-    settings.video_crtea_scanstr = (setting_t){ 6, 0, 10 };
-    settings.video_crtea_sharpness = (setting_t){ 7, 0, 10 };
-    settings.video_crtea_curve = (setting_t){ 2, 0, 10 };
-    settings.video_crtea_corner = (setting_t){ 3, 0, 10 };
-    settings.video_crtea_tcurve = (setting_t){ 10, 0, 10 };
-
-    settings.audio_rsqual = (setting_t){ 3, 0, 10 };
-
-    settings.misc_corelog = (setting_t){ 1, 0, 3 };
-    settings.misc_frontendlog = (setting_t){ 1, 0, 3 };
-
     jgrf_settings_read();
-
     return 1;
+}
+
+void jgrf_settings_deinit(void) {
+    if (confchanged)
+        jgrf_settings_write();
 }
 
 // Read core-specific overrides for frontend settings
@@ -132,6 +182,10 @@ void jgrf_settings_override(const char *name) {
 
     // Clean up the config data
     ini_table_destroy(conf);
+}
+
+jg_setting_t* jgrf_settings_ptr(void) {
+    return settings;
 }
 
 jg_setting_t* jgrf_settings_emu_ptr(size_t *num) {
@@ -179,63 +233,65 @@ void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
     ini_table_destroy(conf);
 }
 
-void jgrf_settings_deinit(void) {
+void jgrf_settings_write(void) {
+    // Create data structure
+    conf = ini_table_create();
+
+    char ibuf[4]; // Buffer to hold integers converted to strings
+
     char path[192];
     snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
 
-    if (confchanged) {
-        // Create data structure
-        conf = ini_table_create();
+    // Video
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_API].val);
+    ini_table_create_entry(conf, "video", "api", ibuf);
 
-        char ibuf[4]; // Buffer to hold integers converted to strings
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_FULLSCREEN].val);
+    ini_table_create_entry(conf, "video", "fullscreen", ibuf);
 
-        // Video
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_api.val);
-        ini_table_create_entry(conf, "video", "api", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_SCALE].val);
+    ini_table_create_entry(conf, "video", "scale", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_fullscreen.val);
-        ini_table_create_entry(conf, "video", "fullscreen", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_SHADER].val);
+    ini_table_create_entry(conf, "video", "shader", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_scale.val);
-        ini_table_create_entry(conf, "video", "scale", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_MODE].val);
+    ini_table_create_entry(conf, "video", "crtea_mode", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_shader.val);
-        ini_table_create_entry(conf, "video", "shader", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_MASKTYPE].val);
+    ini_table_create_entry(conf, "video", "crtea_masktype", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_mode.val);
-        ini_table_create_entry(conf, "video", "crtea_mode", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_MASKSTR].val);
+    ini_table_create_entry(conf, "video", "crtea_maskstr", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_masktype.val);
-        ini_table_create_entry(conf, "video", "crtea_masktype", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_SCANSTR].val);
+    ini_table_create_entry(conf, "video", "crtea_scanstr", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_maskstr.val);
-        ini_table_create_entry(conf, "video", "crtea_maskstr", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_SHARPNESS].val);
+    ini_table_create_entry(conf, "video", "crtea_sharpness", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_scanstr.val);
-        ini_table_create_entry(conf, "video", "crtea_scanstr", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_CURVE].val);
+    ini_table_create_entry(conf, "video", "crtea_curve", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_sharpness.val);
-        ini_table_create_entry(conf, "video", "crtea_sharpness", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_CORNER].val);
+    ini_table_create_entry(conf, "video", "crtea_corner", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_curve.val);
-        ini_table_create_entry(conf, "video", "crtea_curve", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[VIDEO_CRTEA_TCURVE].val);
+    ini_table_create_entry(conf, "video", "crtea_tcurve", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_corner.val);
-        ini_table_create_entry(conf, "video", "crtea_corner", ibuf);
+    // Audio
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[AUDIO_RSQUAL].val);
+    ini_table_create_entry(conf, "audio", "rsqual", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.video_crtea_tcurve.val);
-        ini_table_create_entry(conf, "video", "crtea_tcurve", ibuf);
+    // Misc
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[MISC_CORELOG].val);
+    ini_table_create_entry(conf, "misc", "corelog", ibuf);
 
-        // Misc
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.misc_corelog.val);
-        ini_table_create_entry(conf, "misc", "corelog", ibuf);
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[MISC_FRONTENDLOG].val);
+    ini_table_create_entry(conf, "misc", "frontendlog", ibuf);
 
-        snprintf(ibuf, sizeof(ibuf), "%d", settings.misc_frontendlog.val);
-        ini_table_create_entry(conf, "misc", "frontendlog", ibuf);
+    ini_table_write_to_file(conf, path);
 
-        ini_table_write_to_file(conf, path);
-
-        // Clean up the config data
-        ini_table_destroy(conf);
-    }
+    // Clean up the config data
+    ini_table_destroy(conf);
 }

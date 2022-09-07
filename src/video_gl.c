@@ -29,7 +29,7 @@
 extern int bmark;
 
 static jgrf_gdata_t *gdata = NULL;
-static settings_t *settings = NULL;
+static jg_setting_t *settings = NULL;
 
 // SDL Window management
 static SDL_Window *window;
@@ -102,10 +102,10 @@ static struct dimensions {
 // Create the SDL OpenGL Window
 void jgrf_video_gl_create(void) {
     // Grab settings pointer
-    settings = jgrf_get_settings();
+    settings = jgrf_settings_ptr();
 
     // Set the GL version
-    switch (settings->video_api.val) {
+    switch (settings[VIDEO_API].val) {
         default: case 0: { // OpenGL - Core Profile
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -140,8 +140,8 @@ void jgrf_video_gl_create(void) {
 
     // Set the window dimensions
     dimensions.ww =
-        (vidinfo->aspect * vidinfo->h * settings->video_scale.val) + 0.5;
-    dimensions.wh = (vidinfo->h * settings->video_scale.val) + 0.5;
+        (vidinfo->aspect * vidinfo->h * settings[VIDEO_SCALE].val) + 0.5;
+    dimensions.wh = (vidinfo->h * settings[VIDEO_SCALE].val) + 0.5;
     dimensions.rw = dimensions.ww;
     dimensions.rh = dimensions.wh;
 
@@ -176,14 +176,14 @@ void jgrf_video_gl_create(void) {
             SDL_GetError());
 
     // Initialize glText after setting GL context
-    if (!gltInit(settings->video_api.val == 1))
+    if (!gltInit(settings[VIDEO_API].val == 1))
         jgrf_log(JG_LOG_WRN, "Failed to initialize glText\n");
 
     for (int i = 0; i < 3; ++i)
         msgtext[i] = gltCreateText();
 
     // Do post window creation OpenGL setup
-    if (settings->video_api.val > 1)
+    if (settings[VIDEO_API].val > 1)
         jgrf_video_gl_setup_compat();
     else
         jgrf_video_gl_setup();
@@ -193,7 +193,7 @@ void jgrf_video_gl_create(void) {
     SDL_ShowCursor(false);
 
     // Set fullscreen if required
-    if (settings->video_fullscreen.val)
+    if (settings[VIDEO_FULLSCREEN].val)
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
@@ -583,7 +583,7 @@ static const GLchar* jgrf_video_gl_shader_load(const char *filename) {
     GLchar *shader = (GLchar*)calloc(size + 1, sizeof(GLchar));
 
     // Write version string into the buffer for the full shader source
-    snprintf(src, SIZE_GLSLVER, "%s", settings->video_api.val ?
+    snprintf(src, SIZE_GLSLVER, "%s", settings[VIDEO_API].val ?
         "#version 300 es\n" : "#version 330 core\n");
 
     if (!shader || !fread(shader, size, sizeof(GLchar), file)) {
@@ -694,7 +694,7 @@ static void jgrf_video_gl_shader_setup(void) {
     glUseProgram(shaderProgram);
     glUniform1i(glGetUniformLocation(shaderProgram, "source"), 0);
 
-    switch (settings->video_shader.val) {
+    switch (settings[VIDEO_SHADER].val) {
         default: case 0: { // Nearest Neighbour
             shaderProgram_out =
                 jgrf_video_gl_prog_create("default.vs", "default.fs");
@@ -768,11 +768,11 @@ static void jgrf_video_gl_shader_setup(void) {
 
         // Settings for CRTea
     int masktype = 0, maskstr = 0, scanstr = 0, sharpness = 0,
-        curve = settings->video_crtea_curve.val,
-        corner = settings->video_crtea_corner.val,
-        tcurve = settings->video_crtea_tcurve.val;
+        curve = settings[VIDEO_CRTEA_CURVE].val,
+        corner = settings[VIDEO_CRTEA_CORNER].val,
+        tcurve = settings[VIDEO_CRTEA_TCURVE].val;
 
-    switch (settings->video_crtea_mode.val) {
+    switch (settings[VIDEO_CRTEA_MODE].val) {
         default: case 0: { // Scanlines
             masktype = 0; maskstr = 0; scanstr = 10; sharpness = 10;
             break;
@@ -790,10 +790,10 @@ static void jgrf_video_gl_shader_setup(void) {
             break;
         }
         case 4: { // Custom
-            masktype = settings->video_crtea_masktype.val;
-            maskstr = settings->video_crtea_maskstr.val;
-            scanstr = settings->video_crtea_scanstr.val;
-            sharpness = settings->video_crtea_sharpness.val;
+            masktype = settings[VIDEO_CRTEA_MASKTYPE].val;
+            maskstr = settings[VIDEO_CRTEA_MASKSTR].val;
+            scanstr = settings[VIDEO_CRTEA_SCANSTR].val;
+            sharpness = settings[VIDEO_CRTEA_SHARPNESS].val;
             break;
         }
     }
@@ -877,7 +877,7 @@ void jgrf_video_gl_setup(void) {
 
 // Set up OpenGL - Compatibility Profile
 void jgrf_video_gl_setup_compat(void) {
-    switch (settings->video_shader.val) {
+    switch (settings[VIDEO_SHADER].val) {
         case 0: { // Nearest Neighbour
             texfilter_in = GL_NEAREST;
             break;
@@ -923,4 +923,8 @@ void jgrf_video_gl_swapbuffers(void) {
 void jgrf_video_gl_text(int index, int frames, const char *msg) {
     gltSetText(msgtext[index], msg);
     textframes[index] = frames;
+}
+
+void jgrf_video_gl_rehash(void) {
+    jgrf_video_gl_shader_setup();
 }

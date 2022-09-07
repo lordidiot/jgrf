@@ -275,7 +275,7 @@ static void jgrf_audio_cb_input(void *userdata, uint8_t *stream, int len) {
 
 // Initialize the audio device and allocate buffers
 int jgrf_audio_init(void) {
-    settings_t *settings = jgrf_get_settings();
+    jg_setting_t *settings = jgrf_settings_ptr();
     gdata = jgrf_gdata_ptr();
 
     // Set up Wave Writer
@@ -332,11 +332,11 @@ int jgrf_audio_init(void) {
 
     // Set up the Resampler
     resampler = speex_resampler_init(audinfo->channels,
-        audinfo->rate, audinfo->rate, settings->audio_rsqual.val, &err);
+        audinfo->rate, audinfo->rate, settings[AUDIO_RSQUAL].val, &err);
 
     if (dev && resampler)
         jgrf_log(JG_LOG_INF, "Audio: %dHz %s, Speex %d\n", spec.freq,
-            spec.channels == 1 ? "Mono" : "Stereo", settings->audio_rsqual.val);
+            spec.channels == 1 ? "Mono" : "Stereo", settings[AUDIO_RSQUAL].val);
     else
         jgrf_log(JG_LOG_WRN, "Audio: Error opening audio device.\n");
 

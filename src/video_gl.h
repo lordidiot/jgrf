@@ -26,4 +26,5 @@ void jgrf_video_gl_swapbuffers(void);
 void jgrf_video_gl_text(int, int, const char*);
 void *jgrf_video_gl_get_pixels(int*, int*);
 
+void jgrf_video_gl_rehash(void);
 #endif

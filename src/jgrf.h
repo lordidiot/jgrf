@@ -55,7 +55,8 @@ void jgrf_reset(int);
 void jgrf_media_select(void);
 void jgrf_media_insert(void);
 
-void jgrf_rehash(void);
+void jgrf_rehash_core(void);
+void jgrf_rehash_frontend(void);
 
 void jgrf_schedule_quit(void);
 void jgrf_quit(int);

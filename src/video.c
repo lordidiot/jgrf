@@ -34,15 +34,16 @@ jg_videoinfo_t* (*jgrf_video_get_info)(void);
 void (*jgrf_video_set_info)(jg_videoinfo_t*);
 void (*jgrf_video_swapbuffers)(void);
 void (*jgrf_video_text)(int, int, const char*);
+void (*jgrf_video_rehash)(void);
 
 static jgrf_gdata_t *gdata;
 
 // Set function pointers for video - Use to select a video API when more exist
 void jgrf_video_setfuncs(void) {
-    settings_t *settings = jgrf_get_settings();
     gdata = jgrf_gdata_ptr();
+    jg_setting_t *settings = jgrf_settings_ptr();
 
-    switch (settings->video_api.val) {
+    switch (settings[VIDEO_API].val) {
         case 0: case 1: // OpenGL - Core Profile and OpenGL ES
             jgrf_video_create = &jgrf_video_gl_create;
             jgrf_video_init = &jgrf_video_gl_init;
@@ -56,6 +57,7 @@ void jgrf_video_setfuncs(void) {
             jgrf_video_set_info = &jgrf_video_gl_set_info;
             jgrf_video_swapbuffers = &jgrf_video_gl_swapbuffers;
             jgrf_video_text = &jgrf_video_gl_text;
+            jgrf_video_rehash = &jgrf_video_gl_rehash;
             break;
         case 2: // OpenGL - Compatibility Profile
             jgrf_video_create = &jgrf_video_gl_create;
@@ -70,11 +72,12 @@ void jgrf_video_setfuncs(void) {
             jgrf_video_set_info = &jgrf_video_gl_set_info;
             jgrf_video_swapbuffers = &jgrf_video_gl_swapbuffers;
             jgrf_video_text = &jgrf_video_gl_text;
+            jgrf_video_rehash = &jgrf_video_gl_rehash;
             break;
         case 3: // Vulkan - one day...
         default:
             jgrf_log(JG_LOG_ERR, "Invalid Video API: %d\n",
-                settings->video_api.val);
+                settings[VIDEO_API].val);
             break;
     }
 }

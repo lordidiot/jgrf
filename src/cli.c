@@ -38,7 +38,7 @@ static const struct parg_option po_def[] = {
 static const char *corename = NULL;
 static const char *wavfile = NULL;
 
-static int video = 0;
+static int video = -1;
 static int fullscreen = 0;
 static int rsqual = -1;
 static int scale = 0;
@@ -60,30 +60,30 @@ const char *jgrf_cli_wave(void) {
 
 // Override settings with command line arguments
 void jgrf_cli_override(void) {
-    settings_t *settings = jgrf_get_settings();
+    jg_setting_t *settings = jgrf_settings_ptr();
 
     if (verbose) {
-        settings->misc_corelog.val = 0;
-        settings->misc_frontendlog.val = 0;
+        settings[MISC_CORELOG].val = 0;
+        settings[MISC_FRONTENDLOG].val = 0;
     }
 
-    if (video >= 0 && video <= settings->video_api.max)
-        settings->video_api.val = video;
+    if (video >= 0 && video <= settings[VIDEO_API].max)
+        settings[VIDEO_API].val = video;
 
     if (fullscreen)
-        settings->video_fullscreen.val = 1;
+        settings[VIDEO_FULLSCREEN].val = 1;
 
     if (windowed)
-        settings->video_fullscreen.val = 0;
+        settings[VIDEO_FULLSCREEN].val = 0;
 
-    if (rsqual >= 0 && rsqual <= settings->audio_rsqual.max)
-        settings->audio_rsqual.val = rsqual;
+    if (rsqual >= 0 && rsqual <= settings[AUDIO_RSQUAL].max)
+        settings[AUDIO_RSQUAL].val = rsqual;
 
-    if (shader >= 0 && shader <= settings->video_shader.max)
-        settings->video_shader.val = shader;
+    if (shader >= 0 && shader <= settings[VIDEO_SHADER].max)
+        settings[VIDEO_SHADER].val = shader;
 
-    if (scale && scale <= settings->video_scale.max)
-        settings->video_scale.val = scale;
+    if (scale && scale <= settings[VIDEO_SCALE].max)
+        settings[VIDEO_SCALE].val = scale;
 }
 
 // Command line parsing

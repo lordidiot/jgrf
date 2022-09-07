@@ -9,36 +9,31 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-typedef struct setting_t {
-    int val;
-    int min;
-    int max;
-} setting_t;
-
-typedef struct settings_t {
-    setting_t video_api;
-    setting_t video_fullscreen;
-    setting_t video_scale;
-    setting_t video_shader;
-    setting_t video_crtea_mode;
-    setting_t video_crtea_masktype;
-    setting_t video_crtea_maskstr;
-    setting_t video_crtea_scanstr;
-    setting_t video_crtea_sharpness;
-    setting_t video_crtea_curve;
-    setting_t video_crtea_corner;
-    setting_t video_crtea_tcurve;
-    setting_t audio_rsqual;
-    setting_t misc_corelog;
-    setting_t misc_frontendlog;
-} settings_t;
-
-settings_t *jgrf_get_settings(void);
+enum _jgrf_settings {
+    VIDEO_API,
+    VIDEO_FULLSCREEN,
+    VIDEO_SCALE,
+    VIDEO_SHADER,
+    VIDEO_CRTEA_MODE,
+    VIDEO_CRTEA_MASKTYPE,
+    VIDEO_CRTEA_MASKSTR,
+    VIDEO_CRTEA_SCANSTR,
+    VIDEO_CRTEA_SHARPNESS,
+    VIDEO_CRTEA_CURVE,
+    VIDEO_CRTEA_CORNER,
+    VIDEO_CRTEA_TCURVE,
+    AUDIO_RSQUAL,
+    MISC_CORELOG,
+    MISC_FRONTENDLOG,
+    JGRF_SETTINGS_MAX
+};
 
 int jgrf_settings_init(void);
+void jgrf_settings_deinit(void);
+jg_setting_t* jgrf_settings_ptr(void);
 jg_setting_t* jgrf_settings_emu_ptr(size_t*);
 void jgrf_settings_emu(jg_setting_t* (*)(size_t*));
 void jgrf_settings_override(const char *);
-void jgrf_settings_deinit(void);
+void jgrf_settings_write(void);
 
 #endif
