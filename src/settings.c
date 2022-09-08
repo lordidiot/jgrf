@@ -39,9 +39,9 @@ static jg_setting_t settings[] = {
       "",
       0, 0, 1, 0
     },
-    { "Video: Scale", "N = Video Scale Factor",
+    { "Video: Scale Factor (Initial)", "N = Video Scale Factor",
       "",
-      3, 1, 8, 0
+      3, 1, 8, 1
     },
     { "Video: Shader",
       "0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, "
