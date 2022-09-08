@@ -268,11 +268,11 @@ void jgrf_video_gl_deinit(void) {
     SDL_DestroyWindow(window);
 }
 
-// Make the window fullscreen
+// Toggle between fullscreen and windowed
 void jgrf_video_gl_fullscreen(void) {
+    settings[VIDEO_FULLSCREEN].val ^= 1;
     SDL_SetWindowFullscreen(window,
-        SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP ?
-        0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+        settings[VIDEO_FULLSCREEN].val ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 
     // Fullscreen toggle does not trigger SDL_WINDOWEVENT_RESIZED
     jgrf_video_gl_resize();
