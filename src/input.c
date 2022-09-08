@@ -20,6 +20,7 @@
 #include "jgrf.h"
 #include "cheats.h"
 #include "menu.h"
+#include "settings.h"
 #include "video.h"
 #include "input.h"
 
@@ -53,6 +54,7 @@ void (*jgrf_input_audio)(int, const int16_t*, size_t);
 static jg_videoinfo_t *vidinfo; // Video Info for calculating mouse input
 static jg_inputinfo_t *inputinfo[MAXPORTS]; // Core Input Info
 static jg_inputstate_t coreinput[MAXPORTS]; // Input states shared with core
+static jg_setting_t *settings = NULL;
 
 static jgrf_jsmap_t jsmap[MAXPORTS]; // Pointer maps for joystick/gamepad input
 static uint8_t rumblemap[MAXPORTS]; // Ensure force feedback lines up properly
@@ -181,6 +183,9 @@ static void jgrf_input_undef_port(int port) {
 
 // Initialize input
 int jgrf_input_init(void) {
+    // Grab pointer to settings
+    settings = jgrf_settings_ptr();
+
     // Set all joystick mappings to undefined
     for (int i = 0; i < MAXPORTS; ++i) {
         jgrf_input_undef_port(i);
@@ -667,6 +672,13 @@ void jgrf_input_handler(SDL_Event *event) {
             // Want to play 12-player sports games? Hand-edit the config file.
                 if (event->type == SDL_KEYUP &&
                     (event->key.keysym.mod & KMOD_SHIFT)) {
+                    if (settings[VIDEO_API].val == 2) {
+                        jgrf_log(JG_LOG_WRN,
+                            "Input Configuration unavailable in OpenGL"
+                            " Compatibility Profile\n");
+                        return;
+                    }
+
                     confport =
                         atoi(SDL_GetScancodeName(event->key.keysym.scancode));
 
@@ -684,6 +696,12 @@ void jgrf_input_handler(SDL_Event *event) {
             }
             case SDL_SCANCODE_TAB: {
                 if (event->type == SDL_KEYUP) {
+                    if (settings[VIDEO_API].val == 2) {
+                        jgrf_log(JG_LOG_WRN,
+                            "Menu System unavailable in OpenGL"
+                            " Compatibility Profile\n");
+                        return;
+                    }
                     jgrf_input_menu_enable(1);
                     jgrf_menu_display();
                 }
