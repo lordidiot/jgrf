@@ -66,20 +66,26 @@ Cores that exist locally will be preferred over cores installed system-wide.
 Input
 -----
 Frontend Key Definitions:
-ESC                      - Quit
-TAB                      - Open Menu/Return from Menu
-`                        - Fast-forward
-F1                       - Soft Reset
-F2                       - Hard Reset
-F3                       - Switch Media (FDS Disks or CDs)
-F4                       - Insert/Remove Media
-F5                       - Save State (Slot 0)
-F6                       - Save State (Slot 1)
-F7                       - Load State (Slot 0)
-F8                       - Load State (Slot 1)
-F9                       - Screenshot
-F12                      - Toggle Cheats On/Off
-F                        - Toggle Fullscreen/Windowed Mode
+ESC                     - Quit
+TAB                     - Open Menu
+`                       - Fast-forward
+F1                      - Soft Reset
+F2                      - Hard Reset
+F3                      - Switch Media (FDS Disks or CDs)
+F4                      - Insert/Remove Media
+F5                      - Save State (Slot 0)
+F6                      - Save State (Slot 1)
+F7                      - Load State (Slot 0)
+F8                      - Load State (Slot 1)
+F9                      - Screenshot
+F12                     - Toggle Cheats On/Off
+F                       - Toggle Fullscreen/Windowed Mode
+
+Menu Key Definitions:
+ESC                     - Exit Menu
+TAB                     - Back
+ENTER                   - Activate selected menu item
+UP/DOWN                 - Navigate Up and Down
 
 Input for games is not preconfigured. To configure a device:
   SHIFT+[Port Number] ex. SHIFT+1, SHIFT+2
