@@ -408,7 +408,7 @@ void jgrf_video_gl_render(int render) {
         --textframes[1];
     }
 
-    // Input Config
+    // Menu and Input Config
     if (textframes[2]) {
         gltBeginDraw();
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
