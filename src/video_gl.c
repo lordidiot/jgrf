@@ -888,8 +888,6 @@ void jgrf_video_gl_setup_compat(void) {
         }
         default: {
             texfilter_in = GL_LINEAR;
-            jgrf_log(JG_LOG_WRN, "Post-processing shaders are not available in "
-                "OpenGL Compatibility Profile, defaulting to Linear\n");
             break;
         }
     }
@@ -912,6 +910,11 @@ void jgrf_video_gl_setup_compat(void) {
 
     jgrf_video_gl_resize();
     jgrf_video_gl_refresh();
+
+    jgrf_log(JG_LOG_WRN,
+        "OpenGL Compatibility Profile supports basic functionality only - no "
+        "post-processing shaders, menu, or input configuration.\n"
+    );
 }
 
 // Swap Buffers
@@ -927,4 +930,7 @@ void jgrf_video_gl_text(int index, int frames, const char *msg) {
 
 void jgrf_video_gl_rehash(void) {
     jgrf_video_gl_shader_setup();
+    SDL_SetWindowFullscreen(window, settings[VIDEO_FULLSCREEN].val ?
+        SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    jgrf_video_gl_resize();
 }
