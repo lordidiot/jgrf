@@ -39,7 +39,7 @@ static jg_setting_t settings[] = {
       "",
       0, 0, 1, 0
     },
-    { "Video: Scale Factor (Initial)", "N = Video Scale Factor",
+    { "Video: Scale (Initial)", "N = Video Scale Factor",
       "",
       3, 1, 8, 1
     },
@@ -61,27 +61,27 @@ static jg_setting_t settings[] = {
       "",
       2, 0, 3, 0
     },
-    { "CRTea: Custom Mask Strength", "N = CRTea Mask Strength",
+    { "CRTea: Mask Strength", "N = CRTea Mask Strength",
       "",
       5, 0, 10, 0
     },
-    { "CRTea: Custom Scanline Strength", "N = CRTea Scanline Strength",
+    { "CRTea: Scanline Strength", "N = CRTea Scanline Strength",
       "",
       6, 0, 10, 0
     },
-    { "CRTea: Custom Sharpness", "N = CRTea Sharpness",
+    { "CRTea: Sharpness", "N = CRTea Sharpness",
       "",
       7, 0, 10, 0
     },
-    { "CRTea: Custom Curvature", "N = CRTea Curvature",
+    { "CRTea: Curve", "N = CRTea Curvature",
       "",
       2, 0, 10, 0
     },
-    { "CRTea: Custom Corner", "N = CRTea Corner",
+    { "CRTea: Corner", "N = CRTea Corner",
       "",
       3, 0, 10, 0
     },
-    { "CRTea: Custom Trinitron Curvature", "N = CRTea Trinitron Curvature",
+    { "CRTea: Trinitron Curve", "N = CRTea Trinitron Curvature",
       "",
       10, 0, 10, 0
     },
