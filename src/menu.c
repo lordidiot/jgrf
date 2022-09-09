@@ -43,6 +43,9 @@ typedef struct _menunode_t {
 
 static struct ezmenu ezm;
 
+// Pointer to the core's video information
+static jg_videoinfo_t *vidinfo = NULL;
+
 static jg_setting_t *settings = NULL;
 static jg_setting_t *emusettings = NULL;
 static size_t numemusettings = 0;
@@ -238,7 +241,7 @@ void jgrf_menu_display(void) {
         linebuf[i] = (char*)calloc(DESCSIZE, 1);
 
     menulevel = menuroot->child;
-    ezmenu_init(&ezm, 400, 320, 20, 24); // FIXME arbitrary values...
+    ezmenu_init(&ezm, vidinfo->w, vidinfo->h, 10, 12);
     ezmenu_setheader(&ezm, menuroot->desc);
     ezmenu_setfooter(&ezm, "");
     ezm.wraparound = 1;
@@ -302,4 +305,8 @@ void jgrf_menu_input_handler(SDL_Event *event) {
             break;
         }
     }
+}
+
+void jgrf_menu_set_vinfo(jg_videoinfo_t *ptr) {
+    vidinfo = ptr;
 }

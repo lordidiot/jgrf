@@ -27,6 +27,7 @@
 #include "audio.h"
 #include "cheats.h"
 #include "cli.h"
+#include "menu.h"
 #include "input.h"
 #include "settings.h"
 #include "video.h"
@@ -349,6 +350,7 @@ static void jgrf_core_load(const char *corepath) {
     jgrf_set_paths();
 
     // Set up the videoinfo/audioinfo pointers in the frontend
+    jgrf_menu_set_vinfo(jgapi.jg_get_videoinfo());
     jgrf_video_set_info(jgapi.jg_get_videoinfo());
     jgrf_audio_set_info(jgapi.jg_get_audioinfo());
 

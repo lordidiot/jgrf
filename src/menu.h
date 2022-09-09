@@ -11,5 +11,6 @@
 
 void jgrf_menu_display(void);
 void jgrf_menu_input_handler(SDL_Event*);
+void jgrf_menu_set_vinfo(jg_videoinfo_t*);
 
 #endif
