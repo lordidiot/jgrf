@@ -185,6 +185,7 @@ static void jgrf_menu_select_frontend(int item) {
             settings[node->parent->val].restart ?
             " (restart required)" : ""
         );
+        menupath >>= 8;
     }
 }
 
@@ -212,6 +213,7 @@ static void jgrf_menu_select_emu(int item) {
         else {
             jgrf_log(JG_LOG_SCR, "No Emulator Settings");
         }
+        menupath >>= 8;
     }
 }
 
