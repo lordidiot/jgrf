@@ -41,7 +41,11 @@ typedef struct _menunode_t {
     int val;
 } menunode_t;
 
+// ezmenu context
 static struct ezmenu ezm;
+
+// Menu can remember its path in the menu 4 levels deep (8 bits per level)
+static uint32_t menupath = 0;
 
 // Pointer to the core's video information
 static jg_videoinfo_t *vidinfo = NULL;
@@ -241,6 +245,7 @@ void jgrf_menu_display(void) {
         linebuf[i] = (char*)calloc(DESCSIZE, 1);
 
     menulevel = menuroot->child;
+    menupath = 0;
     ezmenu_init(&ezm, vidinfo->w, vidinfo->h, 10, 12);
     ezmenu_setheader(&ezm, menuroot->desc);
     ezmenu_setfooter(&ezm, "");
@@ -256,6 +261,8 @@ void jgrf_menu_input_handler(SDL_Event *event) {
             if (menulevel != menuroot->child) {
                 menulevel = menulevel->parent->parent->child;
                 jgrf_menu_level();
+                ezm.sel = menupath & 0xff;
+                menupath >>= 8;
                 ezmenu_update(&ezm);
                 jgrf_menu_text_redraw();
                 break;
@@ -283,6 +290,7 @@ void jgrf_menu_input_handler(SDL_Event *event) {
             break;
         }
         case SDL_SCANCODE_RETURN: {
+            menupath = (menupath << 8) | ezm.sel;
             if (menulevel == menuroot->child)
                 menumode = ezm.sel;
 
