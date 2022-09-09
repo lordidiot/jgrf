@@ -386,13 +386,18 @@ void jgrf_video_gl_render(int render) {
     // Draw framebuffer contents
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+    // Scale text to floor(window size) - 1, but never to 0
+    int textscale = (dimensions.rh / vidinfo->h / dimensions.dpiscale) - 1;
+    if (!textscale)
+        textscale = 1;
+
     // Draw any text that needs to be displayed
     if (textframes[0]) {
         gltBeginDraw();
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[0],
             0.0, floor(dimensions.rh),
-            dimensions.dpiscale * 2.0f, GLT_LEFT, GLT_BOTTOM);
+            dimensions.dpiscale * textscale, GLT_LEFT, GLT_BOTTOM);
         gltEndDraw();
         --textframes[0];
     }
@@ -403,7 +408,7 @@ void jgrf_video_gl_render(int render) {
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[1],
             floor(dimensions.rw), floor(dimensions.rh),
-            dimensions.dpiscale * 2.0f, GLT_RIGHT, GLT_BOTTOM);
+            dimensions.dpiscale * textscale, GLT_RIGHT, GLT_BOTTOM);
         gltEndDraw();
         --textframes[1];
     }
@@ -414,7 +419,7 @@ void jgrf_video_gl_render(int render) {
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[2],
             dimensions.rw / 20, dimensions.rh / 20,
-            dimensions.dpiscale * 2.0f, GLT_LEFT, GLT_TOP);
+            dimensions.dpiscale * textscale, GLT_LEFT, GLT_TOP);
         gltEndDraw();
     }
 }
