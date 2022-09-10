@@ -388,7 +388,7 @@ void jgrf_video_gl_render(int render) {
 
     // Scale text based on render width
     int ww = (dimensions.rw / dimensions.dpiscale);
-    int textscale = ww > 936 ? 4 : ww > 702 ? 3 : ww > 468 ? 2 : 1;
+    int textscale = ww > 1344 ? 4 : ww > 906 ? 3 : ww > 468 ? 2 : 1;
 
     // Draw any text that needs to be displayed
     if (textframes[0]) {
