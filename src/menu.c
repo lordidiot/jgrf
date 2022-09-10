@@ -23,7 +23,7 @@
 #include "menu.h"
 
 #define DESCSIZE 256
-#define NUMLINES 64
+#define NUMLINES 256
 #define TEXTSIZE 1024
 
 enum _menumode {

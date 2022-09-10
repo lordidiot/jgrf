@@ -225,7 +225,7 @@ void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
 }
 
 static void jgrf_settings_write_frontend(void) {
-    char ibuf[4]; // Buffer to hold integers converted to strings
+    char ibuf[5]; // Buffer to hold integers converted to strings
 
     // Audio
     snprintf(ibuf, sizeof(ibuf), "%d", settings[AUDIO_RSQUAL].val);
@@ -282,7 +282,7 @@ static void jgrf_settings_write_emu(void) {
         return;
     }
 
-    char ibuf[4]; // Buffer to hold integers converted to strings
+    char ibuf[5]; // Buffer to hold integers converted to strings
 
     for (size_t i = 0; i < numemusettings; ++i) {
         snprintf(ibuf, sizeof(ibuf), "%d", emusettings[i].val);
