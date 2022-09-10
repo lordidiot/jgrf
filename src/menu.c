@@ -338,7 +338,7 @@ void jgrf_menu_input_handler(SDL_Event *event) {
             jgrf_menu_text_redraw();
             break;
         }
-        case SDL_SCANCODE_RETURN: {
+        case SDL_SCANCODE_RETURN: case SDL_SCANCODE_RIGHT: {
             menupath = (menupath << 8) | ezm.sel;
             if (menulevel == menuroot->child)
                 menumode = ezm.sel;
