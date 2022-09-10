@@ -386,10 +386,9 @@ void jgrf_video_gl_render(int render) {
     // Draw framebuffer contents
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    // Scale text to floor(window size) - 1, but never to 0
-    int textscale = (dimensions.rh / vidinfo->h / dimensions.dpiscale) - 1;
-    if (!textscale)
-        textscale = 1;
+    // Scale text based on render width
+    int ww = (dimensions.rw / dimensions.dpiscale);
+    int textscale = ww > 936 ? 4 : ww > 702 ? 3 : ww > 468 ? 2 : 1;
 
     // Draw any text that needs to be displayed
     if (textframes[0]) {
@@ -418,8 +417,7 @@ void jgrf_video_gl_render(int render) {
         gltBeginDraw();
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[2],
-            floor(dimensions.rw / 20), floor(dimensions.rh / 20),
-            dimensions.dpiscale * textscale, GLT_LEFT, GLT_TOP);
+            20, 20, dimensions.dpiscale * textscale, GLT_LEFT, GLT_TOP);
         gltEndDraw();
     }
 }
