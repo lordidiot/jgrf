@@ -30,9 +30,7 @@ enum _menumode {
     FRONTEND,
     EMULATOR,
     INPUT,
-    SAVESETTINGS,
-    SAVESETTINGSEMU,
-    SAVESETTINGSCOMBINED
+    SAVESETTINGS
 };
 
 typedef struct _menunode_t {
@@ -219,6 +217,44 @@ static void jgrf_menu_select_emu(int item) {
     }
 }
 
+static void jgrf_menu_select_save(int item) {
+    menunode_t *node = menulevel;
+    // Seek to the correct node
+    for (int i = 0; i < item; ++i)
+        node = node->next;
+
+    // Check if there is a level below
+    if (node->child) {
+        menulevel = node->child;
+        jgrf_menu_level();
+    }
+    else {
+        switch (item) {
+            case 0: {
+                jgrf_settings_write(SETTINGS_FRONTEND);
+                jgrf_log(JG_LOG_SCR, "Saved Frontend Settings");
+                break;
+            }
+            case 1: {
+                if (numemusettings) {
+                    jgrf_settings_write(SETTINGS_EMULATOR);
+                    jgrf_log(JG_LOG_SCR, "Saved Emulator Settings");
+                }
+                else {
+                    jgrf_log(JG_LOG_SCR, "No Emulator Settings");
+                }
+                break;
+            }
+            case 2: {
+                jgrf_settings_write(SETTINGS_FRONTEND|SETTINGS_EMULATOR);
+                jgrf_log(JG_LOG_SCR, "Saved Combined Settings");
+                break;
+            }
+        }
+        menupath >>= 8;
+    }
+}
+
 // Initialize and display the menu on screen
 void jgrf_menu_display(void) {
     // Grab the frontend settings
@@ -242,13 +278,16 @@ void jgrf_menu_display(void) {
     node = jgrf_menu_node_add_child(menuroot);
     snprintf(node->desc, DESCSIZE, "Map Inputs");
 
-    node = jgrf_menu_node_add_child(menuroot);
+    menunode_t *savenode = jgrf_menu_node_add_child(menuroot);
+    snprintf(savenode->desc, DESCSIZE, "Save Settings");
+
+    node = jgrf_menu_node_add_child(savenode);
     snprintf(node->desc, DESCSIZE, "Save Frontend Settings");
 
-    node = jgrf_menu_node_add_child(menuroot);
+    node = jgrf_menu_node_add_child(savenode);
     snprintf(node->desc, DESCSIZE, "Save Emulator Settings");
 
-    node = jgrf_menu_node_add_child(menuroot);
+    node = jgrf_menu_node_add_child(savenode);
     snprintf(node->desc, DESCSIZE, "Save Combined Settings");
 
     for (unsigned i = 0; i < NUMLINES; ++i)
@@ -308,26 +347,7 @@ void jgrf_menu_input_handler(SDL_Event *event) {
                 case FRONTEND: jgrf_menu_select_frontend(ezm.sel); break;
                 case EMULATOR: jgrf_menu_select_emu(ezm.sel); break;
                 case INPUT: jgrf_log(JG_LOG_SCR, "Unavailable"); break;
-                case SAVESETTINGS: {
-                    jgrf_settings_write(SETTINGS_FRONTEND);
-                    jgrf_log(JG_LOG_SCR, "Saved Frontend Settings");
-                    break;
-                }
-                case SAVESETTINGSEMU: {
-                    if (numemusettings) {
-                        jgrf_settings_write(SETTINGS_EMULATOR);
-                        jgrf_log(JG_LOG_SCR, "Saved Emulator Settings");
-                    }
-                    else {
-                        jgrf_log(JG_LOG_SCR, "No Emulator Settings");
-                    }
-                    break;
-                }
-                case SAVESETTINGSCOMBINED: {
-                    jgrf_settings_write(SETTINGS_FRONTEND|SETTINGS_EMULATOR);
-                    jgrf_log(JG_LOG_SCR, "Saved Combined Settings");
-                    break;
-                }
+                case SAVESETTINGS: jgrf_menu_select_save(ezm.sel); break;
             }
 
             ezmenu_update(&ezm);
