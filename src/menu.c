@@ -267,7 +267,7 @@ void jgrf_menu_display(void) {
 
 void jgrf_menu_input_handler(SDL_Event *event) {
     switch (event->key.keysym.scancode) {
-        case SDL_SCANCODE_TAB: {
+        case SDL_SCANCODE_TAB: case SDL_SCANCODE_LEFT: {
             if (menulevel != menuroot->child) {
                 menulevel = menulevel->parent->parent->child;
                 jgrf_menu_level();
