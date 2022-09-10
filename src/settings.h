@@ -34,5 +34,6 @@ jg_setting_t* jgrf_settings_emu_ptr(size_t*);
 void jgrf_settings_emu(jg_setting_t* (*)(size_t*));
 void jgrf_settings_override(const char *);
 void jgrf_settings_write(void);
+void jgrf_settings_write_emu(void);
 
 #endif

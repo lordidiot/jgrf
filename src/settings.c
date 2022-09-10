@@ -286,3 +286,22 @@ void jgrf_settings_write(void) {
     // Clean up the config data
     ini_table_destroy(conf);
 }
+
+void jgrf_settings_write_emu(void) {
+    conf = ini_table_create();
+
+    char ibuf[4]; // Buffer to hold integers converted to strings
+
+    char path[192];
+    snprintf(path, sizeof(path), "%s%s.ini",
+        gdata->configpath, gdata->corename);
+
+    for (size_t i = 0; i < numemusettings; ++i) {
+        snprintf(ibuf, sizeof(ibuf), "%d", emusettings[i].val);
+        ini_table_create_entry(conf, gdata->corename, emusettings[i].name,
+            ibuf);
+    }
+
+    ini_table_write_to_file(conf, path);
+    ini_table_destroy(conf);
+}

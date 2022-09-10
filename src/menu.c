@@ -30,7 +30,8 @@ enum _menumode {
     FRONTEND,
     EMULATOR,
     INPUT,
-    SAVESETTINGS
+    SAVESETTINGS,
+    SAVESETTINGSEMU
 };
 
 typedef struct _menunode_t {
@@ -241,7 +242,10 @@ void jgrf_menu_display(void) {
     snprintf(node->desc, DESCSIZE, "Map Inputs");
 
     node = jgrf_menu_node_add_child(menuroot);
-    snprintf(node->desc, DESCSIZE, "Save Settings");
+    snprintf(node->desc, DESCSIZE, "Save Frontend Settings");
+
+    node = jgrf_menu_node_add_child(menuroot);
+    snprintf(node->desc, DESCSIZE, "Save Emulator Settings");
 
     for (unsigned i = 0; i < NUMLINES; ++i)
         linebuf[i] = (char*)calloc(DESCSIZE, 1);
@@ -303,6 +307,11 @@ void jgrf_menu_input_handler(SDL_Event *event) {
                 case SAVESETTINGS: {
                     jgrf_settings_write();
                     jgrf_log(JG_LOG_SCR, "Saved Frontend Settings");
+                    break;
+                }
+                case SAVESETTINGSEMU: {
+                    jgrf_settings_write_emu();
+                    jgrf_log(JG_LOG_SCR, "Saved Emulator Settings");
                     break;
                 }
             }
