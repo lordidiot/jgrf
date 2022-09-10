@@ -31,7 +31,8 @@ enum _menumode {
     EMULATOR,
     INPUT,
     SAVESETTINGS,
-    SAVESETTINGSEMU
+    SAVESETTINGSEMU,
+    SAVESETTINGSCOMBINED
 };
 
 typedef struct _menunode_t {
@@ -247,6 +248,9 @@ void jgrf_menu_display(void) {
     node = jgrf_menu_node_add_child(menuroot);
     snprintf(node->desc, DESCSIZE, "Save Emulator Settings");
 
+    node = jgrf_menu_node_add_child(menuroot);
+    snprintf(node->desc, DESCSIZE, "Save Combined Settings");
+
     for (unsigned i = 0; i < NUMLINES; ++i)
         linebuf[i] = (char*)calloc(DESCSIZE, 1);
 
@@ -305,13 +309,18 @@ void jgrf_menu_input_handler(SDL_Event *event) {
                 case EMULATOR: jgrf_menu_select_emu(ezm.sel); break;
                 case INPUT: jgrf_log(JG_LOG_SCR, "Unavailable"); break;
                 case SAVESETTINGS: {
-                    jgrf_settings_write();
+                    jgrf_settings_write(SETTINGS_FRONTEND);
                     jgrf_log(JG_LOG_SCR, "Saved Frontend Settings");
                     break;
                 }
                 case SAVESETTINGSEMU: {
-                    jgrf_settings_write_emu();
+                    jgrf_settings_write(SETTINGS_EMULATOR);
                     jgrf_log(JG_LOG_SCR, "Saved Emulator Settings");
+                    break;
+                }
+                case SAVESETTINGSCOMBINED: {
+                    jgrf_settings_write(SETTINGS_FRONTEND|SETTINGS_EMULATOR);
+                    jgrf_log(JG_LOG_SCR, "Saved Combined Settings");
                     break;
                 }
             }

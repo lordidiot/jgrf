@@ -9,6 +9,9 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#define SETTINGS_FRONTEND 0x01
+#define SETTINGS_EMULATOR 0x02
+
 enum _jgrf_settings {
     AUDIO_RSQUAL,
     VIDEO_API,
@@ -33,7 +36,6 @@ jg_setting_t* jgrf_settings_ptr(void);
 jg_setting_t* jgrf_settings_emu_ptr(size_t*);
 void jgrf_settings_emu(jg_setting_t* (*)(size_t*));
 void jgrf_settings_override(const char *);
-void jgrf_settings_write(void);
-void jgrf_settings_write_emu(void);
+void jgrf_settings_write(int);
 
 #endif

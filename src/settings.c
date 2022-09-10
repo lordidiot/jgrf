@@ -224,14 +224,8 @@ void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
     ini_table_destroy(conf);
 }
 
-void jgrf_settings_write(void) {
-    // Create data structure
-    conf = ini_table_create();
-
+static void jgrf_settings_write_frontend(void) {
     char ibuf[4]; // Buffer to hold integers converted to strings
-
-    char path[192];
-    snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
 
     // Audio
     snprintf(ibuf, sizeof(ibuf), "%d", settings[AUDIO_RSQUAL].val);
@@ -280,28 +274,37 @@ void jgrf_settings_write(void) {
 
     snprintf(ibuf, sizeof(ibuf), "%d", settings[MISC_FRONTENDLOG].val);
     ini_table_create_entry(conf, "misc", "frontendlog", ibuf);
-
-    ini_table_write_to_file(conf, path);
-
-    // Clean up the config data
-    ini_table_destroy(conf);
 }
 
-void jgrf_settings_write_emu(void) {
-    conf = ini_table_create();
-
+static void jgrf_settings_write_emu(void) {
     char ibuf[4]; // Buffer to hold integers converted to strings
-
-    char path[192];
-    snprintf(path, sizeof(path), "%s%s.ini",
-        gdata->configpath, gdata->corename);
 
     for (size_t i = 0; i < numemusettings; ++i) {
         snprintf(ibuf, sizeof(ibuf), "%d", emusettings[i].val);
         ini_table_create_entry(conf, gdata->corename, emusettings[i].name,
             ibuf);
     }
+}
+
+void jgrf_settings_write(int opts) {
+    // Create data structure
+    conf = ini_table_create();
+    char path[256];
+
+    if (opts & SETTINGS_EMULATOR) { // Emulator Settings
+        snprintf(path, sizeof(path), "%s%s.ini",
+            gdata->configpath, gdata->corename);
+        jgrf_settings_write_emu();
+        if (opts & SETTINGS_FRONTEND) // Combined Settings
+            jgrf_settings_write_frontend();
+    }
+    else if (opts & SETTINGS_FRONTEND) { // Frontend Settings
+        snprintf(path, sizeof(path), "%ssettings.ini", gdata->configpath);
+        jgrf_settings_write_frontend();
+    }
 
     ini_table_write_to_file(conf, path);
+
+    // Clean up the config data
     ini_table_destroy(conf);
 }
