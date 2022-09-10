@@ -314,8 +314,13 @@ void jgrf_menu_input_handler(SDL_Event *event) {
                     break;
                 }
                 case SAVESETTINGSEMU: {
-                    jgrf_settings_write(SETTINGS_EMULATOR);
-                    jgrf_log(JG_LOG_SCR, "Saved Emulator Settings");
+                    if (numemusettings) {
+                        jgrf_settings_write(SETTINGS_EMULATOR);
+                        jgrf_log(JG_LOG_SCR, "Saved Emulator Settings");
+                    }
+                    else {
+                        jgrf_log(JG_LOG_SCR, "No Emulator Settings");
+                    }
                     break;
                 }
                 case SAVESETTINGSCOMBINED: {

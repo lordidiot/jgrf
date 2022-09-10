@@ -277,6 +277,11 @@ static void jgrf_settings_write_frontend(void) {
 }
 
 static void jgrf_settings_write_emu(void) {
+    if (!numemusettings) {
+        jgrf_log(JG_LOG_DBG, "No Emulator Settings\n");
+        return;
+    }
+
     char ibuf[4]; // Buffer to hold integers converted to strings
 
     for (size_t i = 0; i < numemusettings; ++i) {
