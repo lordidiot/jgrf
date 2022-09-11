@@ -61,6 +61,8 @@ static char textbuf[TEXTSIZE]; // Buffer for all text on screen
 static char *linebuf[NUMLINES]; // 64 lines of 255 + '\0' characters
 
 static int menumode = 0;
+static int settinglevel = 0;
+static int settingactive = 0;
 
 static menunode_t* jgrf_menu_node_create(void) {
     return (menunode_t*)calloc(1, sizeof(menunode_t));
@@ -161,7 +163,10 @@ static void jgrf_menu_text_redraw(void) {
             strcat(textbuf, "- ");
 
         strcat(textbuf, ezm.vislines[i]);
-        strcat(textbuf, "\n");
+        if (settinglevel && settingactive == (i - 2))
+            strcat(textbuf, " *\n");
+        else
+            strcat(textbuf, "\n");
     }
     jgrf_video_text(2, 1, textbuf);
 }
@@ -172,13 +177,20 @@ static void jgrf_menu_select_frontend(int item) {
     for (int i = 0; i < item; ++i)
         node = node->next;
 
+    if (!settinglevel && !node->child->child)
+        settinglevel = 1;
+
     // Check if there is a level below
     if (node->child) {
         menulevel = node->child;
         jgrf_menu_level();
+        if (settinglevel)
+            settingactive = settings[item].val - settings[item].min;
     }
     else { // No child, means it has a value to set
         settings[node->parent->val].val = node->val;
+        settinglevel = 1;
+        settingactive = item;
         jgrf_rehash_frontend();
         jgrf_log(JG_LOG_SCR, "%s: %s%s",
             node->parent->desc, node->desc,
@@ -195,14 +207,21 @@ static void jgrf_menu_select_emu(int item) {
     for (int i = 0; i < item; ++i)
         node = node->next;
 
+    if (!settinglevel && !node->child->child)
+        settinglevel = 1;
+
     // Check if there is a level below
     if (node->child) {
         menulevel = node->child;
         jgrf_menu_level();
+        if (settinglevel)
+            settingactive = emusettings[item].val - emusettings[item].min;
     }
     else { // No child, means it has a value to set or there are no settings
         if (numemusettings) {
             emusettings[node->parent->val].val = node->val;
+            settinglevel = 1;
+            settingactive = item;
             jgrf_rehash_core();
             jgrf_log(JG_LOG_SCR, "%s: %s%s",
                 node->parent->desc, node->desc,
@@ -307,6 +326,7 @@ void jgrf_menu_display(void) {
 void jgrf_menu_input_handler(SDL_Event *event) {
     switch (event->key.keysym.scancode) {
         case SDL_SCANCODE_TAB: case SDL_SCANCODE_LEFT: {
+            settinglevel = 0;
             if (menulevel != menuroot->child) {
                 menulevel = menulevel->parent->parent->child;
                 jgrf_menu_level();
@@ -326,6 +346,7 @@ void jgrf_menu_input_handler(SDL_Event *event) {
             for (unsigned i = 0; i < NUMLINES; ++i)
                 free(linebuf[i]);
             jgrf_input_menu_enable(0);
+            settinglevel = 0;
             break;
         }
         case SDL_SCANCODE_UP: {
