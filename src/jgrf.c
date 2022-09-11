@@ -88,7 +88,8 @@ static struct _loaded {
     int audio;
     int video;
     int input;
-} loaded = { 0, 0, 0, 0, 0 };
+    int settings;
+} loaded = { 0, 0, 0, 0, 0, 0 };
 
 // Frontend knows the game and path info and passes this to the core
 static jg_fileinfo_t gameinfo;
@@ -911,6 +912,7 @@ void jgrf_quit(int status) {
     if (loaded.audio) jgrf_audio_deinit();
     if (loaded.video) jgrf_video_deinit();
     if (loaded.input) jgrf_input_deinit();
+    if (loaded.settings) jgrf_settings_deinit();
     if (gameinfo.data) free(gameinfo.data);
     for (int i = 0; i < gdata.numauxfiles; ++i)
         if (auxinfo[i].data) free(auxinfo[i].data);
@@ -1018,7 +1020,7 @@ int main(int argc, char *argv[]) {
         "%sscreenshots/", gdata.datapath);
 
     // Load settings
-    jgrf_settings_init();
+    loaded.settings = jgrf_settings_init();
 
     // Set up function pointers for video
     jgrf_video_setfuncs();

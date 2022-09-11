@@ -32,11 +32,13 @@ enum _jgrf_settings {
     JGRF_SETTINGS_MAX
 };
 
-void jgrf_settings_init(void);
+int jgrf_settings_init(void);
+void jgrf_settings_deinit(void);
 jg_setting_t* jgrf_settings_ptr(void);
 jg_setting_t* jgrf_settings_emu_ptr(size_t*);
 void jgrf_settings_emu(jg_setting_t* (*)(size_t*));
 void jgrf_settings_override(const char *);
 void jgrf_settings_write(int);
+void jgrf_settings_default(int);
 
 #endif

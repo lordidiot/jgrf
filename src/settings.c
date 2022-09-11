@@ -24,6 +24,10 @@ static jgrf_gdata_t *gdata;
 
 static size_t numemusettings = 0;
 static jg_setting_t *emusettings = NULL;
+static int *emusettings_default = NULL;
+
+static size_t numsettings = 0;
+static int *settings_default = NULL;
 
 static jg_setting_t settings[] = {
     { "Audio: Resampler Quality", "N = Resampler Quality",
@@ -156,9 +160,27 @@ static void jgrf_settings_read(void) {
 }
 
 // Initialize the settings to defaults and grab global data pointer
-void jgrf_settings_init(void) {
+int jgrf_settings_init(void) {
+    // Grab global data pointer
     gdata = jgrf_gdata_ptr();
+
+    // Store settings defaults to allow restoration later
+    numsettings = sizeof(settings) / sizeof(jg_setting_t);
+    settings_default = (int*)calloc(numsettings, sizeof(int));
+    for (size_t i = 0; i < numsettings; ++i)
+        settings_default[i] = settings[i].val;
+
+    // Read settings from config file
     jgrf_settings_read();
+
+    return 1;
+}
+
+void jgrf_settings_deinit(void) {
+    if (settings_default)
+        free(settings_default);
+    if (emusettings_default)
+        free(emusettings_default);
 }
 
 // Read core-specific overrides for frontend settings
@@ -199,6 +221,9 @@ void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
         return;
     }
 
+    // Create an array of default settings
+    emusettings_default = (int*)calloc(numemusettings, sizeof(int));
+
     // Build the .ini path for emulator-specific settings
     char path[256];
     snprintf(path, sizeof(path), "%s%s.ini",
@@ -210,6 +235,7 @@ void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
         jgrf_log(JG_LOG_DBG, "Core configuration file not found: %s\n", path);
 
     for (size_t i = 0; i < numemusettings; ++i) {
+        emusettings_default[i] = emusettings[i].val; // Store default setting
         if (ini_table_check_entry(conf, gdata->corename,
             emusettings[i].name)) {
 
@@ -320,4 +346,18 @@ void jgrf_settings_write(int opts) {
 
     // Clean up the config data
     ini_table_destroy(conf);
+}
+
+void jgrf_settings_default(int opts) {
+    if (opts & SETTINGS_FRONTEND) {
+        for (size_t i = 0; i < numsettings; ++i)
+            settings[i].val = settings_default[i];
+        jgrf_rehash_frontend();
+    }
+
+    if (opts & SETTINGS_EMULATOR) {
+        for (size_t i = 0; i < numemusettings; ++i)
+            emusettings[i].val = emusettings_default[i];
+        jgrf_rehash_core();
+    }
 }
