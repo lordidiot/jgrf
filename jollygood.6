@@ -203,6 +203,12 @@ feedback data is sent to this controller.
 The General Settings configuration file accepts the following sections.
 .Pp
 .Bl -tag -width <TAB><TAB> -offset indent -compact
+.It Ic [audio]
+.Bl -tag -width <TAB> -offset indent -compact
+.It Ic rsqual = Aq Cm 0-10
+Resampler Quality
+.Aq Default:  3
+.El
 .It Ic [video]
 .Bl -tag -width <TAB> -offset indent -compact
 .It Ic api = Aq Cm 0-2
@@ -258,12 +264,6 @@ CRtea Corner Size
 CRTea Trinitron Curve Strength
 .Aq Default: 10
 .El
-.It Ic [audio]
-.Bl -tag -width <TAB> -offset indent -compact
-.It Ic rsqual = Aq Cm 0-10
-Resampler Quality
-.Aq Default:  3
-.El
 .It Ic [misc]
 .Bl -tag -width <TAB> -offset indent -compact
 .It Ic corelog = Aq Cm 0-3
@@ -280,6 +280,9 @@ Frontend logging options
 .D1 1 = Info
 .D1 2 = Warning
 .D1 3 = Error
+.It Ic textscale = Cm N
+Text Scale Factor
+.Aq Default: 2
 .El
 .El
 .Pp

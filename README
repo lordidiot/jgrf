@@ -110,6 +110,10 @@ Settings
 --------
 Below is an example of the General Settings configuration file, with defaults:
 
+[audio]
+;N = Resampler Quality (0-10)
+rsqual = 3
+
 [video]
 ; 0 = OpenGL Core Profile, 1 = OpenGL ES, 2 = OpenGL Compatibility Profile
 api = 0
@@ -148,16 +152,15 @@ crtea_corner = 3
 ;N = Trinitron Curve Strength
 crtea_tcurve = 10
 
-[audio]
-;N = Resampler Quality (0-10)
-rsqual = 3
-
 [misc]
 ;0 = Debug, 1 = Info, 2 = Warning, 3 = Error
 corelog = 1
 
 ;0 = Debug, 1 = Info, 2 = Warning, 3 = Error
 frontendlog = 1
+
+;N = Text Scale
+textscale = 2
 
 The above configuration settings may be overridden in a core specific
 configuration file. Additionally, you may add a section for Emulator Settings.

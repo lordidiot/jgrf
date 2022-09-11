@@ -386,17 +386,14 @@ void jgrf_video_gl_render(int render) {
     // Draw framebuffer contents
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    // Scale text based on render width
-    int ww = (dimensions.rw / dimensions.dpiscale);
-    int textscale = ww > 1344 ? 4 : ww > 906 ? 3 : ww > 468 ? 2 : 1;
-
     // Draw any text that needs to be displayed
     if (textframes[0]) {
         gltBeginDraw();
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[0],
             0.0, floor(dimensions.rh),
-            dimensions.dpiscale * textscale, GLT_LEFT, GLT_BOTTOM);
+            dimensions.dpiscale * settings[MISC_TEXTSCALE].val,
+            GLT_LEFT, GLT_BOTTOM);
         gltEndDraw();
         --textframes[0];
     }
@@ -407,7 +404,8 @@ void jgrf_video_gl_render(int render) {
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[1],
             floor(dimensions.rw), floor(dimensions.rh),
-            dimensions.dpiscale * textscale, GLT_RIGHT, GLT_BOTTOM);
+            dimensions.dpiscale * settings[MISC_TEXTSCALE].val,
+            GLT_RIGHT, GLT_BOTTOM);
         gltEndDraw();
         --textframes[1];
     }
@@ -417,7 +415,8 @@ void jgrf_video_gl_render(int render) {
         gltBeginDraw();
         gltColor(0.831f, 0.333f, 0.0f, 1.0f); // Jolly Good Orange
         gltDrawText2DAligned(msgtext[2],
-            20, 20, dimensions.dpiscale * textscale, GLT_LEFT, GLT_TOP);
+            20, 20, dimensions.dpiscale * settings[MISC_TEXTSCALE].val,
+            GLT_LEFT, GLT_TOP);
         gltEndDraw();
     }
 }

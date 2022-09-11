@@ -28,6 +28,7 @@ enum _jgrf_settings {
     VIDEO_CRTEA_TCURVE,
     MISC_CORELOG,
     MISC_FRONTENDLOG,
+    MISC_TEXTSCALE,
     JGRF_SETTINGS_MAX
 };
 

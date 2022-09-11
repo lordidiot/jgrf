@@ -93,6 +93,10 @@ static jg_setting_t settings[] = {
       "",
       1, 0, 3, 0
     },
+    { "Text Scale Factor", "N = Text Scale Factor",
+      "",
+      2, 1, 8, 0
+    },
 };
 
 // Read a setting with boundary check
@@ -132,6 +136,7 @@ static void jgrf_settings_handler(void) {
     // Misc
     jgrf_setting_rd("misc", "corelog", &settings[MISC_CORELOG]);
     jgrf_setting_rd("misc", "frontendlog", &settings[MISC_FRONTENDLOG]);
+    jgrf_setting_rd("misc", "textscale", &settings[MISC_TEXTSCALE]);
 }
 
 // Read the general settings ini to override defaults
@@ -274,6 +279,9 @@ static void jgrf_settings_write_frontend(void) {
 
     snprintf(ibuf, sizeof(ibuf), "%d", settings[MISC_FRONTENDLOG].val);
     ini_table_create_entry(conf, "misc", "frontendlog", ibuf);
+
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[MISC_TEXTSCALE].val);
+    ini_table_create_entry(conf, "misc", "textscale", ibuf);
 }
 
 static void jgrf_settings_write_emu(void) {
