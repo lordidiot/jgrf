@@ -71,8 +71,8 @@ TAB                     - Open Menu
 `                       - Fast-forward
 F1                      - Soft Reset
 F2                      - Hard Reset
-F3                      - Switch Media (FDS Disks or CDs)
-F4                      - Insert/Remove Media
+F3                      - Insert/Remove Media
+F4                      - Switch Media (FDS Disks or CDs)
 F5                      - Save State (Slot 0)
 F6                      - Save State (Slot 1)
 F7                      - Load State (Slot 0)
