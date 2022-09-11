@@ -50,6 +50,9 @@ struct ezmenu {
 	/* whether to wrap around if user presses up on first item, or down on
 	   last */
 	int wraparound;
+	int yscroll; /* difference between first line and first visible line */
+	int start; /* first non-header line */
+	int end; /* last non-footer line */
 };
 
 /* ezmenu only cares about down and up events, to scroll and select.
@@ -90,11 +93,12 @@ static void ezmenu_setfooter(struct ezmenu *m, char* ftr) {
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 static void ezmenu_update(struct ezmenu *m) {
-	int start = (!!m->header)*2, end = m->h - (!!m->footer)*2;
-	int vis = end - start;
-	int y, ly = MAX(0, m->sel - vis/2);
+	m->start = (!!m->header)*2;
+	m->end = m->h - (!!m->footer)*2;
+	int vis = m->end - m->start;
+	int y, ly = m->yscroll = MAX(0, m->sel - vis/2);
 	m->vissel = (m->sel-ly)+(!!m->header)*2;
-	for(y = start; y < end; ++y) {
+	for(y = m->start; y < m->end; ++y) {
 		m->vislines[y] = ly>=m->linecount?"":m->lines[ly++];
 	}
 }
