@@ -157,13 +157,20 @@ static void jgrf_menu_level(void) {
 static void jgrf_menu_text_redraw(void) {
     textbuf[0] = '\0';
     for (int i = 0; i < ezm.h; ++i) {
+        // menu line being drawn (offset from header)
+        int mline = i - ezm.start;
+
+        // active setting in relation to scroll offset
+        int active = settingactive - ezm.yscroll;
+
         if (i == ezm.vissel)
             strcat(textbuf, "+ ");
         else if (i > 1 && strlen(ezm.vislines[i]))
             strcat(textbuf, "- ");
 
         strcat(textbuf, ezm.vislines[i]);
-        if (settinglevel && settingactive == (i - 2))
+
+        if (settinglevel && i >= ezm.start && i < ezm.end && active == mline)
             strcat(textbuf, " *\n");
         else
             strcat(textbuf, "\n");
