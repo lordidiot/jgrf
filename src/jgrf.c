@@ -811,7 +811,7 @@ int jgrf_game_detect_sys(const char *filename) {
 }
 
 // Set the default core for a detected system - can be overridden at CLI
-static int jgrf_core_default() {
+static int jgrf_core_default(void) {
     if (!strcmp(gdata.sys, "32x"))
         snprintf(gdata.corename, sizeof(gdata.corename), "picodrive");
 
@@ -881,12 +881,12 @@ void jgrf_reset(int hard) {
 }
 
 // Select disc/disk or other media to be used by the core
-void jgrf_media_select() {
+void jgrf_media_select(void) {
     jgapi.jg_media_select();
 }
 
 // Insert/eject media
-void jgrf_media_insert() {
+void jgrf_media_insert(void) {
     jgapi.jg_media_insert();
 }
 
@@ -901,7 +901,7 @@ void jgrf_rehash_frontend(void) {
 }
 
 // Call to stop and shut down at the end of the current iteration
-void jgrf_schedule_quit() {
+void jgrf_schedule_quit(void) {
     running = 0;
 }
 
