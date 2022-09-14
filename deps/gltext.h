@@ -1,6 +1,6 @@
 
-// Repository: https://github.com/MrVallentin/glText
-// License: https://github.com/MrVallentin/glText/blob/master/LICENSE.md
+// Repository: https://github.com/vallentin/glText
+// License: https://github.com/vallentin/glText/blob/master/LICENSE.md
 
 // In one C or C++ file, define GLT_IMPLEMENTATION prior to inclusion to create the implementation.
 //   #define GLT_IMPLEMENTATION
@@ -38,6 +38,8 @@
 // - Commented unused functions, added transparency from github issues list:
 //   https://github.com/vallentin/glText/issues/2#issuecomment-431558916
 // - Added support for GLES 3.0
+// - Fixed -pedantic warnings with clang 15.0.0
+//   https://github.com/vallentin/glText/pull/20
 
 #ifndef GL_TEXT_H
 #define GL_TEXT_H
@@ -119,8 +121,8 @@ GLT_API GLboolean gltSetText(GLTtext *text, const char *string);
 
 GLT_API void gltViewport(GLsizei width, GLsizei height);
 
-GLT_API void gltBeginDraw();
-GLT_API void gltEndDraw();
+GLT_API void gltBeginDraw(void);
+GLT_API void gltEndDraw(void);
 
 //GLT_API void gltDrawText(GLTtext *text, const GLfloat mvp[16]);
 
@@ -380,7 +382,7 @@ GLT_API void gltViewport(GLsizei width, GLsizei height)
 	memcpy(_gltText2DProjectionMatrix, projection, 16 * sizeof(GLfloat));
 }
 
-GLT_API void gltBeginDraw()
+GLT_API void gltBeginDraw(void)
 {
 	glUseProgram(_gltText2DShader);
 
@@ -388,7 +390,7 @@ GLT_API void gltBeginDraw()
 	glBindTexture(GL_TEXTURE_2D, _gltText2DFontTexture);
 }
 
-GLT_API void gltEndDraw()
+GLT_API void gltEndDraw(void)
 {
 
 }
