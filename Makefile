@@ -42,13 +42,6 @@ endif
 
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
-# Conditions for LIBS
-ifeq ($(UNAME), NetBSD)
-else ifeq ($(UNAME), OpenBSD)
-else
-	LIBS += -ldl
-endif
-
 CSRCS := jgrf.c \
 	audio.c \
 	cheats.c \

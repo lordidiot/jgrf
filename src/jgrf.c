@@ -11,7 +11,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
-#include <dlfcn.h>
 #include <errno.h>
 #include <libgen.h>
 #include <sys/stat.h>
@@ -248,64 +247,77 @@ static void jgrf_callbacks_set(void) {
 // Load and set up the core
 static void jgrf_core_load(const char *corepath) {
     memset(&jgapi, 0, sizeof(jgapi));
-    jgapi.handle = dlopen(corepath, RTLD_LAZY);
+    jgapi.handle = SDL_LoadObject(corepath);
 
     if (!jgapi.handle)
-        jgrf_log(JG_LOG_ERR, "%s\n", dlerror());
+        jgrf_log(JG_LOG_ERR, "%s\n", SDL_GetError());
 
-    dlerror();
+    SDL_GetError();
 
-    *(void**)(&jgapi.jg_init) = dlsym(jgapi.handle, "jg_init");
-    *(void**)(&jgapi.jg_deinit) = dlsym(jgapi.handle, "jg_deinit");
-    *(void**)(&jgapi.jg_reset) = dlsym(jgapi.handle, "jg_reset");
-    *(void**)(&jgapi.jg_exec_frame) = dlsym(jgapi.handle, "jg_exec_frame");
-    *(void**)(&jgapi.jg_game_load) = dlsym(jgapi.handle, "jg_game_load");
-    *(void**)(&jgapi.jg_game_unload) = dlsym(jgapi.handle, "jg_game_unload");
-    *(void**)(&jgapi.jg_state_load) = dlsym(jgapi.handle, "jg_state_load");
-    *(void**)(&jgapi.jg_state_load_raw) = dlsym(jgapi.handle,
+
+    *(void**)(&jgapi.jg_init) = SDL_LoadFunction(jgapi.handle, "jg_init");
+    *(void**)(&jgapi.jg_deinit) = SDL_LoadFunction(jgapi.handle, "jg_deinit");
+    *(void**)(&jgapi.jg_reset) = SDL_LoadFunction(jgapi.handle, "jg_reset");
+    *(void**)(&jgapi.jg_exec_frame) = SDL_LoadFunction(jgapi.handle,
+        "jg_exec_frame");
+    *(void**)(&jgapi.jg_game_load) = SDL_LoadFunction(jgapi.handle,
+        "jg_game_load");
+    *(void**)(&jgapi.jg_game_unload) = SDL_LoadFunction(jgapi.handle,
+        "jg_game_unload");
+    *(void**)(&jgapi.jg_state_load) = SDL_LoadFunction(jgapi.handle,
+        "jg_state_load");
+    *(void**)(&jgapi.jg_state_load_raw) = SDL_LoadFunction(jgapi.handle,
         "jg_state_load_raw");
-    *(void**)(&jgapi.jg_state_save) = dlsym(jgapi.handle, "jg_state_save");
-    *(void**)(&jgapi.jg_state_save_raw) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_state_save) = SDL_LoadFunction(jgapi.handle,
+        "jg_state_save");
+    *(void**)(&jgapi.jg_state_save_raw) = SDL_LoadFunction(jgapi.handle,
         "jg_state_save_raw");
-    *(void**)(&jgapi.jg_state_size) = dlsym(jgapi.handle, "jg_state_size");
-    *(void**)(&jgapi.jg_media_select) = dlsym(jgapi.handle, "jg_media_select");
-    *(void**)(&jgapi.jg_media_insert) = dlsym(jgapi.handle, "jg_media_insert");
-    *(void**)(&jgapi.jg_cheat_clear) = dlsym(jgapi.handle, "jg_cheat_clear");
-    *(void**)(&jgapi.jg_cheat_set) = dlsym(jgapi.handle, "jg_cheat_set");
-    *(void**)(&jgapi.jg_rehash) = dlsym(jgapi.handle, "jg_rehash");
-    *(void**)(&jgapi.jg_input_audio) = dlsym(jgapi.handle, "jg_input_audio");
+    *(void**)(&jgapi.jg_state_size) = SDL_LoadFunction(jgapi.handle,
+        "jg_state_size");
+    *(void**)(&jgapi.jg_media_select) = SDL_LoadFunction(jgapi.handle,
+        "jg_media_select");
+    *(void**)(&jgapi.jg_media_insert) = SDL_LoadFunction(jgapi.handle,
+        "jg_media_insert");
+    *(void**)(&jgapi.jg_cheat_clear) = SDL_LoadFunction(jgapi.handle,
+        "jg_cheat_clear");
+    *(void**)(&jgapi.jg_cheat_set) = SDL_LoadFunction(jgapi.handle,
+        "jg_cheat_set");
+    *(void**)(&jgapi.jg_rehash) = SDL_LoadFunction(jgapi.handle,
+        "jg_rehash");
+    *(void**)(&jgapi.jg_input_audio) = SDL_LoadFunction(jgapi.handle,
+        "jg_input_audio");
 
-    *(void**)(&jgapi.jg_get_coreinfo) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_get_coreinfo) = SDL_LoadFunction(jgapi.handle,
         "jg_get_coreinfo");
-    *(void**)(&jgapi.jg_get_audioinfo) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_get_audioinfo) = SDL_LoadFunction(jgapi.handle,
         "jg_get_audioinfo");
-    *(void**)(&jgapi.jg_get_videoinfo) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_get_videoinfo) = SDL_LoadFunction(jgapi.handle,
         "jg_get_videoinfo");
-    *(void**)(&jgapi.jg_get_inputinfo) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_get_inputinfo) = SDL_LoadFunction(jgapi.handle,
         "jg_get_inputinfo");
-    *(void**)(&jgapi.jg_get_settings) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_get_settings) = SDL_LoadFunction(jgapi.handle,
         "jg_get_settings");
 
-    *(void**)(&jgapi.jg_setup_video) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_setup_video) = SDL_LoadFunction(jgapi.handle,
         "jg_setup_video");
-    *(void**)(&jgapi.jg_setup_audio) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_setup_audio) = SDL_LoadFunction(jgapi.handle,
         "jg_setup_audio");
-    *(void**)(&jgapi.jg_set_inputstate) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_set_inputstate) = SDL_LoadFunction(jgapi.handle,
         "jg_set_inputstate");
-    *(void**)(&jgapi.jg_set_gameinfo) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_set_gameinfo) = SDL_LoadFunction(jgapi.handle,
         "jg_set_gameinfo");
-    *(void**)(&jgapi.jg_set_auxinfo) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_set_auxinfo) = SDL_LoadFunction(jgapi.handle,
         "jg_set_auxinfo");
-    *(void**)(&jgapi.jg_set_paths) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_set_paths) = SDL_LoadFunction(jgapi.handle,
         "jg_set_paths");
 
-    *(void**)(&jgapi.jg_set_cb_log) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_set_cb_log) = SDL_LoadFunction(jgapi.handle,
         "jg_set_cb_log");
-    *(void**)(&jgapi.jg_set_cb_audio) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_set_cb_audio) = SDL_LoadFunction(jgapi.handle,
         "jg_set_cb_audio");
-    *(void**)(&jgapi.jg_set_cb_frametime) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_set_cb_frametime) = SDL_LoadFunction(jgapi.handle,
         "jg_set_cb_frametime");
-    *(void**)(&jgapi.jg_set_cb_rumble) = dlsym(jgapi.handle,
+    *(void**)(&jgapi.jg_set_cb_rumble) = SDL_LoadFunction(jgapi.handle,
         "jg_set_cb_rumble");
 
     // Set up values in global data struct
@@ -369,7 +381,7 @@ static void jgrf_core_unload(void) {
     jgapi.jg_deinit();
 
     if (jgapi.handle)
-        dlclose(jgapi.handle);
+        SDL_UnloadObject(jgapi.handle);
 }
 
 // Generate the CRC32 checksum of the game data
