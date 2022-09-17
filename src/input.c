@@ -612,8 +612,8 @@ void jgrf_input_handler(SDL_Event *event) {
             case SDL_KEYUP: jgrf_menu_input_handler(event); break;
             case SDL_JOYDEVICEADDED: jgrf_input_hotplug_add(event); break;
             case SDL_JOYDEVICEREMOVED: jgrf_input_hotplug_remove(event); break;
-            default: return;
         }
+        return;
     }
 
     // This needs to be fixed and worked into the rest of the system one day...
