@@ -87,6 +87,10 @@ static int confport = 0;
 static uint64_t conftimer = 0;
 static int menuactive = 0;
 
+void jgrf_input_config_enable(int e) {
+    confactive = e;
+}
+
 void jgrf_input_menu_enable(int e) {
     menuactive = e;
 }
@@ -338,7 +342,10 @@ static inline void jgrf_input_coords_scaled(int32_t x, int32_t y,
 static void jgrf_inputcfg(jg_inputinfo_t *iinfo) {
     if (confindex >= (iinfo->numaxes + iinfo->numbuttons)) {
         confactive = 0; // Turn off input config mode
+        confindex = 0;
         jgrf_video_text(2, 0, ""); // Disable display of input config info
+        if (menuactive)
+            jgrf_menu_text_redraw(); // Turn the menu text back on
         return;
     }
     else {
@@ -688,9 +695,7 @@ void jgrf_input_handler(SDL_Event *event) {
                     confport--;
                     confindex = 0;
 
-                    jgrf_input_undef_port(confport);
-                    jgrf_inputcfg(inputinfo[confport]);
-                    confchanged = 1;
+                    jgrf_input_config(confport);
                 }
                 break;
             }
@@ -794,4 +799,14 @@ void jgrf_input_handler(SDL_Event *event) {
 // Callback used by core to rumble the physical input device
 void jgrf_input_rumble(int port, float strength, size_t len) {
     SDL_HapticRumblePlay(haptic[rumblemap[port]], strength, len);
+}
+
+void jgrf_input_config(int port) {
+    jgrf_input_undef_port(port);
+    jgrf_inputcfg(inputinfo[port]);
+    confchanged = 1;
+}
+
+jg_inputinfo_t **jgrf_input_info_ptr(void) {
+    return inputinfo;
 }

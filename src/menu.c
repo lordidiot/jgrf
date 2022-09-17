@@ -63,6 +63,7 @@ static char *linebuf[NUMLINES]; // 64 lines of 255 + '\0' characters
 static int menumode = 0;
 static int settinglevel = 0;
 static int settingactive = 0;
+static int skip_redraw = 0;
 
 static menunode_t* jgrf_menu_node_create(void) {
     return (menunode_t*)calloc(1, sizeof(menunode_t));
@@ -141,6 +142,20 @@ static void jgrf_menu_gen(menunode_t *node, jg_setting_t *s, unsigned num) {
     }
 }
 
+// Generate the nodes for Input Mapping
+static void jgrf_menu_gen_input(menunode_t *node) {
+    jgrf_gdata_t *gdata = jgrf_gdata_ptr();
+    jg_inputinfo_t **inputinfo = jgrf_input_info_ptr();
+
+    for (int i = 0; i < gdata->numinputs; ++i) {
+        if (inputinfo[i]->name != NULL) {
+            menunode_t *menuitem = jgrf_menu_node_add_child(node);
+            snprintf(menuitem->desc, DESCSIZE, "%s", inputinfo[i]->name);
+            menuitem->val = i;
+        }
+    }
+}
+
 // Change menu level
 static void jgrf_menu_level(void) {
     menunode_t *node = menulevel;
@@ -154,7 +169,7 @@ static void jgrf_menu_level(void) {
 }
 
 // Redraw the text to be displayed on screen
-static void jgrf_menu_text_redraw(void) {
+void jgrf_menu_text_redraw(void) {
     textbuf[0] = '\0';
     for (int i = 0; i < ezm.h; ++i) {
         // menu line being drawn (offset from header)
@@ -176,6 +191,11 @@ static void jgrf_menu_text_redraw(void) {
             strcat(textbuf, "\n");
     }
     jgrf_video_text(2, 1, textbuf);
+
+    /* Ensure the menu can be redrawn if this function is called explicitly
+       after redrawing has been disabled
+    */
+    skip_redraw = 0;
 }
 
 static void jgrf_menu_select_frontend(int item) {
@@ -240,6 +260,25 @@ static void jgrf_menu_select_emu(int item) {
             jgrf_log(JG_LOG_SCR, "No Emulator Settings");
         }
         menupath >>= 8;
+    }
+}
+
+static void jgrf_menu_select_input(int item) {
+    menunode_t *node = menulevel;
+    // Seek to the correct node
+    for (int i = 0; i < item; ++i) {
+        node = node->next;
+    }
+
+    // Check if there is a level below
+    if (node->child) {
+        menulevel = node->child;
+        jgrf_menu_level();
+    }
+    else { // No child, means it can be configured
+        jgrf_input_config_enable(1);
+        jgrf_input_config(item);
+        skip_redraw = 1;
     }
 }
 
@@ -313,6 +352,7 @@ void jgrf_menu_display(void) {
 
     node = jgrf_menu_node_add_child(menuroot);
     snprintf(node->desc, DESCSIZE, "Map Inputs");
+    jgrf_menu_gen_input(node);
 
     menunode_t *savenode = jgrf_menu_node_add_child(menuroot);
     snprintf(savenode->desc, DESCSIZE, "Save/Restore Settings");
@@ -390,12 +430,13 @@ void jgrf_menu_input_handler(SDL_Event *event) {
             switch (menumode) {
                 case FRONTEND: jgrf_menu_select_frontend(ezm.sel); break;
                 case EMULATOR: jgrf_menu_select_emu(ezm.sel); break;
-                case INPUT: jgrf_log(JG_LOG_SCR, "Unavailable"); break;
+                case INPUT: jgrf_menu_select_input(ezm.sel); break;
                 case SAVESETTINGS: jgrf_menu_select_save(ezm.sel); break;
             }
 
             ezmenu_update(&ezm);
-            jgrf_menu_text_redraw();
+            if (!skip_redraw)
+                jgrf_menu_text_redraw();
             break;
         }
         default: {

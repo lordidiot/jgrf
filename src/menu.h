@@ -9,6 +9,7 @@
 #ifndef MENU_H
 #define MENU_H
 
+void jgrf_menu_text_redraw(void);
 void jgrf_menu_display(void);
 void jgrf_menu_input_handler(SDL_Event*);
 void jgrf_menu_set_vinfo(jg_videoinfo_t*);
