@@ -564,15 +564,15 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             jgrf_inputcfg(inputinfo[confport]);
             break;
         }
-        default: {
-            break;
-        }
         case SDL_JOYDEVICEADDED: {
             jgrf_input_hotplug_add(event);
             break;
         }
         case SDL_JOYDEVICEREMOVED: {
             jgrf_input_hotplug_remove(event);
+            break;
+        }
+        default: {
             break;
         }
     }
@@ -608,9 +608,12 @@ void jgrf_input_handler(SDL_Event *event) {
         return;
     }
     else if (menuactive) {
-        if (event->type == SDL_KEYUP)
-            jgrf_menu_input_handler(event);
-        return;
+        switch (event->type) {
+            case SDL_KEYUP: jgrf_menu_input_handler(event); break;
+            case SDL_JOYDEVICEADDED: jgrf_input_hotplug_add(event); break;
+            case SDL_JOYDEVICEREMOVED: jgrf_input_hotplug_remove(event); break;
+            default: return;
+        }
     }
 
     // This needs to be fixed and worked into the rest of the system one day...
