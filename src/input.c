@@ -804,6 +804,7 @@ void jgrf_input_rumble(int port, float strength, size_t len) {
 void jgrf_input_config(int port) {
     jgrf_input_undef_port(port);
     jgrf_inputcfg(inputinfo[port]);
+    confport = port;
     confchanged = 1;
 }
 
