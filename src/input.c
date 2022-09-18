@@ -384,6 +384,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             if (confindex < inputinfo[confport]->numaxes) {
                 jgrf_log(JG_LOG_WRN, "Trying to assign digital inputs to axes"
                     " is a losing endeavour. ESC to skip.\n");
+                jgrf_log(JG_LOG_SCR, "Analog input required");
                 break;
             }
 
@@ -404,6 +405,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             if (confindex < inputinfo[confport]->numaxes) {
                 jgrf_log(JG_LOG_WRN, "Trying to assign digital inputs to axes"
                     " is a losing endeavour. ESC to skip.\n");
+                jgrf_log(JG_LOG_SCR, "Analog input required");
                 break;
             }
 
@@ -518,6 +520,7 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
             if (confindex < inputinfo[confport]->numaxes) {
                 jgrf_log(JG_LOG_WRN, "Trying to assign digital inputs to axes"
                     " is a losing endeavour. ESC to skip.\n");
+                jgrf_log(JG_LOG_SCR, "Analog input required");
                 break;
             }
 
