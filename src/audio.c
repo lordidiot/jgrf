@@ -386,8 +386,8 @@ void jgrf_audio_unpause(void) {
 // Deinitialize the audio device and free buffers
 void jgrf_audio_deinit(void) {
     if (waveout) wave_writer_close(ww, &wwerror);
-    if (dev) SDL_CloseAudioDevice(dev);
     if (dev_in) SDL_CloseAudioDevice(dev_in);
+    if (dev) SDL_CloseAudioDevice(dev);
     if (resampler) speex_resampler_destroy(resampler);
 
     if (!(gdata->hints & JG_HINT_AUDIO_INTERNAL))
