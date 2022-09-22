@@ -6,7 +6,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#ifndef __APPLE__
 #define _POSIX_C_SOURCE 200112L
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
