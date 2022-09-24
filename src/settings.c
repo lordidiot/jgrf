@@ -30,74 +30,74 @@ static size_t numsettings = 0;
 static int *settings_default = NULL;
 
 static jg_setting_t settings[] = {
-    { "Audio: Resampler Quality", "N = Resampler Quality",
+    { "", "Audio: Resampler Quality", "N = Resampler Quality",
       "",
       3, 0, 10, 1
     },
-    { "Video: API",
+    { "", "Video: API",
       "0 = OpenGL Core, 1 = OpenGL ES, 2 = OpenGL Compatibility",
       "",
       0, 0, 2, 1
     },
-    { "Video: Fullscreen", "0 = Disabled, 1 = Enabled",
+    { "", "Video: Fullscreen", "0 = Disabled, 1 = Enabled",
       "",
       0, 0, 1, 0
     },
-    { "Video: Scale (Initial)", "N = Video Scale Factor",
+    { "", "Video: Scale (Initial)", "N = Video Scale Factor",
       "",
       3, 1, 8, 1
     },
-    { "Video: Shader",
+    { "", "Video: Shader",
       "0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, "
       "3 = Anti-Aliased Nearest Neighbour, 4 = CRT-Bespoke, 5 = CRTea, 6 = LCD",
       "",
       2, 0, 6, 0
     },
-    { "Video: CRTea Mode",
+    { "", "Video: CRTea Mode",
       "0 = Scanlines, 1 = Aperture Grille Lite, 2 = Aperture Grille, "
       "3 = Shadow Mask, 4 = Custom",
       "",
       2, 0, 4, 0
     },
-    { "CRTea: Custom Mask Type",
+    { "", "CRTea: Custom Mask Type",
       "0 = No Mask, 1 = Aperture Grille Lite, 2 = Aperture Grille, "
       "3 = Shadow Mask",
       "",
       2, 0, 3, 0
     },
-    { "CRTea: Mask Strength", "N = CRTea Mask Strength",
+    { "", "CRTea: Mask Strength", "N = CRTea Mask Strength",
       "",
       5, 0, 10, 0
     },
-    { "CRTea: Scanline Strength", "N = CRTea Scanline Strength",
+    { "", "CRTea: Scanline Strength", "N = CRTea Scanline Strength",
       "",
       6, 0, 10, 0
     },
-    { "CRTea: Sharpness", "N = CRTea Sharpness",
+    { "", "CRTea: Sharpness", "N = CRTea Sharpness",
       "",
       7, 0, 10, 0
     },
-    { "CRTea: Curve", "N = CRTea Curvature",
+    { "", "CRTea: Curve", "N = CRTea Curvature",
       "",
       2, 0, 10, 0
     },
-    { "CRTea: Corner", "N = CRTea Corner",
+    { "", "CRTea: Corner", "N = CRTea Corner",
       "",
       3, 0, 10, 0
     },
-    { "CRTea: Trinitron Curve", "N = CRTea Trinitron Curvature",
+    { "", "CRTea: Trinitron Curve", "N = CRTea Trinitron Curvature",
       "",
       10, 0, 10, 0
     },
-    { "Log Level: Core", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
+    { "", "Log Level: Core", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
       "",
       1, 0, 3, 0
     },
-    { "Log Level: Frontend", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
+    { "", "Log Level: Frontend", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
       "",
       1, 0, 3, 0
     },
-    { "Text Scale Factor", "N = Text Scale Factor",
+    { "", "Text Scale Factor", "N = Text Scale Factor",
       "",
       2, 1, 8, 0
     },

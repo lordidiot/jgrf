@@ -110,7 +110,7 @@ static void jgrf_menu_gen(menunode_t *node, jg_setting_t *s, unsigned num) {
     for (unsigned i = 0; i < num; ++i) {
         // Create a menu item node
         menunode_t *menuitem = jgrf_menu_node_add_child(node);
-        snprintf(menuitem->desc, DESCSIZE, "%s", s[i].name);
+        snprintf(menuitem->desc, DESCSIZE, "%s", s[i].fname);
         menuitem->val = i;
 
         // Add child nodes containing the settings for each menu item
@@ -232,6 +232,11 @@ static void jgrf_menu_select_frontend(int item) {
 }
 
 static void jgrf_menu_select_emu(int item) {
+    if (!numemusettings) {
+        jgrf_log(JG_LOG_SCR, "No Emulator Settings");
+        return;
+    }
+
     menunode_t *node = menulevel;
     // Seek to the correct node
     for (int i = 0; i < item; ++i)
