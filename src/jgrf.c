@@ -90,6 +90,9 @@ static struct _loaded {
     int settings;
 } loaded = { 0, 0, 0, 0, 0, 0 };
 
+// Pointer to core info struct
+static jg_coreinfo_t *coreinfo = NULL;
+
 // Frontend knows the game and path info and passes this to the core
 static jg_fileinfo_t gameinfo;
 static jg_fileinfo_t auxinfo[JGRF_AUXFILE_MAX];
@@ -321,13 +324,10 @@ static void jgrf_core_load(const char *corepath) {
         "jg_set_cb_rumble");
 
     // Set up values in global data struct
-    jg_coreinfo_t *coreinfo = jgapi.jg_get_coreinfo(gdata.sys);
+    coreinfo = jgapi.jg_get_coreinfo(gdata.sys);
 
     // Read emulator settings
     jgrf_settings_emu(jgapi.jg_get_settings);
-
-    // Set hints from the core
-    gdata.hints = coreinfo->hints;
 
     // Match gdata.sys with coreinfo->sys in case of user overriding core at CLI
     snprintf(gdata.sys, sizeof(gdata.sys), "%s", coreinfo->sys);
@@ -1096,6 +1096,9 @@ int main(int argc, char *argv[]) {
 
     // Load the game
     jgrf_game_load(gdata.filename);
+
+    // Set hints from the core
+    gdata.hints = coreinfo->hints;
 
     // Override any core specific settings
     jgrf_settings_override(gdata.corename);
