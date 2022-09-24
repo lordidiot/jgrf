@@ -115,7 +115,7 @@ static void jgrf_menu_gen(menunode_t *node, jg_setting_t *s, unsigned num) {
 
         // Add child nodes containing the settings for each menu item
         char buf[DESCSIZE];
-        snprintf(buf, DESCSIZE, "%s", s[i].desc);
+        snprintf(buf, DESCSIZE, "%s", s[i].opts);
         char *bufptr;
         char *token = strtok_r(buf, ",", &bufptr);
 
