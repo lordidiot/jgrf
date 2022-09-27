@@ -65,6 +65,8 @@ static int corefps = 0; // Emulator core's framerate rounded to nearest int
 static int ma_offset = 0; // Offset the input moving average chunk size
 static int out_offset = 0; // Offset the output rate
 
+static int mute = 0;
+
 extern int bmark; // External benchmark mode variable
 extern int fforward; // External fast-forward level
 extern int waveout; // Wave File Output
@@ -219,13 +221,13 @@ void jgrf_audio_cb_core(size_t in_size) {
         out_size >>= 1;
 
         err = speex_resampler_process_interleaved_int(resampler,
-            rsbuf, &ma_insamps, outbuf, &out_size);
+            mute ? NULL : rsbuf, &ma_insamps, outbuf, &out_size);
 
         out_size <<= 1;
     }
     else {
         err = speex_resampler_process_int(resampler, 0,
-            rsbuf, &ma_insamps, outbuf, &out_size);
+            mute ? NULL : rsbuf, &ma_insamps, outbuf, &out_size);
     }
 
     // Queue the resampled audio for output
@@ -397,4 +399,10 @@ void jgrf_audio_deinit(void) {
     if (rbuf_out.buffer) free(rbuf_out.buffer);
     if (rsbuf) free(rsbuf);
     if (outbuf) free(outbuf);
+}
+
+// Toggle audio playback (mute/unmute)
+void jgrf_audio_toggle(void) {
+    mute ^= 1;
+    jgrf_log(JG_LOG_SCR, "Audio %s", mute ? "Muted" : "Unmuted");
 }

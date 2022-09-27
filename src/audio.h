@@ -33,5 +33,6 @@ void jgrf_audio_cb_core(size_t);
 void jgrf_audio_unpause(void);
 int jgrf_audio_init(void);
 void jgrf_audio_deinit(void);
+void jgrf_audio_toggle(void);
 
 #endif

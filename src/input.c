@@ -18,6 +18,7 @@
 #include "tconfig.h"
 
 #include "jgrf.h"
+#include "audio.h"
 #include "cheats.h"
 #include "menu.h"
 #include "settings.h"
@@ -673,6 +674,10 @@ void jgrf_input_handler(SDL_Event *event) {
             }
             case SDL_SCANCODE_F: {
                 if (event->type == SDL_KEYUP) jgrf_video_fullscreen();
+                break;
+            }
+            case SDL_SCANCODE_M: {
+                if (event->type == SDL_KEYUP) jgrf_audio_toggle();
                 break;
             }
             case SDL_SCANCODE_1:
