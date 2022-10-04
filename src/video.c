@@ -135,6 +135,8 @@ void jgrf_video_screenshot(void) {
     if (error)
         jgrf_log(JG_LOG_WRN, "lodepng code %u: %s\n",
             error, lodepng_error_text(error));
+    else
+        jgrf_log(JG_LOG_SCR, "Screenshot saved");
 
     free(ssdata);
 }
