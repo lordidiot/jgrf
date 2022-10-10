@@ -310,9 +310,11 @@ void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
                 inputinfo[i]->numaxes, inputinfo[i]->numbuttons);
             jgrf_inputcfg_read(inputinfo[i]);
         }
-        if (inputinfo[i]->type == JG_INPUT_GUN) {
+
+        if (inputinfo[i]->type == JG_INPUT_GUN)
             jgrf_video_set_cursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
-        }
+        else if (inputinfo[i]->type == JG_INPUT_TOUCH)
+            jgrf_video_set_cursor(SDL_SYSTEM_CURSOR_HAND);
     }
 }
 
