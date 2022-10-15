@@ -166,8 +166,8 @@ void jgrf_audio_cb_core(size_t in_size) {
         (uint32_t)(mavg_in.avg) + ((uint32_t)(mavg_in.avg) % 2);
 
     // Control the size of the input queue
-    if (rbuf_in.cursize == 0)
-        ma_offset = -(in_size >> 1); // Buffer half of the samples if empty
+    if (rbuf_in.cursize == 0) // Buffer ~half samples if empty
+        ma_offset = -((in_size >> 1) + ((in_size >> 1) % audinfo->channels));
     else if (rbuf_in.cursize < spf)
         ma_offset = -audinfo->channels; // Eat Less
     else if (rbuf_in.cursize > (spf + (spf >> 2)))
