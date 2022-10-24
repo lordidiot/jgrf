@@ -101,9 +101,6 @@ static struct dimensions {
 
 // Create the SDL OpenGL Window
 void jgrf_video_gl_create(void) {
-    // Grab settings pointer
-    settings = jgrf_settings_ptr();
-
     // Set the GL version
     switch (settings[VIDEO_API].val) {
         default: case 0: { // OpenGL - Core Profile
@@ -199,12 +196,19 @@ void jgrf_video_gl_create(void) {
 
 // Initialize video buffer
 int jgrf_video_gl_init(void) {
+    // Grab settings and global data pointers
+    settings = jgrf_settings_ptr();
     gdata = jgrf_gdata_ptr();
+
     if (!(gdata->hints & JG_HINT_VIDEO_INTERNAL)) {
         // Address of allocated memory owned by frontend but passed to core
         videobuf = (void*)calloc(vidinfo->wmax * vidinfo->hmax, pixfmt.size);
         vidinfo->buf = videobuf;
     }
+
+    if (gdata->hints & JG_HINT_VIDEO_PRESCALED)
+        settings[VIDEO_SCALE].val = 1;
+
     return 1;
 }
 
