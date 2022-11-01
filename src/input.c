@@ -28,7 +28,6 @@
 #define MAXPORTS 12
 #define MAXAXES 6
 #define MAXBUTTONS 32
-#define MAXCOORDS 3
 
 #if SDL_VERSION_ATLEAST(2,0,18)
     #define jgrf_getticks SDL_GetTicks64
@@ -240,6 +239,8 @@ void jgrf_input_deinit(void) {
             free(coreinput[i].button);
         if (coreinput[i].coord)
             free(coreinput[i].coord);
+        if (coreinput[i].rel)
+            free(coreinput[i].rel);
     }
 
     // Write out the input config file
@@ -328,8 +329,10 @@ void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
                 (int16_t*)calloc(inputinfo[i]->numaxes, sizeof(int16_t));
             coreinput[i].button =
                 (uint8_t*)calloc(inputinfo[i]->numbuttons, sizeof(uint8_t));
-            coreinput[i].coord =
+            coreinput[i].coord = // There are always X, Y, and Z coords
                 (int32_t*)calloc(3, sizeof(int32_t)); // Magic Number
+            coreinput[i].rel = // There is always X and Y relative motion
+                (int32_t*)calloc(2, sizeof(int32_t)); // Magic Number
 
             // Read configuration for this emulated device
             jgrf_inputcfg_read(inputinfo[i]);
@@ -808,8 +811,8 @@ void jgrf_input_handler(SDL_Event *event) {
             jgrf_input_coords_scaled(event->motion.x, event->motion.y,
                 &coreinput[msmap.index].coord[0],
                 &coreinput[msmap.index].coord[1]);
-            coreinput[msmap.index].axis[0] += event->motion.xrel;
-            coreinput[msmap.index].axis[1] += event->motion.yrel;
+            coreinput[msmap.index].rel[0] += event->motion.xrel;
+            coreinput[msmap.index].rel[1] += event->motion.yrel;
             break;
         }
         case SDL_MOUSEBUTTONUP: {
