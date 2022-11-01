@@ -26,6 +26,9 @@
 #include "input.h"
 
 #define MAXPORTS 12
+#define MAXAXES 6
+#define MAXBUTTONS 32
+#define MAXCOORDS 3
 
 #if SDL_VERSION_ATLEAST(2,0,18)
     #define jgrf_getticks SDL_GetTicks64
@@ -35,10 +38,10 @@
 
 // Pointers to members of core input state
 typedef struct jgrf_jsmap_t {
-    int16_t *axis[JG_AXES_MAX];
-    uint8_t *abtn[JG_AXES_MAX * 2]; // Axes acting as buttons
+    int16_t *axis[MAXAXES];
+    uint8_t *abtn[MAXAXES * 2]; // Axes acting as buttons
     uint8_t *hatpos[4];
-    uint8_t *button[JG_BUTTONS_MAX];
+    uint8_t *button[MAXBUTTONS];
 } jgrf_jsmap_t;
 
 typedef struct jgrf_kbmap_t {
@@ -47,7 +50,7 @@ typedef struct jgrf_kbmap_t {
 
 typedef struct jgrf_msmap_t {
     uint8_t index;
-    uint8_t *button[JG_BUTTONS_MAX];
+    uint8_t *button[MAXBUTTONS];
 } jgrf_msmap_t;
 
 void (*jgrf_input_audio)(int, const int16_t*, size_t);
@@ -174,7 +177,7 @@ static void jgrf_inputcfg_read(jg_inputinfo_t *iinfo) {
 
 // Unmap/undefine all joystick map pointers
 static void jgrf_input_undef_port(int port) {
-    for (int j = 0; j < JG_AXES_MAX; ++j) {
+    for (int j = 0; j < MAXAXES; ++j) {
         jsmap[port].axis[j] = &undef16;
         jsmap[port].abtn[j * 2] = jsmap[port].abtn[(j * 2) + 1] = &undef8;
     }
@@ -182,7 +185,7 @@ static void jgrf_input_undef_port(int port) {
     for (int j = 0; j < 4; ++j)
         jsmap[port].hatpos[j] = &undef8;
 
-    for (int j = 0; j < JG_BUTTONS_MAX; ++j)
+    for (int j = 0; j < MAXBUTTONS; ++j)
         jsmap[port].button[j] = &undef8;
 }
 
@@ -201,7 +204,7 @@ int jgrf_input_init(void) {
         kbmap.key[j] = &undef8;
 
     // Set all mouse mappings to undefined
-    for (int j = 0; j < JG_BUTTONS_MAX; ++j)
+    for (int j = 0; j < MAXBUTTONS; ++j)
         msmap.button[j] = &undef8;
 
     // Initialize the input configuration structure
@@ -227,6 +230,16 @@ void jgrf_input_deinit(void) {
             SDL_HapticClose(haptic[i]);
 
         SDL_JoystickClose(joystick[i]);
+    }
+
+    // Free allocated memory
+    for (int i = 0; i < MAXPORTS; ++i) {
+        if (coreinput[i].axis)
+            free(coreinput[i].axis);
+        if (coreinput[i].button)
+            free(coreinput[i].button);
+        if (coreinput[i].coord)
+            free(coreinput[i].coord);
     }
 
     // Write out the input config file
@@ -301,13 +314,24 @@ static void jgrf_input_hotplug_remove(SDL_Event *event) {
 
 // Retrieve inputinfo data so the frontend knows what the core has plugged in
 void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
-    for(int i = 0; i < gdata->numinputs; ++i) {
+    for (int i = 0; i < gdata->numinputs; ++i) {
         inputinfo[i] = get_inputinfo(i);
+
         if (inputinfo[i]->name) {
             jgrf_log(JG_LOG_INF,
                 "Emulated Input %d: %s, %s, %d axes, %d buttons\n",
                 i + 1, inputinfo[i]->name, inputinfo[i]->fname,
                 inputinfo[i]->numaxes, inputinfo[i]->numbuttons);
+
+            // Allocate memory for the emulated buttons/axes/coords
+            coreinput[i].axis =
+                (int16_t*)calloc(inputinfo[i]->numaxes, sizeof(int16_t));
+            coreinput[i].button =
+                (uint8_t*)calloc(inputinfo[i]->numbuttons, sizeof(uint8_t));
+            coreinput[i].coord =
+                (int32_t*)calloc(3, sizeof(int32_t)); // Magic Number
+
+            // Read configuration for this emulated device
             jgrf_inputcfg_read(inputinfo[i]);
         }
 
