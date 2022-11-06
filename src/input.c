@@ -52,8 +52,6 @@ typedef struct jgrf_msmap_t {
     uint8_t *button[MAXBUTTONS];
 } jgrf_msmap_t;
 
-void (*jgrf_input_audio)(int, const int16_t*, size_t);
-
 static jg_videoinfo_t *vidinfo; // Video Info for calculating mouse input
 static jg_inputinfo_t *inputinfo[MAXPORTS]; // Core Input Info
 static jg_inputstate_t coreinput[MAXPORTS]; // Input states shared with core
@@ -343,11 +341,6 @@ void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
         else if (inputinfo[i]->type == JG_INPUT_TOUCH)
             jgrf_video_set_cursor(SDL_SYSTEM_CURSOR_HAND);
     }
-}
-
-// Pass function pointer to input audio samples into the core
-void jgrf_input_set_audio(void (*inp)(int, const int16_t*, size_t)) {
-    jgrf_input_audio = inp;
 }
 
 // Pass pointers to input states into the core

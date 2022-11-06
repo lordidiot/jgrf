@@ -34,6 +34,9 @@ static jgrf_gdata_t *gdata = NULL;
 // Pointer to audio information from the emulator core
 static jg_audioinfo_t *audinfo = NULL;
 
+// Info about audio to be input to the core (via microphone)
+static jg_audioinfo_t micinfo = { JG_SAMPFMT_INT16, 48000, 1, 800, NULL };
+
 // Audio Output
 static SDL_AudioSpec spec, obtained;
 static SDL_AudioDeviceID dev;
@@ -271,7 +274,8 @@ static void jgrf_audio_cb_waveout(void *userdata, uint8_t *stream, int len) {
 // SDL Audio Callback for Captured audio samples to be input into the core
 static void jgrf_audio_cb_input(void *userdata, uint8_t *stream, int len) {
     if (userdata) {}
-    jgrf_input_audio(0, (const int16_t*)stream, len / sizeof(int16_t));
+    micinfo.buf = (void*)stream;
+    jgrf_data_push(JG_DATA_AUDIO, 0, &micinfo, len / sizeof(int16_t));
 }
 
 // Initialize the audio device and allocate buffers
@@ -316,8 +320,8 @@ int jgrf_audio_init(void) {
 
     // Set up Audio Capture capabilities
     if (gdata->hints & JG_HINT_INPUT_AUDIO && miccount) {
-        spec_in.channels = 1;
-        spec_in.freq = 48000;
+        spec_in.channels = micinfo.channels;
+        spec_in.freq = micinfo.rate;
         spec_in.silence = 0;
         spec_in.samples = 512;
         spec_in.userdata = 0;

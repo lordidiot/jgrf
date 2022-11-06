@@ -47,6 +47,8 @@ void jgrf_auxfile_load(const char*, int);
 
 void jgrf_benchmark(size_t);
 
+void jgrf_data_push(uint32_t, int, const void*, size_t);
+
 void jgrf_state_load(int);
 void jgrf_state_save(int);
 

@@ -59,7 +59,7 @@ static struct _jgapi {
     void (*jg_cheat_clear)(void);
     void (*jg_cheat_set)(const char*);
     void (*jg_rehash)(void);
-    void (*jg_input_audio)(int, const int16_t*, size_t);
+    void (*jg_data_push)(uint32_t, int, const void*, size_t);
     // Callback Setup
     void (*jg_set_cb_log)(jg_cb_log_t);
     void (*jg_set_cb_audio)(jg_cb_audio_t);
@@ -287,8 +287,8 @@ static void jgrf_core_load(const char *corepath) {
         "jg_cheat_set");
     *(void**)(&jgapi.jg_rehash) = SDL_LoadFunction(jgapi.handle,
         "jg_rehash");
-    *(void**)(&jgapi.jg_input_audio) = SDL_LoadFunction(jgapi.handle,
-        "jg_input_audio");
+    *(void**)(&jgapi.jg_data_push) = SDL_LoadFunction(jgapi.handle,
+        "jg_data_push");
 
     *(void**)(&jgapi.jg_get_coreinfo) = SDL_LoadFunction(jgapi.handle,
         "jg_get_coreinfo");
@@ -893,6 +893,11 @@ static int jgrf_core_default(void) {
     return 1;
 }
 
+// Push data to the core
+void jgrf_data_push(uint32_t type, int port, const void *ptr, size_t size) {
+    jgapi.jg_data_push(type, port, ptr, size);
+}
+
 // Send a reset signal to the emulator core
 void jgrf_reset(int hard) {
     jgapi.jg_reset(hard);
@@ -1132,10 +1137,6 @@ int main(int argc, char *argv[]) {
     // Initialize audio output
     loaded.audio = jgrf_audio_init();
     jgapi.jg_setup_audio();
-
-    // Initialize audio capture
-    if (gdata.hints & JG_HINT_INPUT_AUDIO)
-        jgrf_input_set_audio(jgapi.jg_input_audio);
 
     // Initialize input
     loaded.input = jgrf_input_init();
