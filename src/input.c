@@ -208,12 +208,8 @@ static void jgrf_input_undef_port(int port) {
         jsmap[port].button[j] = &undef8;
 }
 
-// Initialize input
-int jgrf_input_init(void) {
-    // Grab pointer to settings
-    settings = jgrf_settings_ptr();
-
-    // Set all joystick mappings to undefined
+// Set all joystick mappings to undefined
+void jgrf_input_undef(void) {
     for (int i = 0; i < MAXPORTS; ++i) {
         jgrf_input_undef_port(i);
     }
@@ -225,6 +221,14 @@ int jgrf_input_init(void) {
     // Set all mouse mappings to undefined
     for (int j = 0; j < MAXBUTTONS; ++j)
         msmap.button[j] = &undef8;
+}
+
+// Initialize input
+int jgrf_input_init(void) {
+    // Grab pointer to settings
+    settings = jgrf_settings_ptr();
+
+    jgrf_input_undef();
 
     // Initialize the input configuration structure
     char path[256];
@@ -251,17 +255,7 @@ void jgrf_input_deinit(void) {
         SDL_JoystickClose(joystick[i]);
     }
 
-    // Free allocated memory
-    for (int i = 0; i < MAXPORTS; ++i) {
-        if (coreinput[i].axis)
-            free(coreinput[i].axis);
-        if (coreinput[i].button)
-            free(coreinput[i].button);
-        if (coreinput[i].coord)
-            free(coreinput[i].coord);
-        if (coreinput[i].rel)
-            free(coreinput[i].rel);
-    }
+    jgrf_input_deinit_core();
 
     // Write out the input config file
     if (confchanged) {
@@ -274,6 +268,20 @@ void jgrf_input_deinit(void) {
 
     // Clean up the input config data
     ini_table_destroy(iconf);
+}
+
+// Free memory allocated for core input states
+void jgrf_input_deinit_core(void) {
+    for (int i = 0; i < MAXPORTS; ++i) {
+        if (coreinput[i].axis)
+            free(coreinput[i].axis);
+        if (coreinput[i].button)
+            free(coreinput[i].button);
+        if (coreinput[i].coord)
+            free(coreinput[i].coord);
+        if (coreinput[i].rel)
+            free(coreinput[i].rel);
+    }
 }
 
 // Handle joystick hotplug additions
@@ -335,6 +343,10 @@ static void jgrf_input_hotplug_remove(SDL_Event *event) {
 
 // Retrieve inputinfo data so the frontend knows what the core has plugged in
 void jgrf_input_query(jg_inputinfo_t* (*get_inputinfo)(int)) {
+    // Make sure cursor state is defaulted
+    SDL_ShowCursor(false);
+    SDL_SetCursor(0);
+
     for (int i = 0; i < gdata->numinputs; ++i) {
         inputinfo[i] = get_inputinfo(i);
 

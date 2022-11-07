@@ -36,11 +36,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int jgrf_input_init(void);
 void jgrf_input_deinit(void);
+void jgrf_input_deinit_core(void);
 void jgrf_input_query(jg_inputinfo_t *(*)(int));
 void jgrf_input_set_audio(void (*)(int, const int16_t*, size_t));
 void jgrf_input_set_states(void (*)(jg_inputstate_t*, int));
 void jgrf_input_handler(SDL_Event*);
 void jgrf_input_rumble(int, float, size_t);
+void jgrf_input_undef(void);
 
 void jgrf_input_map_axis(int, uint32_t, const char*);
 void jgrf_input_map_button(int, uint32_t, const char*);

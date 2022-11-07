@@ -81,6 +81,7 @@ void jgrf_media_insert(void);
 
 void jgrf_rehash_core(void);
 void jgrf_rehash_frontend(void);
+void jgrf_rehash_input(void);
 
 void jgrf_schedule_quit(void);
 void jgrf_quit(int);

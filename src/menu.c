@@ -246,7 +246,7 @@ static void jgrf_menu_select_frontend(int item) {
         jgrf_rehash_frontend();
         jgrf_log(JG_LOG_SCR, "%s: %s%s",
             node->parent->desc, node->desc,
-            settings[node->parent->val].restart ?
+            settings[node->parent->val].flags & JG_SETTING_RESTART ?
             " (restart required)" : ""
         );
         menupath >>= 8;
@@ -280,9 +280,13 @@ static void jgrf_menu_select_emu(int item) {
             settinglevel = 1;
             settingactive = item;
             jgrf_rehash_core();
+
+            if (emusettings[node->parent->val].flags & JG_SETTING_INPUT)
+                jgrf_rehash_input();
+
             jgrf_log(JG_LOG_SCR, "%s: %s%s",
                 node->parent->desc, node->desc,
-                emusettings[node->parent->val].restart ?
+                emusettings[node->parent->val].flags & JG_SETTING_RESTART ?
                 " (restart required)" : ""
             );
         }

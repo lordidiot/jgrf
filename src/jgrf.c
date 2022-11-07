@@ -945,6 +945,16 @@ void jgrf_rehash_frontend(void) {
     jgrf_video_rehash(); // A subset of video settings allow live changes
 }
 
+// Rehash input
+void jgrf_rehash_input(void) {
+    // Deinitialize core input states and undefine mappings
+    jgrf_input_deinit_core();
+    jgrf_input_undef();
+
+    // Query core input devices
+    jgrf_input_query(jgapi.jg_get_inputinfo);
+}
+
 // Call to stop and shut down at the end of the current iteration
 void jgrf_schedule_quit(void) {
     running = 0;
