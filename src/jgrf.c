@@ -1192,20 +1192,20 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
 
     int runframes = 0;
-    int collector = 0;
+    double collector = 0;
 
     while (running) {
         // Divide the core framerate by the base framerate
         runframes = (corefps / basefps); // Ideally, basefps is monitor refresh
 
         // Collect the remainder of the same division operation
-        collector += corefps % basefps;
+        collector += ((double)corefps / basefps) - runframes;
 
         // When sufficient remainder has been collected, run an extra frame
         // If corefps is smaller than basefps, this is the only way frames run
-        if (collector >= basefps) {
+        if (collector >= 1.0) {
             ++runframes;
-            collector -= basefps;
+            collector -= 1.0;
         }
 
         // Run the required number of emulator iterations (frames)
