@@ -28,15 +28,16 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <sys/stat.h>
 
 #include <epoxy/gl.h>
 #include <SDL.h>
 #include <jg/jg.h>
 
+#define NUMPASSES 2
 #define SIZE_GLSLVER 20
 
 #define GLT_IMPLEMENTATION
@@ -65,20 +66,12 @@ static void *videobuf = NULL;
 static jg_videoinfo_t *vidinfo = NULL;
 
 // OpenGL related variables
-static GLuint vao;
-static GLuint vao_out;
-static GLuint vbo;
-static GLuint vbo_out;
-static GLuint shaderProgram; // First pass shader program
-static GLuint shaderProgram_out; // Post-processing shader program
-static GLuint frameBuffer; // Framebuffer for rendering offscreen
-static GLuint texGame; // Game texture, clipped in first pass
-static GLuint texOutput; // Output texture used for post-processing
-static GLint texfilter_in = GL_NEAREST;
-static GLint texfilter_out = GL_NEAREST;
-
-static GLTtext *msgtext[3];
-static int textframes[3];
+static GLuint vao[NUMPASSES];
+static GLuint vbo[NUMPASSES];
+static GLuint shaderprog[NUMPASSES];
+static GLuint tex[NUMPASSES];
+static GLuint texfilter[NUMPASSES];
+static GLuint framebuf; // Framebuffer for rendering offscreen
 
 // Triangle and Texture vertices
 static GLfloat vertices[] = {
@@ -93,33 +86,24 @@ static GLfloat vertices[] = {
     1.0, 1.0,   // Texture 3 (X, Y) Right Bottom
 };
 
-static GLfloat vertices_out[] = {
-    -1.0, -1.0, // Vertex 1 (X, Y) Left Bottom
-    -1.0, 1.0,  // Vertex 2 (X, Y) Left Top
-    1.0, -1.0,  // Vertex 3 (X, Y) Right Bottom
-    1.0, 1.0,   // Vertex 4 (X, Y) Right Top
-
-    0.0, 1.0,   // Texture 1 (X, Y) Left Bottom
-    0.0, 0.0,   // Texture 2 (X, Y) Left Top
-    1.0, 1.0,   // Texture 3 (X, Y) Right Bottom
-    1.0, 0.0,   // Texture 4 (X, Y) Right Top
-};
+static GLTtext *msgtext[3];
+static int textframes[3];
 
 // Pixel Format
-static struct pixfmt {
+static struct _pixfmt {
     GLuint format;
     GLuint format_internal;
     GLuint type;
     size_t size;
-} pixfmt = { GL_BGRA, GL_RGBA, GL_UNSIGNED_BYTE, sizeof(uint32_t) };
+} pixfmt;
 
 // Dimensions
-static struct dimensions {
+static struct _dimensions {
     int ww; int wh;
     float rw; float rh;
     float xo; float yo;
     float dpiscale;
-} dimensions = {0};
+} dimensions;
 
 // Create the SDL OpenGL Window
 void jgrf_video_gl_create(void) {
@@ -153,7 +137,7 @@ void jgrf_video_gl_create(void) {
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
 
     // Set up the window
-    char title[256];
+    char title[128];
     gdata = jgrf_gdata_ptr();
     snprintf(title, sizeof(title), "%s", gdata->gamename);
 
@@ -253,8 +237,7 @@ static inline void jgrf_video_gl_ssflip(uint8_t *pixels,
 
 // Dump the pixels rendered to the default framebuffer
 void *jgrf_video_gl_get_pixels(int *rw, int *rh) {
-    uint8_t *pixels;
-    pixels = (uint8_t*)calloc(dimensions.rw * dimensions.rh,
+    uint8_t *pixels = (uint8_t*)calloc(dimensions.rw * dimensions.rh,
         sizeof(uint32_t));
 
     // Read the pixels and flip them vertically
@@ -273,18 +256,14 @@ void jgrf_video_gl_deinit(void) {
         gltDeleteText(msgtext[i]);
     gltTerminate();
 
-    if (texGame) glDeleteTextures(1, &texGame);
-    if (texOutput) glDeleteTextures(1, &texOutput);
+    if (framebuf) glDeleteFramebuffers(1, &framebuf);
 
-    if (frameBuffer) glDeleteFramebuffers(1, &frameBuffer);
-
-    if (shaderProgram) glDeleteProgram(shaderProgram);
-    if (vao) glDeleteVertexArrays(1, &vao);
-    if (vbo) glDeleteBuffers(1, &vbo);
-
-    if (shaderProgram_out) glDeleteProgram(shaderProgram_out);
-    if (vao_out) glDeleteVertexArrays(1, &vao_out);
-    if (vbo_out) glDeleteBuffers(1, &vbo_out);
+    for (int i = 0; i < NUMPASSES; ++i) {
+        if (shaderprog[i]) glDeleteProgram(shaderprog[i]);
+        if (tex[i]) glDeleteTextures(1, &tex[i]);
+        if (vao[i]) glDeleteVertexArrays(1, &vao[i]);
+        if (vbo[i]) glDeleteBuffers(1, &vbo[i]);
+    }
 
     if (!(gdata->hints & JG_HINT_VIDEO_INTERNAL))
         if (videobuf) free(videobuf);
@@ -326,30 +305,30 @@ static void jgrf_video_gl_refresh(void) {
     }
 
     // Bind the VAO/VBO for the offscreen texture, update with new vertex data
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindVertexArray(vao[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Resize the offscreen texture
-    glBindTexture(GL_TEXTURE_2D, texGame);
+    glBindTexture(GL_TEXTURE_2D, tex[0]);
     glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
         vidinfo->wmax, vidinfo->hmax, 0, pixfmt.format, pixfmt.type, NULL);
 
     // Set row length
-    glUseProgram(shaderProgram);
+    glUseProgram(shaderprog[0]);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, vidinfo->p);
 
     // Resize the output texture
-    glUseProgram(shaderProgram_out);
-    glBindTexture(GL_TEXTURE_2D, texOutput);
+    glUseProgram(shaderprog[1]);
+    glBindTexture(GL_TEXTURE_2D, tex[1]);
     glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
         vidinfo->w, vidinfo->h, 0, pixfmt.format, pixfmt.type, NULL);
 
     // Update uniforms for post-processing
-    glUniform4f(glGetUniformLocation(shaderProgram_out, "sourceSize"),
+    glUniform4f(glGetUniformLocation(shaderprog[1], "sourceSize"),
         (float)vidinfo->w, (float)vidinfo->h,
         1.0/(float)vidinfo->w, 1.0/(float)vidinfo->h);
-    glUniform4f(glGetUniformLocation(shaderProgram_out, "targetSize"),
+    glUniform4f(glGetUniformLocation(shaderprog[1], "targetSize"),
         dimensions.rw, dimensions.rh,
         1.0/dimensions.rw, 1.0/dimensions.rh);
 }
@@ -362,14 +341,14 @@ void jgrf_video_gl_render(int render) {
     glViewport(0, 0, vidinfo->w, vidinfo->h);
 
     // Make sure first pass shader program is active
-    glUseProgram(shaderProgram);
+    glUseProgram(shaderprog[0]);
 
     // Bind user-created framebuffer and draw scene onto it
-    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-    glBindVertexArray(vao);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuf);
+    glBindVertexArray(vao[0]);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texGame);
+    glBindTexture(GL_TEXTURE_2D, tex[0]);
 
     // Render if there is new pixel data, do Black Frame Insertion otherwise
     if (render) {
@@ -396,14 +375,14 @@ void jgrf_video_gl_render(int render) {
     glViewport(dimensions.xo, dimensions.yo, dimensions.rw, dimensions.rh);
 
     // Make sure second pass shader program is active
-    glUseProgram(shaderProgram_out);
+    glUseProgram(shaderprog[1]);
 
     // Bind default framebuffer and draw contents of user framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindVertexArray(vao_out);
+    glBindVertexArray(vao[1]);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texOutput);
+    glBindTexture(GL_TEXTURE_2D, tex[1]);
 
     // Clear the screen to black again
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -459,7 +438,7 @@ void jgrf_video_gl_render_compat(int render) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texGame);
+    glBindTexture(GL_TEXTURE_2D, tex[0]);
 
     // Render if there is new pixel data, do Black Frame Insertion otherwise
     if (render) {
@@ -506,7 +485,7 @@ void jgrf_video_gl_resize(void) {
     dimensions.yo = (dimensions.wh - dimensions.rh) / 2;
 
     // Update the targetSize uniform
-    glUniform4f(glGetUniformLocation(shaderProgram_out, "targetSize"),
+    glUniform4f(glGetUniformLocation(shaderprog[1], "targetSize"),
         dimensions.rw, dimensions.rh,
         1.0/dimensions.rw, 1.0/dimensions.rh);
 
@@ -648,149 +627,146 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
             "%s/jollygood/jgrf/shaders/%s", DATADIR, fs);
     }
 #endif
-    const GLchar *vertexSource = jgrf_video_gl_shader_load(vspath);
-    const GLchar *fragmentSource = jgrf_video_gl_shader_load(fspath);
+    const GLchar *vsrc = jgrf_video_gl_shader_load(vspath);
+    const GLchar *fsrc = jgrf_video_gl_shader_load(fspath);
     GLint err;
 
     // Create and compile the vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexSource, NULL);
-    glCompileShader(vertexShader);
+    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vshader, 1, &vsrc, NULL);
+    glCompileShader(vshader);
 
     // Test if the shader compiled
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &err);
+    glGetShaderiv(vshader, GL_COMPILE_STATUS, &err);
     if (err == GL_FALSE) {
         char shaderlog[1024];
-        glGetShaderInfoLog(vertexShader, 1024, NULL, shaderlog);
+        glGetShaderInfoLog(vshader, 1024, NULL, shaderlog);
         jgrf_log(JG_LOG_WRN, "Vertex shader: %s", shaderlog);
     }
 
     // Create and compile the fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
-    glCompileShader(fragmentShader);
+    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fshader, 1, &fsrc, NULL);
+    glCompileShader(fshader);
 
     // Test if the fragment shader compiled
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &err);
+    glGetShaderiv(fshader, GL_COMPILE_STATUS, &err);
     if (err == GL_FALSE) {
         char shaderlog[1024];
-        glGetShaderInfoLog(fragmentShader, 1024, NULL, shaderlog);
+        glGetShaderInfoLog(fshader, 1024, NULL, shaderlog);
         jgrf_log(JG_LOG_WRN, "Fragment shader: %s", shaderlog);
     }
 
     // Free the allocated memory for shader sources
-    free((GLchar*)vertexSource);
-    free((GLchar*)fragmentSource);
+    free((GLchar*)vsrc);
+    free((GLchar*)fsrc);
 
     // Create the shader program
     GLuint prog = glCreateProgram();
-    glAttachShader(prog, vertexShader);
-    glAttachShader(prog, fragmentShader);
+    glAttachShader(prog, vshader);
+    glAttachShader(prog, fshader);
     glLinkProgram(prog);
 
     // Clean up fragment and vertex shaders
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    glDeleteShader(vshader);
+    glDeleteShader(fshader);
 
     // Return the successfully linked shader program
     return prog;
 }
 
 static void jgrf_video_gl_shader_setup(void) {
-    if (shaderProgram)
-        glDeleteProgram(shaderProgram);
-    if (shaderProgram_out)
-        glDeleteProgram(shaderProgram_out);
-
-    texfilter_in = GL_NEAREST;
-    texfilter_out = GL_NEAREST;
+    for (int i = 0; i < NUMPASSES; ++i) {
+        if (shaderprog[i]) glDeleteProgram(shaderprog[i]);
+        texfilter[i] = GL_NEAREST;
+    }
 
     // Create the shader program for the first pass (clipping)
-    shaderProgram =
+    shaderprog[0] =
         jgrf_video_gl_prog_create("default.vs", "default.fs");
 
-    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    GLint posattrib = glGetAttribLocation(shaderprog[0], "position");
+    glEnableVertexAttribArray(posattrib);
+    glVertexAttribPointer(posattrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    GLint texAttrib = glGetAttribLocation(shaderProgram, "vtxCoord");
-    glEnableVertexAttribArray(texAttrib);
-    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE,
+    GLint texattrib = glGetAttribLocation(shaderprog[0], "vtxCoord");
+    glEnableVertexAttribArray(texattrib);
+    glVertexAttribPointer(texattrib, 2, GL_FLOAT, GL_FALSE,
         0, (void*)(8 * sizeof(GLfloat)));
 
     // Set up uniform for input texture
-    glUseProgram(shaderProgram);
-    glUniform1i(glGetUniformLocation(shaderProgram, "source"), 0);
+    glUseProgram(shaderprog[0]);
+    glUniform1i(glGetUniformLocation(shaderprog[0], "source"), 0);
 
     switch (settings[VIDEO_SHADER].val) {
         default: case 0: { // Nearest Neighbour
-            shaderProgram_out =
+            shaderprog[1] =
                 jgrf_video_gl_prog_create("default.vs", "default.fs");
             break;
         }
         case 1: { // Linear
-            shaderProgram_out =
+            shaderprog[1] =
                 jgrf_video_gl_prog_create("default.vs", "default.fs");
-            texfilter_out = GL_LINEAR;
+            texfilter[1] = GL_LINEAR;
             break;
         }
         case 2: { // Sharp Bilinear
-            shaderProgram_out =
+            shaderprog[1] =
                 jgrf_video_gl_prog_create("default.vs", "sharp-bilinear.fs");
-            texfilter_in = GL_LINEAR;
-            texfilter_out = GL_LINEAR;
+            texfilter[0] = GL_LINEAR;
+            texfilter[1] = GL_LINEAR;
             break;
         }
         case 3: { // AANN
-            shaderProgram_out =
+            shaderprog[1] =
                 jgrf_video_gl_prog_create("default.vs", "aann.fs");
             break;
         }
         case 4: { // CRT-Bespoke
-            shaderProgram_out =
+            shaderprog[1] =
                 jgrf_video_gl_prog_create("default.vs", "crt-bespoke.fs");
             break;
         }
         case 5: { // CRTea
-            shaderProgram_out =
+            shaderprog[1] =
                 jgrf_video_gl_prog_create("default.vs", "crtea.fs");
             break;
         }
         case 6: { // LCD
-            shaderProgram_out =
+            shaderprog[1] =
                 jgrf_video_gl_prog_create("default.vs", "lcd.fs");
             break;
         }
     }
 
     // Set texture parameters for input texture
-    glBindTexture(GL_TEXTURE_2D, texGame);
+    glBindTexture(GL_TEXTURE_2D, tex[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter_in);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter_in);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter[0]);
 
     // Bind vertex array and specify layout for second pass
-    glBindVertexArray(vao_out);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_out);
+    glBindVertexArray(vao[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 
-    GLint posAttrib_out = glGetAttribLocation(shaderProgram_out, "position");
-    glEnableVertexAttribArray(posAttrib_out);
-    glVertexAttribPointer(posAttrib_out, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    GLint posattrib_out = glGetAttribLocation(shaderprog[1], "position");
+    glEnableVertexAttribArray(posattrib_out);
+    glVertexAttribPointer(posattrib_out, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    GLint texAttrib_out = glGetAttribLocation(shaderProgram_out, "vtxCoord");
-    glEnableVertexAttribArray(texAttrib_out);
-    glVertexAttribPointer(texAttrib_out, 2, GL_FLOAT, GL_FALSE,
+    GLint texattrib_out = glGetAttribLocation(shaderprog[1], "vtxCoord");
+    glEnableVertexAttribArray(texattrib_out);
+    glVertexAttribPointer(texattrib_out, 2, GL_FLOAT, GL_FALSE,
         0, (void*)(8 * sizeof(GLfloat)));
 
     // Set up uniforms for post-processing texture
-    glUseProgram(shaderProgram_out);
+    glUseProgram(shaderprog[1]);
 
-    glUniform1i(glGetUniformLocation(shaderProgram_out, "source"), 0);
-    glUniform4f(glGetUniformLocation(shaderProgram_out, "sourceSize"),
+    glUniform1i(glGetUniformLocation(shaderprog[1], "source"), 0);
+    glUniform4f(glGetUniformLocation(shaderprog[1], "sourceSize"),
         (float)vidinfo->w, (float)vidinfo->h,
         1.0/(float)vidinfo->w, 1.0/(float)vidinfo->h);
-    glUniform4f(glGetUniformLocation(shaderProgram_out, "targetSize"),
+    glUniform4f(glGetUniformLocation(shaderprog[1], "targetSize"),
         dimensions.rw, dimensions.rh,
         1.0/dimensions.rw, 1.0/dimensions.rh);
 
@@ -825,56 +801,67 @@ static void jgrf_video_gl_shader_setup(void) {
             break;
         }
     }
-    glUniform1i(glGetUniformLocation(shaderProgram_out, "masktype"),
+    glUniform1i(glGetUniformLocation(shaderprog[1], "masktype"),
         masktype);
-    glUniform1f(glGetUniformLocation(shaderProgram_out, "maskstr"),
+    glUniform1f(glGetUniformLocation(shaderprog[1], "maskstr"),
         maskstr / 10.0);
-    glUniform1f(glGetUniformLocation(shaderProgram_out, "scanstr"),
+    glUniform1f(glGetUniformLocation(shaderprog[1], "scanstr"),
         scanstr / 10.0);
-    glUniform1f(glGetUniformLocation(shaderProgram_out, "sharpness"),
+    glUniform1f(glGetUniformLocation(shaderprog[1], "sharpness"),
         (float)sharpness);
-    glUniform1f(glGetUniformLocation(shaderProgram_out, "curve"),
+    glUniform1f(glGetUniformLocation(shaderprog[1], "curve"),
         curve / 100.0);
-    glUniform1f(glGetUniformLocation(shaderProgram_out, "corner"),
+    glUniform1f(glGetUniformLocation(shaderprog[1], "corner"),
         corner ? (float)corner : -3.0);
-    glUniform1f(glGetUniformLocation(shaderProgram_out, "tcurve"),
+    glUniform1f(glGetUniformLocation(shaderprog[1], "tcurve"),
         tcurve / 10.0);
 
     // Set parameters for output texture
-    glBindTexture(GL_TEXTURE_2D, texOutput);
+    glBindTexture(GL_TEXTURE_2D, tex[1]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter_out);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter_out);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter[1]);
 }
 
 // Set up OpenGL
 void jgrf_video_gl_setup(void) {
     // Create Vertex Array Objects
-    glGenVertexArrays(1, &vao);
-    glGenVertexArrays(1, &vao_out);
+    glGenVertexArrays(1, &vao[0]);
+    glGenVertexArrays(1, &vao[1]);
 
     // Create Vertex Buffer Objects
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &vbo_out);
+    glGenBuffers(1, &vbo[0]);
+    glGenBuffers(1, &vbo[1]);
 
     // Bind buffers for vertex buffer objects
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),
         vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_out);
+    GLfloat vertices_out[] = {
+        -1.0, -1.0, // Vertex 1 (X, Y) Left Bottom
+        -1.0, 1.0,  // Vertex 2 (X, Y) Left Top
+        1.0, -1.0,  // Vertex 3 (X, Y) Right Bottom
+        1.0, 1.0,   // Vertex 4 (X, Y) Right Top
+        0.0, 1.0,   // Texture 1 (X, Y) Left Bottom
+        0.0, 0.0,   // Texture 2 (X, Y) Left Top
+        1.0, 1.0,   // Texture 3 (X, Y) Right Bottom
+        1.0, 0.0,   // Texture 4 (X, Y) Right Top
+    };
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_out),
         vertices_out, GL_STATIC_DRAW);
 
     // Bind vertex array and specify layout for first pass
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindVertexArray(vao[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 
     // Generate texture for raw game output
-    glGenTextures(1, &texGame);
+    glGenTextures(1, &tex[0]);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texGame);
+    glBindTexture(GL_TEXTURE_2D, tex[0]);
 
     // The full sized source image before any clipping
     glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
@@ -882,20 +869,20 @@ void jgrf_video_gl_setup(void) {
         vidinfo->buf);
 
     // Create framebuffer
-    glGenFramebuffers(1, &frameBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+    glGenFramebuffers(1, &framebuf);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuf);
 
     // Create texture to hold colour buffer
-    glGenTextures(1, &texOutput);
+    glGenTextures(1, &tex[1]);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texOutput);
+    glBindTexture(GL_TEXTURE_2D, tex[1]);
 
     // The framebuffer texture that is being rendered to offscreen, after clip
     glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
         vidinfo->w, vidinfo->h, 0, pixfmt.format, pixfmt.type, NULL);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-        texOutput, 0);
+        tex[1], 0);
 
     jgrf_video_gl_shader_setup();
 
@@ -907,24 +894,24 @@ void jgrf_video_gl_setup(void) {
 void jgrf_video_gl_setup_compat(void) {
     switch (settings[VIDEO_SHADER].val) {
         case 0: { // Nearest Neighbour
-            texfilter_in = GL_NEAREST;
+            texfilter[0] = GL_NEAREST;
             break;
         }
         case 1: { // Linear
-            texfilter_in = GL_LINEAR;
+            texfilter[0] = GL_LINEAR;
             break;
         }
         default: {
-            texfilter_in = GL_LINEAR;
+            texfilter[0] = GL_LINEAR;
             break;
         }
     }
 
     // Generate texture for raw game output
     glEnable(GL_TEXTURE_2D);
-    glGenTextures(1, &texGame);
+    glGenTextures(1, &tex[0]);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texGame);
+    glBindTexture(GL_TEXTURE_2D, tex[0]);
 
     // The full sized source image before any clipping
     glTexImage2D(GL_TEXTURE_2D, 0, pixfmt.format_internal,
@@ -933,8 +920,8 @@ void jgrf_video_gl_setup_compat(void) {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter_in);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter_in);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texfilter[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texfilter[0]);
 
     jgrf_video_gl_resize();
     jgrf_video_gl_refresh();
