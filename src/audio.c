@@ -204,13 +204,13 @@ void jgrf_audio_cb_core(size_t in_size) {
 
     // Manage the size of the output buffer to avoid underruns
     if (rbuf_out.cursize < spf) // Push More
-        out_offset = 3 * corefps;
+        out_offset = 3 * screenfps;
     else if (rbuf_out.cursize < (spf + (spf >> 1))) // Push More
-        out_offset = 2 * corefps;
+        out_offset = 2 * screenfps;
     else if (rbuf_out.cursize < spf * 2) // Push More
-        out_offset = corefps;
+        out_offset = screenfps;
     else if (rbuf_out.cursize > spf * 5) // Push Less
-        out_offset = -corefps;
+        out_offset = -screenfps;
     else if (rbuf_out.cursize > spf * 3) // Goldilocks Zone
         out_offset = 0;
 
