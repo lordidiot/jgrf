@@ -136,8 +136,8 @@ int bmark = 0;
 int fforward = 0;
 
 // Frame timing
-static int corefps = 60;
-static int basefps = 60;
+int corefps = 60;
+int screenfps = 60;
 size_t framecount = 0;
 size_t bmarkframes = 0;
 
@@ -1016,9 +1016,9 @@ void jgrf_state_save(int slot) {
         slot, success ? "saved." : "save failed.");
 }
 
-void jgrf_set_basefps(int fps) {
-    basefps = fps;
-    jgrf_log(JG_LOG_DBG, "Screen base FPS set: %dfps\n", basefps);
+void jgrf_set_screenfps(int fps) {
+    screenfps = fps;
+    jgrf_log(JG_LOG_DBG, "Screen base FPS set: %dfps\n", screenfps);
 }
 
 // Callback to inform the frontend of current core framerate
@@ -1196,13 +1196,12 @@ int main(int argc, char *argv[]) {
 
     while (running) {
         // Divide the core framerate by the base framerate
-        runframes = (corefps / basefps); // Ideally, basefps is monitor refresh
+        runframes = (corefps / screenfps); // Screenfps is monitor refresh
 
         // Collect the remainder of the same division operation
-        collector += ((double)corefps / basefps) - runframes;
+        collector += ((double)corefps / screenfps) - runframes;
 
         // When sufficient remainder has been collected, run an extra frame
-        // If corefps is smaller than basefps, this is the only way frames run
         if (collector >= 1.0) {
             ++runframes;
             collector -= 1.0;

@@ -88,7 +88,7 @@ void jgrf_quit(int);
 
 int jgrf_get_speed(void);
 void jgrf_set_speed(int);
-void jgrf_set_basefps(int);
+void jgrf_set_screenfps(int);
 
 void jgrf_state_save(int);
 void jgrf_state_load(int);
@@ -96,5 +96,10 @@ void jgrf_state_load(int);
 int jgrf_game_detect_sys(const char*);
 
 void jgrf_frametime(double);
+
+extern int bmark; // External benchmark mode variable
+extern int fforward; // External fast-forward level
+extern int corefps; // Emulator core's framerate rounded to nearest int
+extern int screenfps; // Screen's framerate rounted to nearest int
 
 #endif

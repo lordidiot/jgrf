@@ -49,8 +49,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "video_gl.h"
 #include "settings.h"
 
-extern int bmark;
-
 static jgrf_gdata_t *gdata = NULL;
 static jg_setting_t *settings = NULL;
 
@@ -497,7 +495,7 @@ void jgrf_video_gl_resize(void) {
     SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(window), &dm);
 
     // Set the base fps for use in the main loop
-    jgrf_set_basefps(dm.refresh_rate);
+    jgrf_set_screenfps(dm.refresh_rate);
 }
 
 // Retrieve scale parameters for pointing device input
