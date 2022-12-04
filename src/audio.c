@@ -49,7 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "settings.h"
 #include "wave_writer.h"
 
-#define SPFTOLERANCE 28 // Divergence tolerance between current and average SPF
+// Divergence tolerance between current and average input samples per frame
+#define SPFTOLERANCE 28
 
 static jgrf_gdata_t *gdata = NULL;
 
@@ -87,7 +88,6 @@ static ringbuf_t rbuf_out = { 0, 0, 0, 0, NULL }; // Ring buffer (output audio)
 static struct timespec req, rem;
 
 static int ma_offset = 0; // Offset the input moving average chunk size
-static int out_offset = 0; // Offset the output rate
 
 static int mute = 0;
 
@@ -179,7 +179,7 @@ void jgrf_audio_cb_core(size_t in_size) {
     // Adjust input moving average calculation to reflect this input size
     jgrf_audio_mavg(&mavg_in, in_size);
 
-    // Try to keep the queue around the size of the ideal samples per frame
+    // Keep the output queue aligned to size of the ideal samples per frame
     size_t spf = (audinfo->rate / corefps) * audinfo->channels;
 
     // Input moving average samples per frame - make sure the number is even
@@ -202,19 +202,10 @@ void jgrf_audio_cb_core(size_t in_size) {
     uint32_t in_rate = (ma_insamps * corefps) / audinfo->channels;
     uint32_t out_rate = audinfo->rate / (fforward ? fforward + 1 : 1);
 
-    // Manage the size of the output buffer to avoid underruns
-    if (rbuf_out.cursize < spf) // Push More
-        out_offset = 3 * screenfps;
-    else if (rbuf_out.cursize < (spf + (spf >> 1))) // Push More
-        out_offset = 2 * screenfps;
-    else if (rbuf_out.cursize < spf * 2) // Push More
-        out_offset = screenfps;
-    else if (rbuf_out.cursize > spf * 5) // Push Less
-        out_offset = -screenfps;
-    else if (rbuf_out.cursize > spf * 3) // Goldilocks Zone
-        out_offset = 0;
-
-    out_rate += out_offset;
+    /* Attempt to keep between 3 and 4 full frames worth of samples in the
+       output buffer by adjusting the output rate
+    */
+    out_rate += (4 - (rbuf_out.cursize / spf)) * screenfps;
 
     // Change the resampling ratio
     err = speex_resampler_set_rate_frac(resampler,
