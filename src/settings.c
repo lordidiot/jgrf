@@ -257,6 +257,11 @@ void jgrf_settings_emu(jg_setting_t* (*get_settings)(size_t*)) {
         jgrf_log(JG_LOG_DBG, "Core configuration file not found: %s\n", path);
 
     for (size_t i = 0; i < numemusettings; ++i) {
+        if (emusettings[i].max < emusettings[i].min) {
+            jgrf_log(JG_LOG_ERR,
+                "Max < Min for setting: %s\n", emusettings[i].name);
+        }
+
         emusettings_default[i] = emusettings[i].val; // Store default setting
         if (ini_table_check_entry(conf, gdata->corename,
             emusettings[i].name)) {
