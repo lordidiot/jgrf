@@ -146,8 +146,8 @@ static void jgrf_menu_gen(menunode_t *node, jg_setting_t *s, unsigned num) {
                 ++token;
 
             if (token[0] == 'N') { // Special case for numerical ranges
-                int range = (s[i].max - s[i].min) + 1;
-                for (int j = 0; j < range; ++j) {
+                unsigned range = abs(s[i].max - s[i].min) + 1;
+                for (unsigned j = 0; j < range; ++j) {
                     menunode_t *setting = jgrf_menu_node_add_child(menuitem);
                     snprintf(setting->desc, DESCSIZE, "%d", j + s[i].min);
                     setting->val = j + s[i].min;
