@@ -1137,10 +1137,13 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < gdata.numauxfiles; ++i)
         jgapi.jg_set_auxinfo(auxinfo[i], i);
 
+    // Set hints from the core
+    gdata.hints = coreinfo->hints;
+
     // Load the game
     jgrf_game_load(gdata.filename);
 
-    // Set hints from the core
+    // Update hints in case loading a game caused a change
     gdata.hints = coreinfo->hints;
 
     // Override any core specific settings
