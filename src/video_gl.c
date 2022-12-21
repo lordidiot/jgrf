@@ -542,7 +542,7 @@ void jgrf_video_gl_set_info(jg_videoinfo_t *ptr) {
             jgrf_log(JG_LOG_DBG, "Pixel format: GL_UNSIGNED_BYTE\n");
             break;
         }
-        case JG_PIXFMT_RGB5551: {
+        case JG_PIXFMT_RGBX5551: {
             pixfmt.format = GL_RGBA;
             pixfmt.format_internal = GL_RGBA;
             pixfmt.type = GL_UNSIGNED_SHORT_5_5_5_1;
