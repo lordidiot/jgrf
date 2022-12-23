@@ -1130,6 +1130,12 @@ int main(int argc, char *argv[]) {
     // Load the core
     jgrf_core_load(corepath);
 
+    // Override any core specific settings
+    jgrf_settings_override(gdata.corename);
+
+    // Do final overrides using command line options
+    jgrf_cli_override();
+
     // Create any directories that are required
     jgrf_mkdirs();
 
@@ -1145,12 +1151,6 @@ int main(int argc, char *argv[]) {
 
     // Update hints in case loading a game caused a change
     gdata.hints = coreinfo->hints;
-
-    // Override any core specific settings
-    jgrf_settings_override(gdata.corename);
-
-    // Do final overrides using command line options
-    jgrf_cli_override();
 
     // Set up function pointers for video
     jgrf_video_setfuncs();
