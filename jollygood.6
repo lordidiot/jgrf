@@ -19,7 +19,7 @@
 .\" OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd September 26, 2022
+.Dd December 22, 2022
 .Dt JOLLYGOOD 6
 .Os
 .Sh NAME
@@ -59,6 +59,10 @@ Run N frames in Benchmark mode.
 Specify which core to use.
 .It Fl f , -fullscreen
 Start in Fullscreen mode.
+.It Fl g , -cheats Ar value
+Auto-activate cheats if present.
+.D1 0 = Disabled
+.D1 1 = Enabled
 .It Fl h , -help
 Show Usage.
 .It Fl o , -wave Ar file
@@ -268,6 +272,11 @@ CRTea Trinitron Curve Strength
 .El
 .It Ic [misc]
 .Bl -tag -width <TAB> -offset indent -compact
+.It Ic cheatauto = Aq Cm 0-1
+Cheat Auto-activation at boot
+.Aq Default: 0
+.D1 0 = Disabled
+.D1 1 = Enabled
 .It Ic corelog = Aq Cm 0-3
 Core logging options
 .Aq Default: 1
@@ -365,11 +374,18 @@ configuration file for the
 .Nm
 frontend.
 .Bd -literal -offset indent
+[audio]
+;N = Resampler Quality (0-10)
+rsqual = 3
+
 [video]
-; 0 = OpenGL Core Profile, 1 = OpenGL ES, 2 = OpenGL Compatibility Profile
+;0 = OpenGL Core Profile, 1 = OpenGL ES, 2 = OpenGL Compatibility Profile
 api = 0
 
-;N = Scale video output by N
+;0 = Disable, 1 = Enable
+fullscreen = 0
+
+;N = Scale video output by N (1-8)
 scale = 3
 
 ;0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, 3 = AANN,
@@ -403,16 +419,18 @@ crtea_corner = 3
 ;N = Trinitron Curve Strength
 crtea_tcurve = 10
 
-[audio]
-;N = Resampler Quality (0-10)
-rsqual = 3
-
 [misc]
+;0 = Disabled, 1 = Enabled
+cheatauto = 0
+
 ;0 = Debug, 1 = Info, 2 = Warning, 3 = Error
 corelog = 1
 
 ;0 = Debug, 1 = Info, 2 = Warning, 3 = Error
 frontendlog = 1
+
+;N = Text Scale
+textscale = 2
 .Ed
 .Pp
 Example
@@ -420,6 +438,9 @@ Example
 configuration file for the JollyCV core.
 .Bd -literal -offset indent
 [jollycv]
+;0 = Show Overscan, 1 = Mask Overscan
+mask_overscan = 0
+
 ;0 = TeaTime, 1 = SYoung
 palette = 0
 
