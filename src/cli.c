@@ -42,12 +42,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "a:b:c:fho:r:s:vwx:";
+static const char *os_def = "a:b:c:fg:ho:r:s:vwx:";
 static const struct parg_option po_def[] = {
     { "video", PARG_REQARG, NULL, 'a' },
     { "benchmark", PARG_REQARG, NULL, 'b' },
     { "core", PARG_REQARG, NULL, 'c' },
     { "fullscreen", PARG_NOARG, NULL, 'f' },
+    { "cheats", PARG_NOARG, NULL, 'g' },
     { "help", PARG_NOARG, NULL, 'h' },
     { "wave", PARG_REQARG, NULL, 'o' },
     { "rsqual", PARG_REQARG, NULL, 'r' },
@@ -62,6 +63,7 @@ static const char *wavfile = NULL;
 
 static int video = -1;
 static int fullscreen = 0;
+static int cheatauto = 0;
 static int rsqual = -1;
 static int scale = 0;
 static int shader = -1;
@@ -94,6 +96,9 @@ void jgrf_cli_override(void) {
 
     if (fullscreen)
         settings[VIDEO_FULLSCREEN].val = 1;
+
+    if (cheatauto >= 0 && cheatauto <= settings[MISC_CHEATAUTO].max)
+        settings[MISC_CHEATAUTO].val = cheatauto;
 
     if (windowed)
         settings[VIDEO_FULLSCREEN].val = 0;
@@ -157,6 +162,10 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 fullscreen = 1;
                 break;
             }
+            case 'g': { // Auto-activate cheats if present
+                cheatauto = atoi(ps.optarg);
+                break;
+            }
             case 'o': { // Wave File Output
                 wavfile = ps.optarg;
                 struct stat fbuf;
@@ -218,6 +227,10 @@ void jgrf_cli_usage(void) {
         "Specify which core to use\n");
     fprintf(stdout, "    -f, --fullscreen        "
         "Start in Fullscreen mode\n");
+    fprintf(stdout, "    -g, --cheats <value>    "
+        "Auto-activate cheats if present\n");
+    fprintf(stdout, "                              0 = Disabled\n");
+    fprintf(stdout, "                              1 = Enabled\n");
     fprintf(stdout, "    -h, --help              "
         "Show Usage\n");
     fprintf(stdout, "    -o, --wave <filename>   "

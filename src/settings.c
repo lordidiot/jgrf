@@ -111,6 +111,10 @@ static jg_setting_t settings[] = {
       "",
       10, 0, 10, 0
     },
+    { "", "Cheats: Auto-activate at Boot", "0 = Disabled, 1 = Enabled",
+      "",
+      0, 0, 1, 1
+    },
     { "", "Log Level: Core", "0 = Debug, 1 = Info, 2 = Warning, 3 = Error",
       "",
       1, 0, 3, 0
@@ -160,6 +164,7 @@ static void jgrf_settings_handler(void) {
     jgrf_setting_rd("video", "crtea_tcurve", &settings[VIDEO_CRTEA_TCURVE]);
 
     // Misc
+    jgrf_setting_rd("misc", "cheatauto", &settings[MISC_CHEATAUTO]);
     jgrf_setting_rd("misc", "corelog", &settings[MISC_CORELOG]);
     jgrf_setting_rd("misc", "frontendlog", &settings[MISC_FRONTENDLOG]);
     jgrf_setting_rd("misc", "textscale", &settings[MISC_TEXTSCALE]);
@@ -327,6 +332,9 @@ static void jgrf_settings_write_frontend(void) {
     ini_table_create_entry(conf, "video", "crtea_tcurve", ibuf);
 
     // Misc
+    snprintf(ibuf, sizeof(ibuf), "%d", settings[MISC_CHEATAUTO].val);
+    ini_table_create_entry(conf, "misc", "cheatauto", ibuf);
+
     snprintf(ibuf, sizeof(ibuf), "%d", settings[MISC_CORELOG].val);
     ini_table_create_entry(conf, "misc", "corelog", ibuf);
 

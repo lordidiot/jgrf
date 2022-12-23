@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "jgrf.h"
 #include "cheats.h"
+#include "settings.h"
 
 static void (*jgrf_cheat_clear)(void);
 static void (*jgrf_cheat_set)(const char *);
@@ -50,7 +51,7 @@ static int chtloaded = 0;
 void jgrf_cheats_toggle(void) {
     // If cheats are not loaded, simply return
     if (!chtloaded) {
-        jgrf_log(JG_LOG_WRN, "No cheats to toggle\n");
+        jgrf_log(JG_LOG_SCR, "No cheat file loaded");
         return;
     }
 
@@ -138,7 +139,10 @@ void jgrf_cheats_init(void (*chtclear)(void), void (*chtset)(const char *)) {
 
     jgrf_log(JG_LOG_DBG, "Cheat file loaded: %s\n", chtfilepath);
 
-    // Activate any cheats
+    // Cheats have been loaded
     chtloaded = 1;
-    jgrf_cheats_toggle();
+
+    // Activate any cheats
+    if (jgrf_settings_ptr()[MISC_CHEATAUTO].val)
+        jgrf_cheats_toggle();
 }
