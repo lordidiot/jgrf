@@ -71,7 +71,7 @@ static jg_setting_t settings[] = {
     },
     { "", "Video: Shader",
       "0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, "
-      "3 = Anti-Aliased Nearest Neighbour, 4 = CRT-Bespoke, 5 = CRTea, 6 = LCD",
+      "3 = Anti-Aliased Nearest Neighbour, 4 = CRT-Yee64, 5 = CRTea, 6 = LCD",
       "",
       2, 0, 6, 0
     },

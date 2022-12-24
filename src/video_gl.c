@@ -720,9 +720,9 @@ static void jgrf_video_gl_shader_setup(void) {
                 jgrf_video_gl_prog_create("default.vs", "aann.fs");
             break;
         }
-        case 4: { // CRT-Bespoke
+        case 4: { // CRT-Yee64
             shaderprog[1] =
-                jgrf_video_gl_prog_create("default.vs", "crt-bespoke.fs");
+                jgrf_video_gl_prog_create("default.vs", "crt-yee64.fs");
             break;
         }
         case 5: { // CRTea

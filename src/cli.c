@@ -245,7 +245,7 @@ void jgrf_cli_usage(void) {
     fprintf(stdout, "                              2 = Sharp Bilinear\n");
     fprintf(stdout, "                              3 = Anti-Aliased Nearest "
         "Neighbour\n");
-    fprintf(stdout, "                              4 = CRT-Bespoke\n");
+    fprintf(stdout, "                              4 = CRT-Yee64\n");
     fprintf(stdout, "                              5 = CRTea\n");
     fprintf(stdout, "                              6 = LCD\n");
     fprintf(stdout, "    -v, --verbose           "

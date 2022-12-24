@@ -126,7 +126,7 @@ fullscreen = 0
 scale = 3
 
 ;0 = Nearest Neighbour, 1 = Linear, 2 = Sharp Bilinear, 3 = AANN,
-;4 = CRT-Bespoke, 5 = CRTea, 6 = LCD
+;4 = CRT-Yee64, 5 = CRTea, 6 = LCD
 shader = 3
 
 ; Settings for CRTea
@@ -215,6 +215,9 @@ The Jolly Good Reference Frontend
 
 AntiAliased Nearest Neighbor Fragment Shader
   Copyright (c) 2015 nyanpasu64 and wareya (MIT)
+
+CRT-Yee64 Fragment Shader
+  Copyright (c) 2017 Lucas Melo (MIT)
 
 ezmenu
   Copyright (c) 2022 rofl0r (MIT)
