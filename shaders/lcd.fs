@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-// Based on Public Domain work by hunterk
 
 precision highp float;
 
@@ -31,39 +30,29 @@ uniform vec4 sourceSize;
 in vec2 texCoord;
 out vec4 fragColor;
 
-vec3 mask_weights(vec2 coord, float mask_intensity) {
-    vec3 weights = vec3(1.,1.,1.);
-    float on = 1.;
-    float off = 1.-mask_intensity;
-    vec3 red     = vec3(on,  off, off);
-    vec3 green   = vec3(off, on,  off);
-    vec3 blue    = vec3(off, off, on );
-    vec3 black   = vec3(off, off, off);
-    int w, z = 0;
-
-    vec3 lcdmask_x1[4] = vec3[](red, green, blue, black);
-    vec3 lcdmask_x2[4] = vec3[](red, green, blue, black);
-    vec3 lcdmask_x3[4] = vec3[](red, green, blue, black);
-    vec3 lcdmask_x4[4] = vec3[](black, black, black, black);
-
-    // find the vertical index
-    w = int(floor(mod(coord.y, 4.0)));
-
-    // find the horizontal index
-    z = int(floor(mod(coord.x, 4.0)));
-
-    // do a comparison
-    weights =
-        (w == 1) ? lcdmask_x1[z] :
-        (w == 2) ? lcdmask_x2[z] :
-        (w == 3) ? lcdmask_x3[z] : lcdmask_x4[z];
-    return weights;
-}
-
-#define mask_str 0.4
+#define maskstr 0.6
 
 void main() {
-    vec2 tcoord = texCoord * 1.00001;
-    fragColor = vec4(pow(texture(source, tcoord).rgb, vec3(1.+mask_str)) *
-        mask_weights(tcoord.xy * sourceSize.xy * 4., mask_str), 1.0);
+    // Find out where in the LCD screen we are
+    vec2 lcdCoord = texCoord * sourceSize.xy * 3.0;
+
+    // Find out which column of the pixel we're in
+    float col = floor(mod(lcdCoord.x, 3.0));
+
+    // Shade all pixels
+    vec4 shade = vec4(maskstr, maskstr, maskstr, 1.0);
+
+    // Shade stronger in red, green, or blue for each column
+    if (col == 1.0)
+        shade.g = 1.0;
+    else if (col == 2.0)
+        shade.b = 1.0;
+    else
+        shade.r = 1.0;
+
+    // Draw a horizontal scanline at the bottom of each pixel
+    if (floor(mod(lcdCoord.y, 3.0)) == 0.0)
+        shade.rgba = vec4(maskstr, maskstr, maskstr, 1.0);
+
+    fragColor = texture(source, texCoord) * shade;
 }
