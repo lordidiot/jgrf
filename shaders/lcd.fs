@@ -30,7 +30,7 @@ uniform vec4 sourceSize;
 in vec2 texCoord;
 out vec4 fragColor;
 
-#define maskstr 0.6
+#define maskstr 0.5
 
 void main() {
     // Find out where in the LCD screen we are
