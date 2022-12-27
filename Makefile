@@ -138,6 +138,7 @@ install: all
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
 	@mkdir -p $(DESTDIR)$(MANDIR)/man6
 	cp $(TARGET) $(DESTDIR)$(BINDIR)
+	cp $(SOURCEDIR)/ChangeLog $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/jollygood.6 $(DESTDIR)$(MANDIR)/man6
