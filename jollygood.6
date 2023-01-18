@@ -1,5 +1,5 @@
 .\" jollygood.6
-.\" Copyright (c) 2022 Rupert Carmichael
+.\" Copyright (c) 2022-2023 Rupert Carmichael
 .\" All rights reserved.
 .\"
 .\" Redistribution and use of this script, with or without modification, is
@@ -19,7 +19,7 @@
 .\" OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 25, 2022
+.Dd January 17, 2023
 .Dt JOLLYGOOD 6
 .Os
 .Sh NAME
@@ -348,7 +348,9 @@ Run a Super Nintendo rom using the Faust emulator included in the Mednafen core
 instead of the default BSNES core.
 .It Nm Fl c Cm bsnes Qo Ar Super Game Boy (World) (Rev 2).sfc Qc Ar rom.gb
 Run a Game Boy rom using the BSNES core and an auxiliary Super Game Boy Rom.
-.It Nm Fl a Cm 1 Ar file
+.It Nm Fl c Cm sameboy Ar rom1.gb Ar rom2.gb
+Run a multiplayer linked game with two Game Boy roms using the SameBoy core.
+.It Nm Fl a Cm 2 Ar file
 Run the frontend in a OpenGL Compatibility Profile.
 .It Cm time Nm Fl b Cm 1000 Ar file
 Run the frontend for
