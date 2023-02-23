@@ -813,6 +813,9 @@ int jgrf_game_detect_sys(const char *filename) {
     else if (!strcasecmp(ext, "nds") || !strcasecmp(ext, "dsi"))
         snprintf(gdata.sys, sizeof(gdata.sys), "nds");
 
+    else if (!strcasecmp(ext, "neo"))
+        snprintf(gdata.sys, sizeof(gdata.sys), "neogeo");
+
     else if (!strcasecmp(ext, "nes") || !strcasecmp(ext, "fds"))
         snprintf(gdata.sys, sizeof(gdata.sys), "nes");
 
@@ -875,6 +878,9 @@ static int jgrf_core_default(void) {
 
     else if (!strcmp(gdata.sys, "nds"))
         snprintf(gdata.corename, sizeof(gdata.corename), "melonds");
+
+    else if (!strcmp(gdata.sys, "neogeo"))
+        snprintf(gdata.corename, sizeof(gdata.corename), "gngeo");
 
     else if (!strcmp(gdata.sys, "nes"))
         snprintf(gdata.corename, sizeof(gdata.corename), "nestopia");
