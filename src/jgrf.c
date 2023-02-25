@@ -411,6 +411,16 @@ static void jgrf_hash_crc32(void) {
     gameinfo.crc = mz_crc32(gdata.crc, gameinfo.data, gameinfo.size);
 }
 
+// Convert a nybble's hexadecimal representation to a lower case ASCII char
+static inline char jgrf_nyb_hexchar(unsigned nyb) {
+    nyb &= 0xf; // Lower nybble only
+    if (nyb >= 10)
+        nyb += 'a' - 10;
+    else
+        nyb += '0';
+    return (char)nyb;
+}
+
 // Generate the MD5 checksum of the game data
 static void jgrf_hash_md5(void) {
     MD5_CTX c;
@@ -427,8 +437,12 @@ static void jgrf_hash_md5(void) {
     MD5_Update(&c, dataptr, md5len);
     MD5_Final(digest, &c);
 
-    for (int i = 0; i < 16; ++i)
-        snprintf(&(gdata.md5[i * 2]), 16 * 2, "%02x", (unsigned)digest[i]);
+    // Convert the digest to a string without dodgy calls to snprintf
+    for (int i = 0; i < 16; ++i) {
+        gdata.md5[i * 2] = jgrf_nyb_hexchar(digest[i] >> 4);
+        gdata.md5[(i * 2) + 1] = jgrf_nyb_hexchar(digest[i]);
+    }
+    gdata.md5[32] = '\0';
 
     gameinfo.md5 = gdata.md5;
 }
