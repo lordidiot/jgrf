@@ -894,7 +894,7 @@ static int jgrf_core_default(void) {
         snprintf(gdata.corename, sizeof(gdata.corename), "melonds");
 
     else if (!strcmp(gdata.sys, "neogeo"))
-        snprintf(gdata.corename, sizeof(gdata.corename), "gngeo");
+        snprintf(gdata.corename, sizeof(gdata.corename), "geolith");
 
     else if (!strcmp(gdata.sys, "nes"))
         snprintf(gdata.corename, sizeof(gdata.corename), "nestopia");
