@@ -1200,7 +1200,7 @@ int main(int argc, char *argv[]) {
     jgrf_input_query(jgapi.jg_get_inputinfo);
 
     // Reset the core
-    jgapi.jg_reset(1);
+    jgapi.jg_reset(2);
 
     // Activate Cheats
     jgrf_cheats_init(jgapi.jg_cheat_clear, jgapi.jg_cheat_set);
