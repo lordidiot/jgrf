@@ -373,7 +373,7 @@ void jgrf_menu_display(void) {
     emusettings = jgrf_settings_emu_ptr(&numemusettings);
 
     menuroot = jgrf_menu_node_create();
-    snprintf(menuroot->desc, DESCSIZE, "Jolly Good Menu");
+    snprintf(menuroot->desc, DESCSIZE, "%s", jgrf_gdata_ptr()->corefname);
     menunode_t *node;
 
     node = jgrf_menu_node_add_child(menuroot);
