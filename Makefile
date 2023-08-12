@@ -30,6 +30,7 @@ LIBDIR ?= $(PREFIX)/lib
 MANDIR ?= $(DATAROOTDIR)/man
 TARGET := jollygood
 
+BUILD_STATIC ?= 0
 USE_EXTERNAL_MD5 ?= 0
 USE_EXTERNAL_MINIZ ?= 0
 
@@ -38,6 +39,10 @@ UNAME := $(shell uname -s)
 # Conditions for DEFINES
 ifneq ($(OS), Windows_NT)
 	DEFINES += -DDATADIR="\"$(DATADIR)\"" -DLIBDIR="\"$(LIBDIR)\""
+endif
+
+ifneq ($(BUILD_STATIC), 0)
+	DEFINES += -DJGRF_STATIC
 endif
 
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
