@@ -902,6 +902,7 @@ int jgrf_game_detect_sys(const char *filename) {
     return 1;
 }
 
+#ifndef JGRF_STATIC
 // Set the default core for a detected system - can be overridden at CLI
 static int jgrf_core_default(void) {
     if (!strcmp(gdata.sys, "32x"))
@@ -972,6 +973,7 @@ static int jgrf_core_default(void) {
 
     return 1;
 }
+#endif
 
 // Push data to the core
 void jgrf_data_push(uint32_t type, int port, const void *ptr, size_t size) {
@@ -1095,9 +1097,9 @@ int main(int argc, char *argv[]) {
     jgrf_cli_parse(argc, argv);
 
     // Force DirectSound audio driver on Windows
-    #if defined(__MINGW32__) || defined(__MINGW64__)
+#if defined(__MINGW32__) || defined(__MINGW64__)
     putenv("SDL_AUDIODRIVER=directsound");
-    #endif
+#endif
 
     // Allow joystick input when the window is not focused
     SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
@@ -1145,6 +1147,10 @@ int main(int argc, char *argv[]) {
     }
     jgrf_game_detect_sys(gdata.filename);
 
+#ifdef JGRF_STATIC
+    char corepath[192] = "Statically linked";
+    snprintf(gdata.coreassets, sizeof(gdata.coreassets), ".");
+#else
     // Detect the default core for the system
     if (jgrf_cli_core()) {
         snprintf(gdata.corename, sizeof(gdata.corename), "%s", jgrf_cli_core());
@@ -1184,6 +1190,7 @@ int main(int argc, char *argv[]) {
     // If no core was found, there is no reason to keep the program running
     if (!corefound)
         jgrf_log(JG_LOG_ERR, "Failed to locate core. Exiting...\n");
+#endif
 
     // Load the core
     jgrf_core_load(corepath);
