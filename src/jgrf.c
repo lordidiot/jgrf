@@ -272,13 +272,50 @@ static void jgrf_callbacks_set(void) {
 // Load and set up the core
 static void jgrf_core_load(const char *corepath) {
     memset(&jgapi, 0, sizeof(jgapi));
+#ifdef JGRF_STATIC
+    (void)corepath;
+    jgapi.jg_init = &jg_init;
+    jgapi.jg_deinit = &jg_deinit;
+    jgapi.jg_reset = &jg_reset;
+    jgapi.jg_exec_frame = &jg_exec_frame;
+    jgapi.jg_game_load = &jg_game_load;
+    jgapi.jg_game_unload = &jg_game_unload;
+    jgapi.jg_state_load = &jg_state_load;
+    jgapi.jg_state_load_raw = &jg_state_load_raw;
+    jgapi.jg_state_save = &jg_state_save;
+    jgapi.jg_state_save_raw = &jg_state_save_raw;
+    jgapi.jg_state_size = &jg_state_size;
+    jgapi.jg_media_select = &jg_media_select;
+    jgapi.jg_media_insert = &jg_media_insert;
+    jgapi.jg_cheat_clear = &jg_cheat_clear;
+    jgapi.jg_cheat_set = &jg_cheat_set;
+    jgapi.jg_rehash = &jg_rehash;
+    jgapi.jg_data_push = &jg_data_push;
+
+    jgapi.jg_get_coreinfo = &jg_get_coreinfo;
+    jgapi.jg_get_audioinfo = &jg_get_audioinfo;
+    jgapi.jg_get_videoinfo = &jg_get_videoinfo;
+    jgapi.jg_get_inputinfo = &jg_get_inputinfo;
+    jgapi.jg_get_settings = &jg_get_settings;
+
+    jgapi.jg_setup_video = &jg_setup_video;
+    jgapi.jg_setup_audio = &jg_setup_audio;
+    jgapi.jg_set_inputstate = &jg_set_inputstate;
+    jgapi.jg_set_gameinfo = &jg_set_gameinfo;
+    jgapi.jg_set_auxinfo = &jg_set_auxinfo;
+    jgapi.jg_set_paths = &jg_set_paths;
+
+    jgapi.jg_set_cb_log = &jg_set_cb_log;
+    jgapi.jg_set_cb_audio = &jg_set_cb_audio;
+    jgapi.jg_set_cb_frametime = &jg_set_cb_frametime;
+    jgapi.jg_set_cb_rumble = &jg_set_cb_rumble;
+#else
     jgapi.handle = SDL_LoadObject(corepath);
 
     if (!jgapi.handle)
         jgrf_log(JG_LOG_ERR, "%s\n", SDL_GetError());
 
     SDL_GetError();
-
 
     *(void**)(&jgapi.jg_init) = SDL_LoadFunction(jgapi.handle, "jg_init");
     *(void**)(&jgapi.jg_deinit) = SDL_LoadFunction(jgapi.handle, "jg_deinit");
@@ -344,6 +381,7 @@ static void jgrf_core_load(const char *corepath) {
         "jg_set_cb_frametime");
     *(void**)(&jgapi.jg_set_cb_rumble) = SDL_LoadFunction(jgapi.handle,
         "jg_set_cb_rumble");
+#endif
 
     // Set up values in global data struct
     coreinfo = jgapi.jg_get_coreinfo(gdata.sys);
