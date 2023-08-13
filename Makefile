@@ -69,12 +69,10 @@ else
 endif
 
 ifeq ($(USE_EXTERNAL_MINIZ), 0)
-	Q_MINIZ :=
 	CFLAGS_MINIZ := -I$(SOURCEDIR)/deps/miniz
 	LIBS_MINIZ :=
 	CSRCS += deps/miniz/miniz.c
 else
-	Q_MINIZ := @
 	CFLAGS_MINIZ := $(shell $(PKG_CONFIG) --cflags miniz)
 	LIBS_MINIZ := $(shell $(PKG_CONFIG) --libs miniz)
 endif
@@ -162,10 +160,9 @@ install: all
 	cp $(SOURCEDIR)/icons/jollygood1024.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps
-	$(Q_MINIZ)if test $(USE_EXTERNAL_MINIZ) = 0; then \
-		cp $(SOURCEDIR)/deps/miniz/LICENSE \
-			$(DESTDIR)$(DOCDIR)/LICENSE-miniz; \
-	fi
+ifeq ($(USE_EXTERNAL_MINIZ), 0)
+	cp $(SOURCEDIR)/deps/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
+endif
 
 install-strip: install
 	strip $(DESTDIR)$(BINDIR)/$(TARGET)
