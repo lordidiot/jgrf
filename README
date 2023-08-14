@@ -15,7 +15,9 @@ SpeexDSP, and libepoxy.
 
 Options:
   USE_EXTERNAL_MD5 - Set non-zero to use an external libcrypto
-  USE_EXTERNAL_MINIZ -  Set non-zero to use an external miniz
+  USE_EXTERNAL_MINIZ - Set non-zero to use an external miniz
+  BUILD_STATIC - Set to the path of a core built with a static JG archive to
+    build a standalone binary
 
 Linux:
   make
