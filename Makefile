@@ -28,7 +28,6 @@ DATADIR ?= $(DATAROOTDIR)
 DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
 LIBDIR ?= $(PREFIX)/lib
 MANDIR ?= $(DATAROOTDIR)/man
-TARGET := jollygood
 
 BUILD_STATIC ?= 0
 USE_EXTERNAL_MD5 ?= 0
@@ -47,7 +46,11 @@ ifneq ($(BUILD_STATIC), 0)
 	include $(BUILD_STATIC)/jg-static.mk
 	DEFINES += -DJGRF_STATIC
 	LIBS += $(LIBS_STATIC) -L$(BUILD_STATIC) -l$(NAME)-jg
-	TARGET = $(NAME)/$(NAME)
+	TARGET := $(NAME)/$(NAME)
+	CORE := $(NAME)
+else
+	TARGET := jollygood
+	CORE := $(TARGET)
 endif
 
 CSRCS := jgrf.c \
@@ -123,12 +126,12 @@ $(OBJDIR)/.tag:
 
 $(TARGET): $(OBJS)
 ifneq ($(BUILD_STATIC), 0)
-	@mkdir -p $(SOURCEDIR)/$(NAME)
+	@mkdir -p $(NAME)
 endif
-	$(CC) $^ $(LDFLAGS) $(LIBS) -o $@
+	$(strip $(CC) $^ $(LDFLAGS) $(LIBS) -o $@)
 
 clean:
-	rm -rf $(OBJDIR) $(TARGET)
+	rm -rf $(OBJDIR) $(CORE)
 
 install: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
@@ -176,10 +179,10 @@ ifeq ($(USE_EXTERNAL_MINIZ), 0)
 endif
 
 install-strip: install
-	strip $(DESTDIR)$(BINDIR)/$(TARGET)
+	strip $(DESTDIR)$(BINDIR)/$(CORE)
 
 uninstall:
-	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
+	rm -f $(DESTDIR)$(BINDIR)/$(CORE)
 	rm -rf $(DESTDIR)$(DOCDIR)
 	rm -rf $(DESTDIR)$(DATADIR)/jollygood/jgrf
 	rm -f $(DESTDIR)$(DATAROOTDIR)/applications/jollygood.desktop
