@@ -52,7 +52,7 @@ ifneq ($(BUILD_STATIC), 0)
 	DEFINES += -DJGRF_STATIC
 	LIBS += -L$(BUILD_STATIC) -l$(NAME)-jg $(LIBS_STATIC)
 	EXE := $(NAME)/$(NAME)
-	TARGET := $(EXE)
+	TARGET := $(EXE) $(NAME)/shaders/default.fs
 	CORE := $(NAME)
 	ifneq ($(ASSETS),)
 		TARGET += $(ASSETS)
@@ -147,6 +147,10 @@ $(ASSETS): $(ASSETS_PATH)
 	@mkdir -p $(NAME)
 	@cp $(subst $(NAME),$(BUILD_STATIC),$@) $(NAME)/
 endif
+
+$(NAME)/shaders/default.fs: $(SOURCEDIR)/shaders/default.fs
+	@mkdir -p $(NAME)
+	@cp -r $(SOURCEDIR)/shaders $(NAME)/
 endif
 
 clean:
