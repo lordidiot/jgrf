@@ -46,11 +46,17 @@ ifneq ($(BUILD_STATIC), 0)
 	include $(BUILD_STATIC)/jg-static.mk
 	DEFINES += -DJGRF_STATIC
 	LIBS += $(LIBS_STATIC) -L$(BUILD_STATIC) -l$(NAME)-jg
-	TARGET := $(NAME)/$(NAME)
+	EXE := $(NAME)/$(NAME)
+	TARGET := $(EXE)
 	CORE := $(NAME)
+	ifneq ($(ASSETS),)
+		TARGET += $(ASSETS)
+		ASSETS_PATH := $(subst $(NAME),$(BUILD_STATIC),$(ASSETS))
+	endif
 else
-	TARGET := jollygood
-	CORE := $(TARGET)
+	EXE := jollygood
+	TARGET := $(EXE)
+	CORE := $(EXE)
 endif
 
 CSRCS := jgrf.c \
@@ -124,11 +130,19 @@ $(OBJDIR)/.tag:
 	@mkdir -p $(OBJDIR)/deps/miniz
 	@touch $@
 
-$(TARGET): $(OBJS)
+$(EXE): $(OBJS)
 ifneq ($(BUILD_STATIC), 0)
 	@mkdir -p $(NAME)
 endif
 	$(strip $(CC) $^ $(LDFLAGS) $(LIBS) -o $@)
+
+ifneq ($(BUILD_STATIC), 0)
+ifneq ($(ASSETS),)
+$(ASSETS): $(ASSETS_PATH)
+	@mkdir -p $(NAME)
+	@cp $(subst $(NAME),$(BUILD_STATIC),$@) $(NAME)/
+endif
+endif
 
 clean:
 	rm -rf $(OBJDIR) $(CORE)
@@ -149,7 +163,7 @@ install: all
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
 	@mkdir -p $(DESTDIR)$(MANDIR)/man6
-	cp $(TARGET) $(DESTDIR)$(BINDIR)
+	cp $(EXE) $(DESTDIR)$(BINDIR)
 	cp $(SOURCEDIR)/ChangeLog $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
@@ -174,6 +188,14 @@ install: all
 	cp $(SOURCEDIR)/icons/jollygood1024.png $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps
+ifneq ($(BUILD_STATIC), 0)
+ifneq ($(ASSETS),)
+	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(NAME)
+	for a in $(ASSETS); do \
+		cp $$a $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(NAME)/; \
+	done
+endif
+endif
 ifeq ($(USE_EXTERNAL_MINIZ), 0)
 	cp $(SOURCEDIR)/deps/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
 endif
