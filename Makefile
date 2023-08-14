@@ -36,16 +36,19 @@ USE_EXTERNAL_MINIZ ?= 0
 
 UNAME := $(shell uname -s)
 
+LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
+
 # Conditions for DEFINES
 ifneq ($(OS), Windows_NT)
 	DEFINES += -DDATADIR="\"$(DATADIR)\"" -DLIBDIR="\"$(LIBDIR)\""
 endif
 
 ifneq ($(BUILD_STATIC), 0)
+	include $(BUILD_STATIC)/jg-static.mk
 	DEFINES += -DJGRF_STATIC
+	LIBS += $(LIBS_STATIC) -L$(BUILD_STATIC) -l$(NAME)-jg
+	TARGET = $(NAME)/$(NAME)
 endif
-
-LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
 CSRCS := jgrf.c \
 	audio.c \
@@ -119,6 +122,9 @@ $(OBJDIR)/.tag:
 	@touch $@
 
 $(TARGET): $(OBJS)
+ifneq ($(BUILD_STATIC), 0)
+	@mkdir -p $(SOURCEDIR)/$(NAME)
+endif
 	$(CC) $^ $(LDFLAGS) $(LIBS) -o $@
 
 clean:
