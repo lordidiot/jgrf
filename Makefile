@@ -45,7 +45,7 @@ endif
 ifneq ($(BUILD_STATIC), 0)
 	include $(BUILD_STATIC)/jg-static.mk
 	DEFINES += -DJGRF_STATIC
-	LIBS += $(LIBS_STATIC) -L$(BUILD_STATIC) -l$(NAME)-jg
+	LIBS += -L$(BUILD_STATIC) -l$(NAME)-jg $(LIBS_STATIC)
 	EXE := $(NAME)/$(NAME)
 	TARGET := $(EXE)
 	CORE := $(NAME)
