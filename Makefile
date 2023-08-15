@@ -33,9 +33,14 @@ BUILD_STATIC ?= 0
 USE_EXTERNAL_MD5 ?= 0
 USE_EXTERNAL_MINIZ ?= 0
 
-UNAME := $(shell uname -s)
-
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
+
+UNAME := $(shell uname -s)
+ifeq ($(UNAME), Darwin)
+	LIBS += -Wl,-undefined,error
+else
+	LIBS += -Wl,--no-undefined
+endif
 
 # Conditions for DEFINES
 ifneq ($(OS), Windows_NT)
