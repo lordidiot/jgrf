@@ -57,8 +57,8 @@ ifneq ($(BUILD_STATIC), 0)
 	TARGET := $(EXE) $(NAME)/shaders/default.fs
 	CORE := $(NAME)
 	ifneq ($(ASSETS),)
-		ASSETS_PATH := $(subst $(BASE),$(BUILD_STATIC),$(ASSETS))
-		ASSETS_TARGET := $(subst $(BASE),$(NAME),$(ASSETS))
+		ASSETS_PATH := $(ASSETS:%=$(BUILD_STATIC)/%)
+		ASSETS_TARGET := $(ASSETS:%=$(NAME)/%)
 		TARGET += $(ASSETS_TARGET)
 	endif
 else
