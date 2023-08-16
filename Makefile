@@ -50,14 +50,16 @@ endif
 
 ifneq ($(BUILD_STATIC), 0)
 	include $(BUILD_STATIC)/jg-static.mk
+	BASE := $(NAME:%-jg=%)
 	DEFINES += -DJGRF_STATIC
-	LIBS += -L$(BUILD_STATIC) -l$(NAME)-jg $(LIBS_STATIC)
+	LIBS += -L$(BUILD_STATIC) -l$(BASE)-jg $(LIBS_STATIC)
 	EXE := $(NAME)/$(NAME)
 	TARGET := $(EXE) $(NAME)/shaders/default.fs
 	CORE := $(NAME)
 	ifneq ($(ASSETS),)
-		TARGET += $(ASSETS)
-		ASSETS_PATH := $(subst $(NAME),$(BUILD_STATIC),$(ASSETS))
+		ASSETS_PATH := $(subst $(BASE),$(BUILD_STATIC),$(ASSETS))
+		ASSETS_TARGET := $(subst $(BASE),$(NAME),$(ASSETS))
+		TARGET += $(ASSETS_TARGET)
 	endif
 else
 	EXE := jollygood
@@ -144,7 +146,7 @@ endif
 
 ifneq ($(BUILD_STATIC), 0)
 ifneq ($(ASSETS),)
-$(ASSETS): $(ASSETS_PATH)
+$(ASSETS_TARGET): $(ASSETS_PATH)
 	@mkdir -p $(NAME)
 	@cp $(subst $(NAME),$(BUILD_STATIC),$@) $(NAME)/
 endif
@@ -200,9 +202,9 @@ install: all
 	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps
 ifneq ($(BUILD_STATIC), 0)
 ifneq ($(ASSETS),)
-	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(NAME)
-	for a in $(ASSETS); do \
-		cp $$a $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(NAME)/; \
+	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(BASE)
+	for a in $(ASSETS_TARGET); do \
+		cp $$a $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(BASE)/; \
 	done
 endif
 endif
