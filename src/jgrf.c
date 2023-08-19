@@ -1089,7 +1089,7 @@ void jgrf_frametime(double frametime) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        jgrf_cli_usage();
+        jgrf_cli_usage(argv[0]);
         jgrf_quit(EXIT_SUCCESS);
     }
 
@@ -1142,7 +1142,7 @@ int main(int argc, char *argv[]) {
 
     // Detect the system required to play the game
     if (gdata.filename == NULL) {
-        jgrf_cli_usage();
+        jgrf_cli_usage(argv[0]);
         jgrf_log(JG_LOG_ERR, "Invalid file specified. Exiting...\n");
     }
     jgrf_game_detect_sys(gdata.filename);

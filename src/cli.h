@@ -35,6 +35,6 @@ const char *jgrf_cli_core(void);
 const char *jgrf_cli_wave(void);
 void jgrf_cli_override(void);
 void jgrf_cli_parse(int, char**);
-void jgrf_cli_usage(void);
+void jgrf_cli_usage(char*);
 
 #endif

@@ -154,7 +154,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 break;
             }
             case 'h': { // Show usage
-                jgrf_cli_usage();
+                jgrf_cli_usage(argv[0]);
                 jgrf_quit(EXIT_SUCCESS);
                 break;
             }
@@ -211,9 +211,14 @@ void jgrf_cli_parse(int argc, char *argv[]) {
     }
 }
 
-void jgrf_cli_usage(void) {
+void jgrf_cli_usage(char *binname) {
+#ifdef JGRF_STATIC
+    jg_coreinfo_t *coreinfo = jg_get_coreinfo("static");
+    fprintf(stdout, "%s %s\n", coreinfo->fname, coreinfo->version);
+#else
     fprintf(stdout, "The Jolly Good Reference Frontend %s\n", VERSION);
-    fprintf(stdout, "usage: jollygood [options] [auxiliary files] game\n");
+#endif
+    fprintf(stdout, "usage: %s [options] [auxiliary files] game\n", binname);
     fprintf(stdout, "  options:\n");
     fprintf(stdout, "    -a, --video <value>     "
         "Specify which Video API to use\n");
