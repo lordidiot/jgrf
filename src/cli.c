@@ -213,7 +213,7 @@ void jgrf_cli_parse(int argc, char *argv[]) {
 
 void jgrf_cli_usage(char *binname) {
 #ifdef JGRF_STATIC
-    jg_coreinfo_t *coreinfo = jg_get_coreinfo("static");
+    jg_coreinfo_t *coreinfo = jg_get_coreinfo("");
     fprintf(stdout, "%s %s\n", coreinfo->fname, coreinfo->version);
 #else
     fprintf(stdout, "The Jolly Good Reference Frontend %s\n", VERSION);
