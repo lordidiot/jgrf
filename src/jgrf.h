@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef struct jgrf_gdata_t { // Global Data
     const char *filename;
+    char binpath[128]; // Directory containing the binary
     char configpath[128]; // Base user config path
     char datapath[64]; // Base user data path
     char corename[64]; // Internally used core name
@@ -44,7 +45,7 @@ typedef struct jgrf_gdata_t { // Global Data
     char coreversion[32]; // Core Version
     char gamename[128]; // Internally used game name
     char gamefname[128]; // Internally used game name with extension
-    char coreassets[128]; // Core asset path
+    char coreassets[256]; // Core asset path
     char userassets[128]; // User asset path
     char biospath[128]; // BIOS path
     char cheatpath[128]; // Cheat path

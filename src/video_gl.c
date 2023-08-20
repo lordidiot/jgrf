@@ -613,9 +613,12 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
     char vspath[192];
     char fspath[192];
     struct stat fbuf; // First find what path to use. Check local first.
-    if (stat("shaders/default.vs", &fbuf) == 0) { // Found it locally
-        snprintf(vspath, sizeof(vspath), "shaders/%s", vs);
-        snprintf(fspath, sizeof(fspath), "shaders/%s", fs);
+
+    snprintf(vspath, sizeof(vspath), "%s/shaders/default.vs", gdata->binpath);
+
+    if (stat(vspath, &fbuf) == 0) { // Found it locally
+        snprintf(vspath, sizeof(vspath), "%s/shaders/%s", gdata->binpath, vs);
+        snprintf(fspath, sizeof(fspath), "%s/shaders/%s", gdata->binpath, fs);
     }
 #if defined(DATADIR)
     else { // Use the system-wide path

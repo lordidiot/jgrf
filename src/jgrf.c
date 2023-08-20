@@ -1147,9 +1147,14 @@ int main(int argc, char *argv[]) {
     }
     jgrf_game_detect_sys(gdata.filename);
 
+    // Determine the binary's path relative to the current working directory
+    int lastdirpos = strrchr(argv[0], '/') - argv[0];
+    strncpy(gdata.binpath, argv[0], sizeof(gdata.binpath));
+    gdata.binpath[lastdirpos] = '\0';
+
 #ifdef JGRF_STATIC
     char corepath[192] = "Statically linked";
-    snprintf(gdata.coreassets, sizeof(gdata.coreassets), ".");
+    snprintf(gdata.coreassets, sizeof(gdata.coreassets), "%s", gdata.binpath);
 #else
     // Detect the default core for the system
     if (jgrf_cli_core()) {
@@ -1160,17 +1165,17 @@ int main(int argc, char *argv[]) {
             "Cannot detect default core, or invalid file. Exiting...\n");
 
     // Set the core path to the local core path
-    char corepath[192];
-    snprintf(corepath, sizeof(corepath), "./cores/%s/%s.%s",
-        gdata.corename, gdata.corename, SOEXT);
+    char corepath[384];
+    snprintf(corepath, sizeof(corepath), "%s/cores/%s/%s.%s",
+        gdata.binpath, gdata.corename, gdata.corename, SOEXT);
 
     // Check if a core exists at that path
     struct stat fbuf;
     int corefound = 0;
     if (stat(corepath, &fbuf) == 0) {
         // Set core asset path
-        snprintf(gdata.coreassets, sizeof(gdata.coreassets), "./cores/%s",
-            gdata.corename);
+        snprintf(gdata.coreassets, sizeof(gdata.coreassets), "%s/cores/%s",
+            gdata.binpath, gdata.corename);
         corefound = 1;
     }
 #if defined(LIBDIR) && defined(DATADIR) // Check for the core system-wide
