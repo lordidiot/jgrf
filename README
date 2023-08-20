@@ -212,7 +212,7 @@ support multiple types of codes. All codes are represented as JSON strings.
 Copyright
 ---------
 The Jolly Good Reference Frontend
-  Copyright (c) 2020-2022, Rupert Carmichael (BSD-3-Clause)
+  Copyright (c) 2020-2023, Rupert Carmichael (BSD-3-Clause)
   See LICENSE
 
 AntiAliased Nearest Neighbor Fragment Shader
