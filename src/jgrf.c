@@ -1148,7 +1148,8 @@ int main(int argc, char *argv[]) {
     jgrf_game_detect_sys(gdata.filename);
 
     // Determine the binary's path relative to the current working directory
-    int lastdirpos = strrchr(argv[0], '/') - argv[0];
+    int lastdirpos = strrchr(argv[0], '/') ?
+        strrchr(argv[0], '/') - argv[0] : 0;
     strncpy(gdata.binpath, argv[0], sizeof(gdata.binpath));
     gdata.binpath[lastdirpos] = '\0';
 
