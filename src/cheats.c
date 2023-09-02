@@ -134,6 +134,7 @@ void jgrf_cheats_init(void (*chtclear)(void), void (*chtset)(const char *)) {
 
     if (!chtfile || !fread((void*)chtfile, chtfilesize, 1, file)) {
         jgrf_log(JG_LOG_WRN, "Failed to read file: %s\n", chtfilepath);
+        fclose(file);
         return;
     }
 
