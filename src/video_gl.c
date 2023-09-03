@@ -593,7 +593,9 @@ static const GLchar* jgrf_video_gl_shader_load(const char *filename) {
 
     if (!shader || !fread(shader, size, sizeof(GLchar), file)) {
         free(src);
+        fclose(file);
         jgrf_log(JG_LOG_ERR, "Could not open shader file, exiting...\n");
+        return NULL;
     }
 
     // Close file handle after reading
