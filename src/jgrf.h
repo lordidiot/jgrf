@@ -35,6 +35,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define JGRF_AUXFILE_MAX 3
 
+#ifdef __APPLE__
+    #define SOEXT "dylib"
+#elif defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+    #define SOEXT "dll"
+#else
+    #define SOEXT "so"
+#endif
+
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+    #define SEP '\\'
+#else
+    #define SEP '/'
+#endif
+
 typedef struct jgrf_gdata_t { // Global Data
     const char *filename;
     char binpath[128]; // Directory containing the binary

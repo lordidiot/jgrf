@@ -53,14 +53,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "settings.h"
 #include "video.h"
 
-#ifdef __APPLE__
-    #define SOEXT "dylib"
-#elif defined(__MINGW32__) || defined(__MINGW64__)
-    #define SOEXT "dll"
-#else
-    #define SOEXT "so"
-#endif
-
 // Jolly Good API calls
 static struct _jgapi {
     void *handle;
@@ -1097,7 +1089,7 @@ int main(int argc, char *argv[]) {
     jgrf_cli_parse(argc, argv);
 
     // Force DirectSound audio driver on Windows
-#if defined(__MINGW32__) || defined(__MINGW64__)
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
     putenv("SDL_AUDIODRIVER=directsound");
 #endif
 
@@ -1148,8 +1140,8 @@ int main(int argc, char *argv[]) {
     jgrf_game_detect_sys(gdata.filename);
 
     // Determine the binary's path relative to the current working directory
-    int lastdirpos = strrchr(argv[0], '/') ?
-        strrchr(argv[0], '/') - argv[0] : 0;
+    int lastdirpos = strrchr(argv[0], SEP) ?
+        strrchr(argv[0], SEP) - argv[0] : 0;
     strncpy(gdata.binpath, argv[0], sizeof(gdata.binpath));
     gdata.binpath[lastdirpos] = '\0';
 
