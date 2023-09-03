@@ -1106,21 +1106,39 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Determine the binary's path relative to the current working directory
+    int lastdirpos = strrchr(argv[0], SEP) ?
+        strrchr(argv[0], SEP) - argv[0] : 0;
+    strncpy(gdata.binpath, argv[0], sizeof(gdata.binpath));
+    gdata.binpath[lastdirpos] = '\0';
+
+#if defined(JGRF_STATIC)
+    const char *binname = jg_get_coreinfo("")->name;
+#else
+    const char *binname = "jollygood";
+#endif
+
     // Set up user config path
+#if defined(JGRF_STATIC) && defined(_WIN32) \
+    || defined(__MINGW32__) || defined(__MINGW64__)
+    snprintf(gdata.configpath, sizeof(gdata.configpath), "%s/", gdata.binpath);
+    snprintf(gdata.datapath, sizeof(gdata.datapath), "%s/", gdata.binpath);
+#else
     if (getenv("XDG_CONFIG_HOME"))
         snprintf(gdata.configpath, sizeof(gdata.configpath),
-            "%s/jollygood/", getenv("XDG_CONFIG_HOME"));
+            "%s/%s/", getenv("XDG_CONFIG_HOME"), binname);
     else
         snprintf(gdata.configpath, sizeof(gdata.configpath),
-            "%s/.config/jollygood/", getenv("HOME"));
+            "%s/.config/%s/", getenv("HOME"), binname);
 
     // Set up user data path
     if (getenv("XDG_DATA_HOME"))
         snprintf(gdata.datapath, sizeof(gdata.datapath),
-            "%s/jollygood/", getenv("XDG_DATA_HOME"));
+            "%s/%s/", getenv("XDG_DATA_HOME"), binname);
     else
         snprintf(gdata.datapath, sizeof(gdata.datapath),
-            "%s/.local/share/jollygood/", getenv("HOME"));
+            "%s/.local/share/%s/", getenv("HOME"), binname);
+#endif
 
     // Set up screenshot path
     snprintf(gdata.sspath, sizeof(gdata.sspath),
@@ -1138,12 +1156,6 @@ int main(int argc, char *argv[]) {
         jgrf_log(JG_LOG_ERR, "Invalid file specified. Exiting...\n");
     }
     jgrf_game_detect_sys(gdata.filename);
-
-    // Determine the binary's path relative to the current working directory
-    int lastdirpos = strrchr(argv[0], SEP) ?
-        strrchr(argv[0], SEP) - argv[0] : 0;
-    strncpy(gdata.binpath, argv[0], sizeof(gdata.binpath));
-    gdata.binpath[lastdirpos] = '\0';
 
 #ifdef JGRF_STATIC
     char corepath[192] = "Statically linked";
