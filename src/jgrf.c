@@ -144,14 +144,14 @@ static void mkdirr(const char *dir) {
         tmp[len - 1] = 0;
 
     for (p = tmp + 1; *p; ++p) {
-        if (*p == '/') {
+        if (*p == SEP) {
             *p = 0;
             #if defined(__MINGW32__) || defined(__MINGW64__)
             mkdir(tmp);
             #else
             mkdir(tmp, S_IRWXU);
             #endif
-            *p = '/';
+            *p = SEP;
         }
     }
     #if defined(__MINGW32__) || defined(__MINGW64__)
@@ -390,15 +390,15 @@ static void jgrf_core_load(const char *corepath) {
     snprintf(gdata.coreversion, sizeof(gdata.coreversion),
         "%s", coreinfo->version);
     snprintf(gdata.userassets, sizeof(gdata.userassets),
-        "%sassets/%s", gdata.datapath, coreinfo->name);
+        "%sassets%c%s", gdata.datapath, SEP, coreinfo->name);
     snprintf(gdata.biospath, sizeof(gdata.biospath),
         "%sbios", gdata.datapath);
     snprintf(gdata.cheatpath, sizeof(gdata.cheatpath),
-        "%scheats/%s", gdata.datapath, coreinfo->name);
+        "%scheats%c%s", gdata.datapath, SEP, coreinfo->name);
     snprintf(gdata.savepath, sizeof(gdata.savepath),
-        "%ssave/%s", gdata.datapath, coreinfo->name);
+        "%ssave%c%s", gdata.datapath, SEP, coreinfo->name);
     snprintf(gdata.statepath, sizeof(gdata.statepath),
-        "%sstate/%s", gdata.datapath, coreinfo->name);
+        "%sstate%c%s", gdata.datapath, SEP, coreinfo->name);
     gdata.numinputs = coreinfo->numinputs;
 
     // Copy path values into the pathinfo struct
@@ -756,7 +756,7 @@ static int jgrf_game_detect_cue(const char *filename) {
 
             // If we got this far, try to read into the binary file
             snprintf(binpath, sizeof(binpath), "%s", filename);
-            end = strrchr(binpath, '/');
+            end = strrchr(binpath, SEP);
             if (end) *(end + 1) = '\0';
             else *binpath = '\0';
             snprintf(binfullpath, sizeof(binfullpath),
@@ -792,7 +792,7 @@ static int jgrf_game_detect_m3u(const char *filename) {
         line[strlen(line) - 1] = '\0'; // Remove the newline character
 
         // Build the absolute path to the .cue file
-        char *end = strrchr(cuepath, '/');
+        char *end = strrchr(cuepath, SEP);
         if (end) *(end + 1) = '\0';
         else *cuepath = '\0';
         snprintf(cuefullpath, sizeof(cuefullpath), "%s%s", cuepath, line);
@@ -1041,8 +1041,8 @@ void jgrf_set_speed(int speed) {
 // Load state
 void jgrf_state_load(int slot) {
     char statepath[260];
-    snprintf(statepath, sizeof(statepath), "%s/%s.st%d",
-        gdata.statepath, gdata.gamename, slot);
+    snprintf(statepath, sizeof(statepath), "%s%c%s.st%d",
+        gdata.statepath, SEP, gdata.gamename, slot);
 
     int success = jgapi.jg_state_load(statepath);
 
@@ -1056,8 +1056,8 @@ void jgrf_state_load(int slot) {
 // Save state
 void jgrf_state_save(int slot) {
     char statepath[260];
-    snprintf(statepath, sizeof(statepath), "%s/%s.st%d",
-        gdata.statepath, gdata.gamename, slot);
+    snprintf(statepath, sizeof(statepath), "%s%c%s.st%d",
+        gdata.statepath, SEP, gdata.gamename, slot);
 
     int success = jgapi.jg_state_save(statepath);
 
@@ -1121,28 +1121,31 @@ int main(int argc, char *argv[]) {
     // Set up user config path
 #if defined(JGRF_STATIC) && defined(_WIN32) \
     || defined(__MINGW32__) || defined(__MINGW64__)
-    snprintf(gdata.configpath, sizeof(gdata.configpath), "%s/", gdata.binpath);
-    snprintf(gdata.datapath, sizeof(gdata.datapath), "%s/", gdata.binpath);
+    snprintf(gdata.configpath, sizeof(gdata.configpath), "%s%c",
+        gdata.binpath, SEP);
+    snprintf(gdata.datapath, sizeof(gdata.datapath), "%s%c",
+        gdata.binpath, SEP);
 #else
     if (getenv("XDG_CONFIG_HOME"))
         snprintf(gdata.configpath, sizeof(gdata.configpath),
-            "%s/%s/", getenv("XDG_CONFIG_HOME"), binname);
+            "%s%c%s%c", getenv("XDG_CONFIG_HOME"), SEP, binname, SEP);
     else
         snprintf(gdata.configpath, sizeof(gdata.configpath),
-            "%s/.config/%s/", getenv("HOME"), binname);
+            "%s%c.config%c%s%c", getenv("HOME"), SEP, SEP, binname, SEP);
 
     // Set up user data path
     if (getenv("XDG_DATA_HOME"))
         snprintf(gdata.datapath, sizeof(gdata.datapath),
-            "%s/%s/", getenv("XDG_DATA_HOME"), binname);
+            "%s%c%s%c", getenv("XDG_DATA_HOME"), SEP, binname, SEP);
     else
         snprintf(gdata.datapath, sizeof(gdata.datapath),
-            "%s/.local/share/%s/", getenv("HOME"), binname);
+            "%s%c.local%cshare%c%s%c",
+            getenv("HOME"), SEP, SEP, SEP, binname, SEP);
 #endif
 
     // Set up screenshot path
     snprintf(gdata.sspath, sizeof(gdata.sspath),
-        "%sscreenshots/", gdata.datapath);
+        "%sscreenshots%c", gdata.datapath, SEP);
 
     // Load settings
     loaded.settings = jgrf_settings_init();
@@ -1171,27 +1174,27 @@ int main(int argc, char *argv[]) {
 
     // Set the core path to the local core path
     char corepath[384];
-    snprintf(corepath, sizeof(corepath), "%s/cores/%s/%s.%s",
-        gdata.binpath, gdata.corename, gdata.corename, SOEXT);
+    snprintf(corepath, sizeof(corepath), "%s%ccores%c%s%c%s.%s",
+        gdata.binpath, SEP, SEP, gdata.corename, SEP, gdata.corename, SOEXT);
 
     // Check if a core exists at that path
     struct stat fbuf;
     int corefound = 0;
     if (stat(corepath, &fbuf) == 0) {
         // Set core asset path
-        snprintf(gdata.coreassets, sizeof(gdata.coreassets), "%s/cores/%s",
-            gdata.binpath, gdata.corename);
+        snprintf(gdata.coreassets, sizeof(gdata.coreassets), "%s%ccores%c%s",
+            gdata.binpath, SEP, SEP, gdata.corename);
         corefound = 1;
     }
 #if defined(LIBDIR) && defined(DATADIR) // Check for the core system-wide
     else {
-        snprintf(corepath, sizeof(corepath), "%s/jollygood/%s.%s",
-            LIBDIR, gdata.corename, SOEXT);
+        snprintf(corepath, sizeof(corepath), "%s%cjollygood%c%s.%s",
+            LIBDIR, SEP, SEP, gdata.corename, SOEXT);
 
         // If it was found, set the core assets path
         if (stat(corepath, &fbuf) == 0) {
             snprintf(gdata.coreassets, sizeof(gdata.coreassets),
-                "%s/jollygood/%s", DATADIR, gdata.corename);
+                "%s%cjollygood%c%s", DATADIR, SEP, SEP, gdata.corename);
             corefound = 1;
         }
     }

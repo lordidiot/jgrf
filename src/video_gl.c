@@ -616,18 +616,21 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
     char fspath[192];
     struct stat fbuf; // First find what path to use. Check local first.
 
-    snprintf(vspath, sizeof(vspath), "%s/shaders/default.vs", gdata->binpath);
+    snprintf(vspath, sizeof(vspath), "%s%cshaders%cdefault.vs",
+        gdata->binpath, SEP, SEP);
 
     if (stat(vspath, &fbuf) == 0) { // Found it locally
-        snprintf(vspath, sizeof(vspath), "%s/shaders/%s", gdata->binpath, vs);
-        snprintf(fspath, sizeof(fspath), "%s/shaders/%s", gdata->binpath, fs);
+        snprintf(vspath, sizeof(vspath), "%s%cshaders%c%s",
+            gdata->binpath, SEP, SEP, vs);
+        snprintf(fspath, sizeof(fspath), "%s%cshaders%c%s",
+            gdata->binpath, SEP, SEP, fs);
     }
 #if defined(DATADIR)
     else { // Use the system-wide path
-        snprintf(vspath, sizeof(vspath),
-            "%s/jollygood/jgrf/shaders/%s", DATADIR, vs);
-        snprintf(fspath, sizeof(fspath),
-            "%s/jollygood/jgrf/shaders/%s", DATADIR, fs);
+        snprintf(vspath, sizeof(vspath), "%s%cjollygood%cjgrf%cshaders%c%s",
+            DATADIR, SEP, SEP, SEP, SEP, vs);
+        snprintf(fspath, sizeof(fspath), "%s%cjollygood%cjgrf%cshaders%c%s",
+            DATADIR, SEP, SEP, SEP, SEP, fs);
     }
 #endif
     const GLchar *vsrc = jgrf_video_gl_shader_load(vspath);
