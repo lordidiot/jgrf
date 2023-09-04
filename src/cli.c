@@ -149,10 +149,12 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 jgrf_benchmark(atoll(ps.optarg));
                 break;
             }
+#ifndef JGRF_STATIC
             case 'c': { // Core selection
                 corename = ps.optarg;
                 break;
             }
+#endif
             case 'h': { // Show usage
                 jgrf_cli_usage(argv[0]);
                 jgrf_quit(EXIT_SUCCESS);
@@ -228,8 +230,10 @@ void jgrf_cli_usage(char *binname) {
         "Profile\n");
     fprintf(stdout, "    -b, --bmark <frames>    "
         "Run N frames in Benchmark mode\n");
+#ifndef JGRF_STATIC
     fprintf(stdout, "    -c, --core <corename>   "
         "Specify which core to use\n");
+#endif
     fprintf(stdout, "    -f, --fullscreen        "
         "Start in Fullscreen mode\n");
     fprintf(stdout, "    -g, --cheats <value>    "

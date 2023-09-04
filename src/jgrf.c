@@ -1167,6 +1167,8 @@ int main(int argc, char *argv[]) {
 #ifdef JGRF_STATIC
     char corepath[192] = "Statically linked";
     snprintf(gdata.coreassets, sizeof(gdata.coreassets), "%s", gdata.binpath);
+    snprintf(gdata.corename, sizeof(gdata.corename), "%s",
+        jg_get_coreinfo("")->name);
 #else
     // Detect the default core for the system
     if (jgrf_cli_core()) {
