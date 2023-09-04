@@ -1107,10 +1107,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Determine the binary's path relative to the current working directory
-    int lastdirpos = strrchr(argv[0], SEP) ?
-        strrchr(argv[0], SEP) - argv[0] : 0;
-    strncpy(gdata.binpath, argv[0], sizeof(gdata.binpath));
-    gdata.binpath[lastdirpos] = '\0';
+    if (strrchr(argv[0], SEP)) {
+        int lastdirpos = strrchr(argv[0], SEP) - argv[0];
+        strncpy(gdata.binpath, argv[0], sizeof(gdata.binpath));
+        gdata.binpath[lastdirpos] = '\0';
+    }
+    else {
+        snprintf(gdata.binpath, sizeof(gdata.binpath), ".");
+    }
 
 #if defined(JGRF_STATIC)
     const char *binname = jg_get_coreinfo("")->name;
