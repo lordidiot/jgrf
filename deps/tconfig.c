@@ -129,7 +129,14 @@ bool ini_table_read_from_file(ini_table_s* table, const char* file)
         if (position > buffer_size-2) {
             buffer_size += 128 * sizeof(char);
             size_t value_offset = value == NULL ? 0 : value - buf;
-            buf = realloc(buf, buffer_size);
+            char *res = realloc(buf, buffer_size);
+            if (!res) {
+                free(buf);
+                fprintf(stderr, "TConfig failed to reallocate buffer\n");
+            }
+            else {
+                buf = res;
+            }
             memset(buf+position, '\0', buffer_size-position);
             if (value != NULL)
                 value = buf + value_offset;
