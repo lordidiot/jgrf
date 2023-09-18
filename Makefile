@@ -63,8 +63,27 @@ ifneq ($(BUILD_STATIC), 0)
 		ASSETS_TARGET := $(ASSETS:%=$(NAME)/%)
 		TARGET += $(ASSETS_TARGET)
 	endif
+	ifneq ($(ICONS),)
+		ICONS_DIR := $(BUILD_STATIC)/icons
+		ICONS_NAME := $(BASE)
+		ICONS_PATH := $(ICONS:%=$(ICONS_DIR)/%)
+	else
+		ICONS_DIR := $(SOURCEDIR)/icons
+		ICONS_NAME := jollygood
+		ICONS_PATH := $(wildcard $(ICONS_DIR)/*.png) \
+			$(ICONS_DIR)/$(ICONS_NAME).svg
+		ICONS_BASE := $(notdir $(ICONS_PATH))
+		ICONS := $(subst $(ICONS_NAME),$(BASE),$(ICONS_BASE))
+	endif
+	ICONS_SRC = $(subst icons/$(BASE),icons/$(ICONS_NAME),$@)
+	ICONS_CPY = $(subst $(NAME)/icons,$(ICONS_DIR),$(ICONS_SRC))
+	ICONS_TARGET := $(ICONS:%=$(NAME)/icons/%)
+	TARGET += $(ICONS_TARGET)
 else
 	EXE := jollygood
+	BASE := $(EXE)
+	ICONS_DIR := $(SOURCEDIR)/icons
+	ICONS_NAME := $(EXE)
 	TARGET := $(EXE)
 	CORE := $(EXE)
 endif
@@ -153,6 +172,10 @@ $(ASSETS_TARGET): $(ASSETS_PATH)
 	@cp $(subst $(NAME),$(BUILD_STATIC),$@) $(NAME)/
 endif
 
+$(ICONS_TARGET): $(ICONS_PATH)
+	@mkdir -p $(NAME)/icons
+	@cp $(ICONS_CPY) $(NAME)/icons/$(notdir $@)
+
 $(NAME)/shaders/default.fs: $(SOURCEDIR)/shaders/default.fs
 	@mkdir -p $(NAME)
 	@cp -r $(SOURCEDIR)/shaders $(NAME)/
@@ -185,14 +208,14 @@ install: all
 	for i in 32 48 64 96 128 256 512 1024; do \
 		mkdir -p $(DESTDIR)$(ICONS_INSTALL_DIR); \
 		if test "$$i" = '96' || test "$$i" = '1024'; then \
-			cp $(SOURCEDIR)/icons/jollygood$$i.png \
-				$(DESTDIR)$(DATADIR)/jollygood/jgrf; \
+			cp $(ICONS_DIR)/$(ICONS_NAME)$$i.png \
+				$(DESTDIR)$(DATADIR)/jollygood/jgrf/$(BASE)$$i.png; \
 		fi; \
-		cp $(SOURCEDIR)/icons/jollygood$$i.png \
-			$(DESTDIR)$(ICONS_INSTALL_DIR)/jollygood.png; \
+		cp $(ICONS_DIR)/$(ICONS_NAME)$$i.png \
+			$(DESTDIR)$(ICONS_INSTALL_DIR)/$(BASE).png; \
 	done
-	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
-	cp $(SOURCEDIR)/icons/jollygood.svg $(DESTDIR)$(DATAROOTDIR)/pixmaps
+	cp $(ICONS_DIR)/$(ICONS_NAME).svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/$(BASE).svg
+	cp $(ICONS_DIR)/$(ICONS_NAME).svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/$(BASE).svg
 ifneq ($(BUILD_STATIC), 0)
 ifneq ($(ASSETS),)
 	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(BASE)
