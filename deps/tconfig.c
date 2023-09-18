@@ -133,6 +133,7 @@ bool ini_table_read_from_file(ini_table_s* table, const char* file)
             if (!res) {
                 free(buf);
                 fprintf(stderr, "TConfig failed to reallocate buffer\n");
+                break;
             }
             else {
                 buf = res;
