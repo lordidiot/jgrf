@@ -236,14 +236,14 @@ uninstall:
 	rm -rf $(DESTDIR)$(DOCDIR)
 	rm -rf $(DESTDIR)$(DATADIR)/jollygood/jgrf
 	rm -f $(DESTDIR)$(DATAROOTDIR)/applications/jollygood.desktop
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/jollygood.png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/jollygood.png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps/jollygood.png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/96x96/apps/jollygood.png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/128x128/apps/jollygood.png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/256x256/apps/jollygood.png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/512x512/apps/jollygood.png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/jollygood.png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/jollygood.svg
-	rm -f $(DESTDIR)$(DATAROOTDIR)/pixmaps/jollygood.svg
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/$(ICONS_NAME).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/$(ICONS_NAME).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps/$(ICONS_NAME).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/96x96/apps/$(ICONS_NAME).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/128x128/apps/$(ICONS_NAME).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/256x256/apps/$(ICONS_NAME).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/512x512/apps/$(ICONS_NAME).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/$(ICONS_NAME).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/$(ICONS_NAME).svg
+	rm -f $(DESTDIR)$(DATAROOTDIR)/pixmaps/$(ICONS_NAME).svg
 	rm -f $(DESTDIR)$(MANDIR)/man6/jollygood.6
