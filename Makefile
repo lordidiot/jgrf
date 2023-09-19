@@ -75,15 +75,15 @@ ifneq ($(BUILD_STATIC), 0)
 		ICONS_BASE := $(notdir $(ICONS_PATH))
 		ICONS := $(subst $(ICONS_NAME),$(BASE),$(ICONS_BASE))
 	endif
+	ICONS_DEST := $(NAME)/icons
 	ICONS_SRC = $(subst icons/$(BASE),icons/$(ICONS_NAME),$@)
-	ICONS_CPY = $(subst $(NAME)/icons,$(ICONS_DIR),$(ICONS_SRC))
-	ICONS_TARGET := $(ICONS:%=$(NAME)/icons/%)
+	ICONS_CPY = $(subst $(ICONS_DEST),$(ICONS_DIR),$(ICONS_SRC))
+	ICONS_TARGET := $(ICONS:%=$(ICONS_DEST)/%)
 	TARGET += $(ICONS_TARGET)
 else
 	EXE := jollygood
 	BASE := $(EXE)
-	ICONS_DIR := $(SOURCEDIR)/icons
-	ICONS_NAME := $(EXE)
+	ICONS_DEST := $(SOURCEDIR)/icons
 	TARGET := $(EXE)
 	CORE := $(EXE)
 endif
@@ -173,8 +173,8 @@ $(ASSETS_TARGET): $(ASSETS_PATH)
 endif
 
 $(ICONS_TARGET): $(ICONS_PATH)
-	@mkdir -p $(NAME)/icons
-	@cp $(ICONS_CPY) $(NAME)/icons/$(notdir $@)
+	@mkdir -p $(ICONS_DEST)
+	@cp $(ICONS_CPY) $(ICONS_DEST)/$(notdir $@)
 
 $(NAME)/shaders/default.fs: $(SOURCEDIR)/shaders/default.fs
 	@mkdir -p $(NAME)
@@ -208,14 +208,14 @@ install: all
 	for i in 32 48 64 96 128 256 512 1024; do \
 		mkdir -p $(DESTDIR)$(ICONS_INSTALL_DIR); \
 		if test "$$i" = '96' || test "$$i" = '1024'; then \
-			cp $(ICONS_DIR)/$(ICONS_NAME)$$i.png \
-				$(DESTDIR)$(DATADIR)/jollygood/jgrf/$(BASE)$$i.png; \
+			cp $(ICONS_DEST)/$(BASE)$$i.png \
+				$(DESTDIR)$(DATADIR)/jollygood/jgrf/; \
 		fi; \
-		cp $(ICONS_DIR)/$(ICONS_NAME)$$i.png \
+		cp $(ICONS_DEST)/$(BASE)$$i.png \
 			$(DESTDIR)$(ICONS_INSTALL_DIR)/$(BASE).png; \
 	done
-	cp $(ICONS_DIR)/$(ICONS_NAME).svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/$(BASE).svg
-	cp $(ICONS_DIR)/$(ICONS_NAME).svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/$(BASE).svg
+	cp $(ICONS_DEST)/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/
+	cp $(ICONS_DEST)/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/
 ifneq ($(BUILD_STATIC), 0)
 ifneq ($(ASSETS),)
 	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(BASE)
@@ -236,14 +236,14 @@ uninstall:
 	rm -rf $(DESTDIR)$(DOCDIR)
 	rm -rf $(DESTDIR)$(DATADIR)/jollygood/jgrf
 	rm -f $(DESTDIR)$(DATAROOTDIR)/applications/jollygood.desktop
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/$(ICONS_NAME).png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/$(ICONS_NAME).png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps/$(ICONS_NAME).png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/96x96/apps/$(ICONS_NAME).png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/128x128/apps/$(ICONS_NAME).png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/256x256/apps/$(ICONS_NAME).png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/512x512/apps/$(ICONS_NAME).png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/$(ICONS_NAME).png
-	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/$(ICONS_NAME).svg
-	rm -f $(DESTDIR)$(DATAROOTDIR)/pixmaps/$(ICONS_NAME).svg
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/$(BASE).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/$(BASE).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps/$(BASE).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/96x96/apps/$(BASE).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/128x128/apps/$(BASE).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/256x256/apps/$(BASE).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/512x512/apps/$(BASE).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/1024x1024/apps/$(BASE).png
+	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/$(BASE).svg
+	rm -f $(DESTDIR)$(DATAROOTDIR)/pixmaps/$(BASE).svg
 	rm -f $(DESTDIR)$(MANDIR)/man6/jollygood.6
