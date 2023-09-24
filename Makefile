@@ -57,7 +57,6 @@ ifneq ($(BUILD_STATIC), 0)
 	LIBS += -L$(BUILD_STATIC) -l$(BASE)-jg $(LIBS_STATIC)
 	EXE := $(NAME)/$(NAME)
 	TARGET := $(EXE) $(NAME)/shaders/default.fs
-	CORE := $(NAME)
 	ifneq ($(ASSETS),)
 		ASSETS_PATH := $(ASSETS:%=$(BUILD_STATIC)/%)
 		ASSETS_TARGET := $(ASSETS:%=$(NAME)/%)
@@ -81,11 +80,11 @@ ifneq ($(BUILD_STATIC), 0)
 	ICONS_TARGET := $(ICONS:%=$(ICONS_DEST)/%)
 	TARGET += $(ICONS_TARGET)
 else
-	EXE := jollygood
-	BASE := $(EXE)
+	NAME := jollygood
+	BASE := $(NAME)
+	EXE := $(NAME)
 	ICONS_DEST := $(SOURCEDIR)/icons
-	TARGET := $(EXE)
-	CORE := $(EXE)
+	TARGET := $(NAME)
 endif
 
 CSRCS := jgrf.c \
@@ -182,7 +181,7 @@ $(NAME)/shaders/default.fs: $(SOURCEDIR)/shaders/default.fs
 endif
 
 clean:
-	rm -rf $(OBJDIR) $(CORE)
+	rm -rf $(OBJDIR) $(NAME)
 
 install: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
@@ -229,10 +228,10 @@ ifeq ($(USE_EXTERNAL_MINIZ), 0)
 endif
 
 install-strip: install
-	strip $(DESTDIR)$(BINDIR)/$(CORE)
+	strip $(DESTDIR)$(BINDIR)/$(NAME)
 
 uninstall:
-	rm -f $(DESTDIR)$(BINDIR)/$(CORE)
+	rm -f $(DESTDIR)$(BINDIR)/$(NAME)
 	rm -rf $(DESTDIR)$(DOCDIR)
 	rm -rf $(DESTDIR)$(DATADIR)/jollygood/jgrf
 	rm -f $(DESTDIR)$(DATAROOTDIR)/applications/jollygood.desktop
