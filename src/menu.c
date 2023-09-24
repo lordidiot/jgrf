@@ -329,6 +329,23 @@ static void jgrf_menu_select_save(int item) {
     }
     else {
         switch (item) {
+#ifdef JGRF_STATIC
+            case 0: {
+                jgrf_settings_write(SETTINGS_FRONTEND|SETTINGS_EMULATOR);
+                jgrf_log(JG_LOG_SCR, "Saved Settings");
+                break;
+            }
+            case 1: {
+                jgrf_settings_default(SETTINGS_FRONTEND);
+                jgrf_log(JG_LOG_SCR, "Restored Frontend Defaults");
+                break;
+            }
+            case 2: {
+                jgrf_settings_default(SETTINGS_EMULATOR);
+                jgrf_log(JG_LOG_SCR, "Restored Emulator Defaults");
+                break;
+            }
+#else
             case 0: {
                 jgrf_settings_write(SETTINGS_FRONTEND);
                 jgrf_log(JG_LOG_SCR, "Saved Frontend Settings");
@@ -359,6 +376,7 @@ static void jgrf_menu_select_save(int item) {
                 jgrf_log(JG_LOG_SCR, "Restored Emulator Defaults");
                 break;
             }
+#endif
         }
         menupath >>= 8;
     }
@@ -391,6 +409,10 @@ void jgrf_menu_display(void) {
     menunode_t *savenode = jgrf_menu_node_add_child(menuroot);
     snprintf(savenode->desc, DESCSIZE, "Save/Restore Settings");
 
+#ifdef JGRF_STATIC
+    node = jgrf_menu_node_add_child(savenode);
+    snprintf(node->desc, DESCSIZE, "Save Settings");
+#else
     node = jgrf_menu_node_add_child(savenode);
     snprintf(node->desc, DESCSIZE, "Save Frontend Settings");
 
@@ -399,6 +421,7 @@ void jgrf_menu_display(void) {
 
     node = jgrf_menu_node_add_child(savenode);
     snprintf(node->desc, DESCSIZE, "Save Combined Settings");
+#endif
 
     node = jgrf_menu_node_add_child(savenode);
     snprintf(node->desc, DESCSIZE, "Restore Frontend Defaults");
