@@ -53,6 +53,7 @@ endif
 ifneq ($(BUILD_STATIC), 0)
 	include $(BUILD_STATIC)/jg-static.mk
 	BASE := $(NAME:%-jg=%)
+	SHARE_DEST := $(BASE)
 	DEFINES += -DJGRF_STATIC
 	LIBS += -L$(BUILD_STATIC) -l$(BASE)-jg $(LIBS_STATIC)
 	EXE := $(NAME)/$(NAME)
@@ -85,6 +86,7 @@ ifneq ($(BUILD_STATIC), 0)
 else
 	NAME := jollygood
 	BASE := $(NAME)
+	SHARE_DEST := jgrf
 	DESKTOP_PATH := $(SOURCEDIR)/$(NAME).desktop
 	EXE := $(NAME)
 	ICONS_DEST := $(SOURCEDIR)/icons
@@ -194,7 +196,7 @@ clean:
 install: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
 	@mkdir -p $(DESTDIR)$(DOCDIR)
-	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/applications
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
@@ -205,18 +207,18 @@ install: all
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/jollygood.6 $(DESTDIR)$(MANDIR)/man6
 	cp $(DESKTOP_PATH) $(DESTDIR)$(DATAROOTDIR)/applications
-	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp $(SOURCEDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp $(SOURCEDIR)/shaders/crt-yee64.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp $(SOURCEDIR)/shaders/crtea.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp $(SOURCEDIR)/shaders/lcd.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
-	cp $(SOURCEDIR)/shaders/sharp-bilinear.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
+	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(SOURCEDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(SOURCEDIR)/shaders/crt-yee64.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(SOURCEDIR)/shaders/crtea.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(SOURCEDIR)/shaders/lcd.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(SOURCEDIR)/shaders/sharp-bilinear.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 	for i in 32 48 64 96 128 256 512 1024; do \
 		mkdir -p $(DESTDIR)$(ICONS_INSTALL_DIR); \
 		if test "$$i" = '96' || test "$$i" = '1024'; then \
 			cp $(ICONS_DEST)/$(BASE)$$i.png \
-				$(DESTDIR)$(DATADIR)/jollygood/jgrf/; \
+				$(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/; \
 		fi; \
 		cp $(ICONS_DEST)/$(BASE)$$i.png \
 			$(DESTDIR)$(ICONS_INSTALL_DIR)/$(BASE).png; \
@@ -225,9 +227,9 @@ install: all
 	cp $(ICONS_DEST)/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/
 ifneq ($(BUILD_STATIC), 0)
 ifneq ($(ASSETS),)
-	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(BASE)
+	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)
 	for a in $(ASSETS_TARGET); do \
-		cp $$a $(DESTDIR)$(DATADIR)/jollygood/jgrf/$(BASE)/; \
+		cp $$a $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/; \
 	done
 endif
 endif
@@ -241,7 +243,7 @@ install-strip: install
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(NAME)
 	rm -rf $(DESTDIR)$(DOCDIR)
-	rm -rf $(DESTDIR)$(DATADIR)/jollygood/jgrf
+	rm -rf $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)
 	rm -f $(DESTDIR)$(DATAROOTDIR)/applications/$(NAME).desktop
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/$(BASE).png
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/$(BASE).png

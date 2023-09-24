@@ -1169,6 +1169,17 @@ int main(int argc, char *argv[]) {
     snprintf(gdata.coreassets, sizeof(gdata.coreassets), "%s", gdata.binpath);
     snprintf(gdata.corename, sizeof(gdata.corename), "%s",
         jg_get_coreinfo("")->name);
+
+#if defined(LIBDIR) && defined(DATADIR) // Check for core assets system-wide
+    char coreassets[256];
+    snprintf(coreassets, sizeof(coreassets),
+        "%s%cjollygood%c%s", DATADIR, SEP, SEP, gdata.corename);
+
+    struct stat fbuf;
+    if (stat(coreassets, &fbuf) == 0)
+        snprintf(gdata.coreassets, sizeof(gdata.coreassets), coreassets);
+#endif // defined(LIBDIR) && defined(DATADIR)
+
 #else
     // Detect the default core for the system
     if (jgrf_cli_core()) {
@@ -1204,12 +1215,13 @@ int main(int argc, char *argv[]) {
             corefound = 1;
         }
     }
-#endif
 
     // If no core was found, there is no reason to keep the program running
     if (!corefound)
         jgrf_log(JG_LOG_ERR, "Failed to locate core. Exiting...\n");
-#endif
+#endif // defined(LIBDIR) && defined(DATADIR)
+
+#endif // JGRF_STATIC
 
     // Load the core
     jgrf_core_load(corepath);

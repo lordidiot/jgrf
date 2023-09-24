@@ -625,6 +625,19 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
         snprintf(fspath, sizeof(fspath), "%s%cshaders%c%s",
             gdata->binpath, SEP, SEP, fs);
     }
+#ifdef JGRF_STATIC
+
+#if defined(DATADIR)
+    else { // Use the system-wide path
+        snprintf(vspath, sizeof(vspath), "%s%cjollygood%c%s%cshaders%c%s",
+            DATADIR, SEP, SEP, jg_get_coreinfo("")->name, SEP, SEP, vs);
+        snprintf(fspath, sizeof(fspath), "%s%cjollygood%c%s%cshaders%c%s",
+            DATADIR, SEP, SEP, jg_get_coreinfo("")->name, SEP, SEP, fs);
+    }
+#endif
+
+#else
+
 #if defined(DATADIR)
     else { // Use the system-wide path
         snprintf(vspath, sizeof(vspath), "%s%cjollygood%cjgrf%cshaders%c%s",
@@ -632,6 +645,8 @@ static GLuint jgrf_video_gl_prog_create(const char *vs, const char *fs) {
         snprintf(fspath, sizeof(fspath), "%s%cjollygood%cjgrf%cshaders%c%s",
             DATADIR, SEP, SEP, SEP, SEP, fs);
     }
+#endif
+
 #endif
     const GLchar *vsrc = jgrf_video_gl_shader_load(vspath);
     const GLchar *fsrc = jgrf_video_gl_shader_load(fspath);

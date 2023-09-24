@@ -117,10 +117,20 @@ void jgrf_video_icon_load(SDL_Window *window) {
     snprintf(iconpath, sizeof(iconpath), "%s%cicons%c%s%d.png",
         jgrf_gdata_ptr()->binpath, SEP, SEP, jg_get_coreinfo("")->name,
         iconsize);
+
+#if defined(DATADIR)
+    struct stat fbuf; // Make sure the icon actually exists at this path
+    if (stat(iconpath, &fbuf) != 0) { // Not found locally, use system-wide path
+        snprintf(iconpath, sizeof(iconpath),
+            "%s%cjollygood%c%s%c%s%d.png",
+            DATADIR, SEP, SEP, jg_get_coreinfo("")->name, SEP,
+            jg_get_coreinfo("")->name, iconsize);
+    }
+#endif
+
 #else
     snprintf(iconpath, sizeof(iconpath), "%s%cicons%cjollygood%d.png",
         jgrf_gdata_ptr()->binpath, SEP, SEP, iconsize);
-#endif
 
 #if defined(DATADIR)
     struct stat fbuf; // Make sure the icon actually exists at this path
@@ -129,6 +139,8 @@ void jgrf_video_icon_load(SDL_Window *window) {
             "%s%cjollygood%cjgrf%cjollygood%d.png",
             DATADIR, SEP, SEP, SEP, iconsize);
     }
+#endif
+
 #endif
 
     uint32_t x, y;
