@@ -62,6 +62,9 @@ ifneq ($(BUILD_STATIC), 0)
 		ASSETS_TARGET := $(ASSETS:%=$(NAME)/%)
 		TARGET += $(ASSETS_TARGET)
 	endif
+	DESKTOP := $(NAME).desktop
+	DESKTOP_PATH := $(BUILD_STATIC)/$(DESKTOP)
+	DESKTOP_TARGET := $(NAME)/$(DESKTOP)
 	ifneq ($(ICONS),)
 		ICONS_DIR := $(BUILD_STATIC)/icons
 		ICONS_NAME := $(BASE)
@@ -78,10 +81,11 @@ ifneq ($(BUILD_STATIC), 0)
 	ICONS_SRC = $(subst icons/$(BASE),icons/$(ICONS_NAME),$@)
 	ICONS_CPY = $(subst $(ICONS_DEST),$(ICONS_DIR),$(ICONS_SRC))
 	ICONS_TARGET := $(ICONS:%=$(ICONS_DEST)/%)
-	TARGET += $(ICONS_TARGET)
+	TARGET += $(DESKTOP_TARGET) $(ICONS_TARGET)
 else
 	NAME := jollygood
 	BASE := $(NAME)
+	DESKTOP_PATH := $(SOURCEDIR)/$(NAME).desktop
 	EXE := $(NAME)
 	ICONS_DEST := $(SOURCEDIR)/icons
 	TARGET := $(NAME)
@@ -171,6 +175,10 @@ $(ASSETS_TARGET): $(ASSETS_PATH)
 	@cp $(subst $(NAME),$(BUILD_STATIC),$@) $(NAME)/
 endif
 
+$(DESKTOP_TARGET): $(DESKTOP_PATH)
+	@mkdir -p $(NAME)
+	@cp $< $@
+
 $(ICONS_TARGET): $(ICONS_PATH)
 	@mkdir -p $(ICONS_DEST)
 	@cp $(ICONS_CPY) $(ICONS_DEST)/$(notdir $@)
@@ -196,7 +204,7 @@ install: all
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/jollygood.6 $(DESTDIR)$(MANDIR)/man6
-	cp $(SOURCEDIR)/jollygood.desktop $(DESTDIR)$(DATAROOTDIR)/applications
+	cp $(DESKTOP_PATH) $(DESTDIR)$(DATAROOTDIR)/applications
 	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
 	cp $(SOURCEDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/jgrf/shaders
@@ -234,7 +242,7 @@ uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(NAME)
 	rm -rf $(DESTDIR)$(DOCDIR)
 	rm -rf $(DESTDIR)$(DATADIR)/jollygood/jgrf
-	rm -f $(DESTDIR)$(DATAROOTDIR)/applications/jollygood.desktop
+	rm -f $(DESTDIR)$(DATAROOTDIR)/applications/$(NAME).desktop
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/32x32/apps/$(BASE).png
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/48x48/apps/$(BASE).png
 	rm -f $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/64x64/apps/$(BASE).png
