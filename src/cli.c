@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <sys/stat.h>
 
 #include <jg/jg.h>
@@ -220,7 +221,8 @@ void jgrf_cli_usage(char *binname) {
 #else
     fprintf(stdout, "The Jolly Good Reference Frontend %s\n", VERSION);
 #endif
-    fprintf(stdout, "usage: %s [options] [auxiliary files] game\n", binname);
+    fprintf(stdout, "usage: %s [options] [auxiliary files] game\n",
+        strrchr(binname, SEP) ? strrchr(binname, SEP) + 1 : binname);
     fprintf(stdout, "  options:\n");
     fprintf(stdout, "    -a, --video <value>     "
         "Specify which Video API to use\n");
