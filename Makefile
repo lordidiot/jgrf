@@ -64,9 +64,7 @@ ifneq ($(BUILD_STATIC), 0)
 		ASSETS_TARGET := $(ASSETS:%=$(NAME)/%)
 		TARGET += $(ASSETS_TARGET)
 	endif
-	DESKTOP := $(NAME).desktop
-	DESKTOP_PATH := $(BUILD_STATIC)/$(DESKTOP)
-	DESKTOP_TARGET := $(NAME)/$(DESKTOP)
+	DESKTOP_TARGET := $(NAME)/$(NAME).desktop
 	ifneq ($(ICONS),)
 		ICONS_DIR := $(BUILD_STATIC)/icons
 		ICONS_NAME := $(BASE)
@@ -79,10 +77,9 @@ ifneq ($(BUILD_STATIC), 0)
 		ICONS_BASE := $(notdir $(ICONS_PATH))
 		ICONS := $(subst $(ICONS_NAME),$(BASE),$(ICONS_BASE))
 	endif
-	ICONS_DEST := $(NAME)/icons
 	ICONS_SRC = $(subst icons/$(BASE),icons/$(ICONS_NAME),$@)
-	ICONS_CPY = $(subst $(ICONS_DEST),$(ICONS_DIR),$(ICONS_SRC))
-	ICONS_TARGET := $(ICONS:%=$(ICONS_DEST)/%)
+	ICONS_CPY = $(subst $(NAME)/icons,$(ICONS_DIR),$(ICONS_SRC))
+	ICONS_TARGET := $(ICONS:%=$(NAME)/icons/%)
 	SHADERS := $(wildcard $(SOURCEDIR)/shaders/*.fs) \
 		$(wildcard $(SOURCEDIR)/shaders/*.vs)
 	SHADERS_BASE := $(notdir $(SHADERS))
@@ -94,8 +91,6 @@ else
 	EXE := $(NAME)
 	INSTALLDIR := $(SOURCEDIR)
 	SHARE_DEST := jgrf
-	DESKTOP_PATH := $(SOURCEDIR)/$(NAME).desktop
-	ICONS_DEST := $(SOURCEDIR)/icons
 	TARGET := $(NAME)
 endif
 
@@ -183,13 +178,13 @@ $(ASSETS_TARGET): $(ASSETS_PATH)
 	@cp $(subst $(NAME),$(BUILD_STATIC),$@) $(NAME)/
 endif
 
-$(DESKTOP_TARGET): $(DESKTOP_PATH)
+$(DESKTOP_TARGET): $(BUILD_STATIC)/$(NAME).desktop
 	@mkdir -p $(NAME)
 	@cp $< $@
 
 $(ICONS_TARGET): $(ICONS_PATH)
-	@mkdir -p $(ICONS_DEST)
-	@cp $(ICONS_CPY) $(ICONS_DEST)/$(notdir $@)
+	@mkdir -p $(NAME)/icons
+	@cp $(ICONS_CPY) $(NAME)/icons/$(notdir $@)
 
 $(SHADERS_TARGET): $(SHADERS)
 	@mkdir -p $(NAME)/shaders
@@ -212,7 +207,7 @@ install: all
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/jollygood.6 $(DESTDIR)$(MANDIR)/man6
-	cp $(DESKTOP_PATH) $(DESTDIR)$(DATAROOTDIR)/applications
+	cp $(INSTALLDIR)/$(NAME).desktop $(DESTDIR)$(DATAROOTDIR)/applications
 	cp $(INSTALLDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 	cp $(INSTALLDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 	cp $(INSTALLDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
@@ -223,14 +218,14 @@ install: all
 	for i in 32 48 64 96 128 256 512 1024; do \
 		mkdir -p $(DESTDIR)$(ICONS_INSTALL_DIR); \
 		if test "$$i" = '96' || test "$$i" = '1024'; then \
-			cp $(ICONS_DEST)/$(BASE)$$i.png \
+			cp $(INSTALLDIR)/icons/$(BASE)$$i.png \
 				$(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/; \
 		fi; \
-		cp $(ICONS_DEST)/$(BASE)$$i.png \
+		cp $(INSTALLDIR)/icons/$(BASE)$$i.png \
 			$(DESTDIR)$(ICONS_INSTALL_DIR)/$(BASE).png; \
 	done
-	cp $(ICONS_DEST)/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/
-	cp $(ICONS_DEST)/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/
+	cp $(INSTALLDIR)/icons/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/
+	cp $(INSTALLDIR)/icons/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/
 ifneq ($(BUILD_STATIC), 0)
 ifneq ($(ASSETS),)
 	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)
