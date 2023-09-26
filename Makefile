@@ -53,11 +53,12 @@ endif
 ifneq ($(BUILD_STATIC), 0)
 	include $(BUILD_STATIC)/jg-static.mk
 	BASE := $(NAME:%-jg=%)
+	INSTALLDIR := $(NAME)
 	SHARE_DEST := $(BASE)
 	DEFINES += -DJGRF_STATIC
 	LIBS += -L$(BUILD_STATIC) -l$(BASE)-jg $(LIBS_STATIC)
 	EXE := $(NAME)/$(NAME)
-	TARGET := $(EXE) $(NAME)/shaders/default.fs
+	TARGET := $(EXE)
 	ifneq ($(ASSETS),)
 		ASSETS_PATH := $(ASSETS:%=$(BUILD_STATIC)/%)
 		ASSETS_TARGET := $(ASSETS:%=$(NAME)/%)
@@ -82,13 +83,18 @@ ifneq ($(BUILD_STATIC), 0)
 	ICONS_SRC = $(subst icons/$(BASE),icons/$(ICONS_NAME),$@)
 	ICONS_CPY = $(subst $(ICONS_DEST),$(ICONS_DIR),$(ICONS_SRC))
 	ICONS_TARGET := $(ICONS:%=$(ICONS_DEST)/%)
-	TARGET += $(DESKTOP_TARGET) $(ICONS_TARGET)
+	SHADERS := $(wildcard $(SOURCEDIR)/shaders/*.fs) \
+		$(wildcard $(SOURCEDIR)/shaders/*.vs)
+	SHADERS_BASE := $(notdir $(SHADERS))
+	SHADERS_TARGET := $(SHADERS_BASE:%=$(NAME)/shaders/%)
+	TARGET += $(DESKTOP_TARGET) $(ICONS_TARGET) $(SHADERS_TARGET)
 else
 	NAME := jollygood
 	BASE := $(NAME)
+	EXE := $(NAME)
+	INSTALLDIR := $(SOURCEDIR)
 	SHARE_DEST := jgrf
 	DESKTOP_PATH := $(SOURCEDIR)/$(NAME).desktop
-	EXE := $(NAME)
 	ICONS_DEST := $(SOURCEDIR)/icons
 	TARGET := $(NAME)
 endif
@@ -185,9 +191,9 @@ $(ICONS_TARGET): $(ICONS_PATH)
 	@mkdir -p $(ICONS_DEST)
 	@cp $(ICONS_CPY) $(ICONS_DEST)/$(notdir $@)
 
-$(NAME)/shaders/default.fs: $(SOURCEDIR)/shaders/default.fs
-	@mkdir -p $(NAME)
-	@cp -r $(SOURCEDIR)/shaders $(NAME)/
+$(SHADERS_TARGET): $(SHADERS)
+	@mkdir -p $(NAME)/shaders
+	@cp $(subst $(NAME),$(SOURCEDIR),$@) $(NAME)/shaders
 endif
 
 clean:
@@ -207,13 +213,13 @@ install: all
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/jollygood.6 $(DESTDIR)$(MANDIR)/man6
 	cp $(DESKTOP_PATH) $(DESTDIR)$(DATAROOTDIR)/applications
-	cp $(SOURCEDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(SOURCEDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(SOURCEDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(SOURCEDIR)/shaders/crt-yee64.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(SOURCEDIR)/shaders/crtea.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(SOURCEDIR)/shaders/lcd.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(SOURCEDIR)/shaders/sharp-bilinear.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(INSTALLDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(INSTALLDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(INSTALLDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(INSTALLDIR)/shaders/crt-yee64.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(INSTALLDIR)/shaders/crtea.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(INSTALLDIR)/shaders/lcd.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(INSTALLDIR)/shaders/sharp-bilinear.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 	for i in 32 48 64 96 128 256 512 1024; do \
 		mkdir -p $(DESTDIR)$(ICONS_INSTALL_DIR); \
 		if test "$$i" = '96' || test "$$i" = '1024'; then \
