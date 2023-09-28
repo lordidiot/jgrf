@@ -389,6 +389,19 @@ static void jgrf_core_load(const char *corepath) {
         "%s", coreinfo->fname);
     snprintf(gdata.coreversion, sizeof(gdata.coreversion),
         "%s", coreinfo->version);
+#ifdef JGRF_STATIC
+    snprintf(gdata.userassets, sizeof(gdata.userassets),
+        "%sassets", gdata.datapath);
+    snprintf(gdata.biospath, sizeof(gdata.biospath),
+        "%sbios", gdata.datapath);
+    snprintf(gdata.cheatpath, sizeof(gdata.cheatpath),
+        "%scheats", gdata.datapath);
+    snprintf(gdata.savepath, sizeof(gdata.savepath),
+        "%ssave", gdata.datapath);
+    snprintf(gdata.statepath, sizeof(gdata.statepath),
+        "%sstate", gdata.datapath);
+    gdata.numinputs = coreinfo->numinputs;
+#else
     snprintf(gdata.userassets, sizeof(gdata.userassets),
         "%sassets%c%s", gdata.datapath, SEP, coreinfo->name);
     snprintf(gdata.biospath, sizeof(gdata.biospath),
@@ -400,6 +413,7 @@ static void jgrf_core_load(const char *corepath) {
     snprintf(gdata.statepath, sizeof(gdata.statepath),
         "%sstate%c%s", gdata.datapath, SEP, coreinfo->name);
     gdata.numinputs = coreinfo->numinputs;
+#endif
 
     // Copy path values into the pathinfo struct
     pathinfo.base = gdata.datapath;
