@@ -1,7 +1,8 @@
 The Jolly Good Reference Frontend
 ---------------------------------
-The Jolly Good Reference Frontend is the simplest possible frontend for The
-Jolly Good API.
+The Jolly Good Reference Frontend is the simplest possible frontend to The
+Jolly Good API. It may be used to run emulators built as shared objects, or
+as a "white-label" frontend for statically linked standalone emulators.
 
 This repository lives at https://gitlab.com/jgemu/jgrf
 
@@ -36,8 +37,8 @@ The program may be run locally, or installed system-wide using the "install"
 target. For command line usage instructions, execute the binary with no
 arguments or the -h switch.
 
-Configuration
--------------
+Configuration (Generic frontend)
+--------------------------------
 Configuration files are located in:
   ~/.config/jollygood
 
@@ -64,6 +65,32 @@ mkdir cores
 cp -r /path/to/core cores/
 
 Cores that exist locally will be preferred over cores installed system-wide.
+
+Configuration (Statically linked standalone builds)
+---------------------------------------------------
+Static builds act as a standalone emulator, where "corename" is the name of the
+emulator, ex. bsnes, jollycv, nestopia.
+
+Configuration files are located in:
+  ~/.config/corename    - Staic builds
+
+The following filenames are used:
+  input_sysname.ini      - Input definitions for a specific system
+  corename.ini           - Core-specific settings
+                         - Emulator settings listed in [corename] section
+
+Static builds use combined settings in "corename.ini" only.
+
+User data is located in:
+  ~/.local/share/corename
+
+The User data directory contains the following subdirectories:
+  assets/                - User assets such as sample data for Nestopia JG
+  bios/                  - Directory the frontend will load BIOS images from
+  cheats/                - Directory the frontend will load Cheat files from
+  save/                  - SRAM, Memory Card, or other types of save data
+  screenshots/           - Screenshots with a timestamp and random number
+  state/                 - Save States
 
 Input
 -----
@@ -194,7 +221,8 @@ Cheats
 When a core supports cheats, the cheat file must be named the same as the
 game, but with a file extension of ".json". The file must be located in the
 cheats directory for the core, for example:
-  ~/.local/share/jollygood/cheats/corename/gamename.json
+  ~/.local/share/jollygood/cheats/corename/gamename.json    - Generic frontend
+  ~/.local/share/corename/cheats/gamename.json              - Static builds
 
 The file must be formatted as such:
 
