@@ -1191,7 +1191,7 @@ int main(int argc, char *argv[]) {
 
     struct stat fbuf;
     if (stat(coreassets, &fbuf) == 0)
-        snprintf(gdata.coreassets, sizeof(gdata.coreassets), coreassets);
+        snprintf(gdata.coreassets, sizeof(gdata.coreassets), "%s", coreassets);
 #endif // defined(LIBDIR) && defined(DATADIR)
 
 #else
