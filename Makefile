@@ -154,11 +154,11 @@ BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(DEFINES) $(INCLUDES))
 all: $(TARGET)
 
 $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
-	$(call COMPILE_INFO, $(BUILD_MAIN))
+	$(call COMPILE_INFO,$(BUILD_MAIN))
 	@$(BUILD_MAIN)
 
 $(OBJDIR)/deps/%.o: $(SOURCEDIR)/deps/%.c $(OBJDIR)/.tag
-	$(call COMPILE_INFO, $(BUILD_DEPS))
+	$(call COMPILE_INFO,$(BUILD_DEPS))
 	@$(BUILD_DEPS)
 
 $(OBJDIR)/.tag:
