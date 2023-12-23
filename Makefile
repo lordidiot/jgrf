@@ -1,9 +1,21 @@
 SOURCEDIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword \
 	$(MAKEFILE_LIST))))))
 
+BUILD_STATIC ?= 0
+USE_EXTERNAL_MD5 ?= 0
+
 CC ?= cc
 CFLAGS ?= -O2
 PKG_CONFIG ?= pkg-config
+
+PREFIX ?= /usr/local
+EXEC_PREFIX ?= $(PREFIX)
+BINDIR ?= $(EXEC_PREFIX)/bin
+LIBDIR ?= $(EXEC_PREFIX)/lib
+DATAROOTDIR ?= $(PREFIX)/share
+DATADIR ?= $(DATAROOTDIR)
+DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
+MANDIR ?= $(DATAROOTDIR)/man
 
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -Wmissing-prototypes -pedantic
 
@@ -23,19 +35,7 @@ DEPDIR := $(SOURCEDIR)/deps
 INCLUDES := -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
 	$(CFLAGS_SPEEX)
 
-PREFIX ?= /usr/local
-EXEC_PREFIX ?= $(PREFIX)
-BINDIR ?= $(EXEC_PREFIX)/bin
-LIBDIR ?= $(EXEC_PREFIX)/lib
-DATAROOTDIR ?= $(PREFIX)/share
-DATADIR ?= $(DATAROOTDIR)
-DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
-MANDIR ?= $(DATAROOTDIR)/man
-
 ICONS_INSTALL_DIR = $(DATAROOTDIR)/icons/hicolor/$${i}x$${i}/apps
-
-BUILD_STATIC ?= 0
-USE_EXTERNAL_MD5 ?= 0
 
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
