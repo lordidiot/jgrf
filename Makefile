@@ -119,8 +119,8 @@ ifeq ($(USE_EXTERNAL_MD5), 0)
 	CSRCS += deps/md5.c
 else
 	DEFINES += -DHAVE_OPENSSL
-	CFLAGS_MD5 := $(shell $(PKG_CONFIG) --cflags libcrypto)
-	LIBS_MD5 := $(shell $(PKG_CONFIG) --libs libcrypto)
+	CFLAGS_MD5 = $(shell $(PKG_CONFIG) --cflags libcrypto)
+	LIBS_MD5 = $(shell $(PKG_CONFIG) --libs libcrypto)
 endif
 
 include $(SOURCEDIR)/mk/miniz.mk
