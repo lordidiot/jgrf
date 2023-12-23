@@ -3,22 +3,24 @@ SOURCEDIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword \
 
 CC ?= cc
 CFLAGS ?= -O2
+PKG_CONFIG ?= pkg-config
+
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -Wmissing-prototypes -pedantic
 
-PKG_CONFIG ?= pkg-config
-CFLAGS_JG := $(shell $(PKG_CONFIG) --cflags jg)
+CFLAGS_JG = $(shell $(PKG_CONFIG) --cflags jg)
 
-CFLAGS_EPOXY := $(shell $(PKG_CONFIG) --cflags epoxy)
-LIBS_EPOXY := $(shell $(PKG_CONFIG) --libs epoxy)
+CFLAGS_EPOXY = $(shell $(PKG_CONFIG) --cflags epoxy)
+LIBS_EPOXY = $(shell $(PKG_CONFIG) --libs epoxy)
 
-CFLAGS_SDL2 := $(shell $(PKG_CONFIG) --cflags sdl2)
-LIBS_SDL2 := $(shell $(PKG_CONFIG) --libs sdl2)
+CFLAGS_SDL2 = $(shell $(PKG_CONFIG) --cflags sdl2)
+LIBS_SDL2 = $(shell $(PKG_CONFIG) --libs sdl2)
 
-CFLAGS_SPEEX := $(shell $(PKG_CONFIG) --cflags speexdsp)
-LIBS_SPEEX := $(shell $(PKG_CONFIG) --libs speexdsp)
+CFLAGS_SPEEX = $(shell $(PKG_CONFIG) --cflags speexdsp)
+LIBS_SPEEX = $(shell $(PKG_CONFIG) --libs speexdsp)
 
 DEFINES :=
-INCLUDES := -I$(SOURCEDIR)/deps $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
+DEPDIR := $(SOURCEDIR)/deps
+INCLUDES := -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
 	$(CFLAGS_SPEEX)
 
 PREFIX ?= /usr/local
@@ -34,7 +36,6 @@ ICONS_INSTALL_DIR = $(DATAROOTDIR)/icons/hicolor/$${i}x$${i}/apps
 
 BUILD_STATIC ?= 0
 USE_EXTERNAL_MD5 ?= 0
-USE_EXTERNAL_MINIZ ?= 0
 
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
@@ -94,6 +95,8 @@ else
 	TARGET := $(NAME)
 endif
 
+MKDIRS :=
+
 CSRCS := jgrf.c \
 	audio.c \
 	cheats.c \
@@ -120,14 +123,7 @@ else
 	LIBS_MD5 := $(shell $(PKG_CONFIG) --libs libcrypto)
 endif
 
-ifeq ($(USE_EXTERNAL_MINIZ), 0)
-	CFLAGS_MINIZ := -I$(SOURCEDIR)/deps/miniz
-	LIBS_MINIZ :=
-	CSRCS += deps/miniz/miniz.c
-else
-	CFLAGS_MINIZ := $(shell $(PKG_CONFIG) --cflags miniz)
-	LIBS_MINIZ := $(shell $(PKG_CONFIG) --libs miniz)
-endif
+include $(SOURCEDIR)/mk/miniz.mk
 
 INCLUDES += $(CFLAGS_MD5) $(CFLAGS_MINIZ)
 LIBS += $(LIBS_MD5) $(LIBS_MINIZ)
@@ -157,12 +153,12 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
 	$(call COMPILE_INFO,$(BUILD_MAIN))
 	@$(BUILD_MAIN)
 
-$(OBJDIR)/deps/%.o: $(SOURCEDIR)/deps/%.c $(OBJDIR)/.tag
+$(OBJDIR)/deps/%.o: $(DEPDIR)/%.c $(OBJDIR)/.tag
 	$(call COMPILE_INFO,$(BUILD_DEPS))
 	@$(BUILD_DEPS)
 
 $(OBJDIR)/.tag:
-	@mkdir -p $(OBJDIR)/deps/miniz
+	@mkdir -p -- $(if $(MKDIRS),$(MKDIRS:%=$(OBJDIR)/%),$(OBJDIR)/deps)
 	@touch $@
 
 $(EXE): $(OBJS)
@@ -235,7 +231,7 @@ ifneq ($(ASSETS),)
 endif
 endif
 ifeq ($(USE_EXTERNAL_MINIZ), 0)
-	cp $(SOURCEDIR)/deps/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
+	cp $(DEPDIR)/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
 endif
 
 install-strip: install
