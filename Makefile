@@ -37,6 +37,11 @@ INCLUDES := -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
 
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
+.DEFAULT_GOAL := all
+
+install-docs:: all
+	@mkdir -p $(DESTDIR)$(DOCDIR)
+
 UNAME := $(shell uname -s)
 ifeq ($(UNAME), Darwin)
 	LIBS += -Wl,-undefined,error
@@ -230,14 +235,10 @@ ifneq ($(ASSETS),)
 endif
 endif
 
-install-docs:: all
-	@mkdir -p $(DESTDIR)$(DOCDIR)
+install-docs::
 	cp $(SOURCEDIR)/ChangeLog $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
 	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
-ifeq ($(USE_EXTERNAL_MINIZ), 0)
-	cp $(DEPDIR)/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
-endif
 
 install-man: all
 	@mkdir -p $(DESTDIR)$(MANDIR)/man6

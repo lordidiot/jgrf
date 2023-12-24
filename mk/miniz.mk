@@ -5,6 +5,9 @@ ifeq ($(USE_EXTERNAL_MINIZ), 0)
 	LIBS_MINIZ :=
 	MKDIRS += deps/miniz
 	CSRCS += deps/miniz/miniz.c
+
+install-docs::
+	cp $(DEPDIR)/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
 else
 	override REQUIRES_PRIVATE += miniz
 	CFLAGS_MINIZ = $(shell $(PKG_CONFIG) --cflags miniz)
