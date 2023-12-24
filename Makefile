@@ -145,7 +145,8 @@ BUILD_DEPS = $(call COMPILE_C, $(FLAGS))
 # Core command
 BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(DEFINES) $(INCLUDES))
 
-.PHONY: all clean install install-strip uninstall
+.PHONY: all clean install install-bin install-data install-docs install-man \
+	install-strip uninstall
 
 all: $(TARGET)
 
@@ -190,19 +191,15 @@ endif
 clean:
 	rm -rf $(OBJDIR) $(NAME)
 
-install: all
+install-bin: all
 	@mkdir -p $(DESTDIR)$(BINDIR)
-	@mkdir -p $(DESTDIR)$(DOCDIR)
+	cp $(EXE) $(DESTDIR)$(BINDIR)
+
+install-data: all
 	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/applications
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
-	@mkdir -p $(DESTDIR)$(MANDIR)/man6
-	cp $(EXE) $(DESTDIR)$(BINDIR)
-	cp $(SOURCEDIR)/ChangeLog $(DESTDIR)$(DOCDIR)
-	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
-	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
-	cp $(SOURCEDIR)/jollygood.6 $(DESTDIR)$(MANDIR)/man6
 	cp $(INSTALLDIR)/$(NAME).desktop $(DESTDIR)$(DATAROOTDIR)/applications
 	cp $(INSTALLDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 	cp $(INSTALLDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
@@ -220,8 +217,9 @@ install: all
 		cp $(INSTALLDIR)/icons/$(BASE)$$i.png \
 			$(DESTDIR)$(ICONS_INSTALL_DIR)/$(BASE).png; \
 	done
-	cp $(INSTALLDIR)/icons/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/
 	cp $(INSTALLDIR)/icons/$(BASE).svg $(DESTDIR)$(DATAROOTDIR)/pixmaps/
+	cp $(INSTALLDIR)/icons/$(BASE).svg \
+		$(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps/
 ifneq ($(BUILD_STATIC), 0)
 ifneq ($(ASSETS),)
 	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)
@@ -230,9 +228,21 @@ ifneq ($(ASSETS),)
 	done
 endif
 endif
+
+install-docs:: all
+	@mkdir -p $(DESTDIR)$(DOCDIR)
+	cp $(SOURCEDIR)/ChangeLog $(DESTDIR)$(DOCDIR)
+	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
+	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 ifeq ($(USE_EXTERNAL_MINIZ), 0)
 	cp $(DEPDIR)/miniz/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
 endif
+
+install-man: all
+	@mkdir -p $(DESTDIR)$(MANDIR)/man6
+	cp $(SOURCEDIR)/jollygood.6 $(DESTDIR)$(MANDIR)/man6
+
+install: install-bin install-data install-docs install-man
 
 install-strip: install
 	strip $(DESTDIR)$(BINDIR)/$(NAME)
