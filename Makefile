@@ -4,24 +4,15 @@ SOURCEDIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword \
 BUILD_STATIC ?= 0
 USE_EXTERNAL_MD5 ?= 0
 
-CC ?= cc
 CFLAGS ?= -O2
-PKG_CONFIG ?= pkg-config
-
-PREFIX ?= /usr/local
-EXEC_PREFIX ?= $(PREFIX)
-BINDIR ?= $(EXEC_PREFIX)/bin
-LIBDIR ?= $(EXEC_PREFIX)/lib
-DATAROOTDIR ?= $(PREFIX)/share
-DATADIR ?= $(DATAROOTDIR)
-DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
-MANDIR ?= $(DATAROOTDIR)/man
 
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -Wmissing-prototypes -pedantic
 DEFINES :=
 DEPDIR := $(SOURCEDIR)/deps
 
-CFLAGS_JG = $(shell $(PKG_CONFIG) --cflags jg)
+DOCS := ChangeLog LICENSE README
+
+include $(SOURCEDIR)/mk/common.mk
 
 CFLAGS_EPOXY = $(shell $(PKG_CONFIG) --cflags epoxy)
 LIBS_EPOXY = $(shell $(PKG_CONFIG) --libs epoxy)
@@ -37,12 +28,6 @@ INCLUDES := -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
 
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
-.DEFAULT_GOAL := all
-
-install-docs:: all
-	@mkdir -p $(DESTDIR)$(DOCDIR)
-
-UNAME := $(shell uname -s)
 ifeq ($(UNAME), Darwin)
 	LIBS += -Wl,-undefined,error
 else
@@ -101,7 +86,7 @@ endif
 ICONS_INSTALL_DIR = $(DATAROOTDIR)/icons/hicolor/$${i}x$${i}/apps
 SHADER_INSTALL_DIR := $(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 
-MKDIRS :=
+MKDIRS := deps
 
 CSRCS := jgrf.c \
 	audio.c \
@@ -134,16 +119,11 @@ include $(SOURCEDIR)/mk/miniz.mk
 INCLUDES += $(CFLAGS_MD5) $(CFLAGS_MINIZ)
 LIBS += $(LIBS_MD5) $(LIBS_MINIZ)
 
-OBJDIR := objs
-
 # List of object files
 OBJS := $(patsubst %,$(OBJDIR)/%,$(CSRCS:.c=.o))
 
 # Compiler command
 COMPILE_C = $(strip $(CC) $(CFLAGS) $(CPPFLAGS) $(1) -c $< -o $@)
-
-# Info command
-COMPILE_INFO = $(info $(subst $(SOURCEDIR)/,,$(1)))
 
 # Dependencies command
 BUILD_DEPS = $(call COMPILE_C, $(FLAGS))
@@ -151,8 +131,7 @@ BUILD_DEPS = $(call COMPILE_C, $(FLAGS))
 # Core command
 BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(DEFINES) $(INCLUDES))
 
-.PHONY: all clean install install-bin install-data install-docs install-man \
-	install-strip uninstall
+.PHONY: $(PHONY) install-bin install-data install-docs install-man
 
 all: $(TARGET)
 
@@ -163,10 +142,6 @@ $(OBJDIR)/%.o: $(SOURCEDIR)/src/%.c $(OBJDIR)/.tag
 $(OBJDIR)/deps/%.o: $(DEPDIR)/%.c $(OBJDIR)/.tag
 	$(call COMPILE_INFO,$(BUILD_DEPS))
 	@$(BUILD_DEPS)
-
-$(OBJDIR)/.tag:
-	@mkdir -p -- $(if $(MKDIRS),$(MKDIRS:%=$(OBJDIR)/%),$(OBJDIR)/deps)
-	@touch $@
 
 $(EXE): $(OBJS)
 ifneq ($(BUILD_STATIC), 0)
@@ -234,11 +209,6 @@ ifneq ($(ASSETS),)
 	done
 endif
 endif
-
-install-docs::
-	cp $(SOURCEDIR)/ChangeLog $(DESTDIR)$(DOCDIR)
-	cp $(SOURCEDIR)/LICENSE $(DESTDIR)$(DOCDIR)
-	cp $(SOURCEDIR)/README $(DESTDIR)$(DOCDIR)
 
 install-man: all
 	@mkdir -p $(DESTDIR)$(MANDIR)/man6
