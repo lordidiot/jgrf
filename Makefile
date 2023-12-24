@@ -18,6 +18,8 @@ DOCDIR ?= $(DATAROOTDIR)/doc/jgrf
 MANDIR ?= $(DATAROOTDIR)/man
 
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -Wmissing-prototypes -pedantic
+DEFINES :=
+DEPDIR := $(SOURCEDIR)/deps
 
 CFLAGS_JG = $(shell $(PKG_CONFIG) --cflags jg)
 
@@ -30,12 +32,8 @@ LIBS_SDL2 = $(shell $(PKG_CONFIG) --libs sdl2)
 CFLAGS_SPEEX = $(shell $(PKG_CONFIG) --cflags speexdsp)
 LIBS_SPEEX = $(shell $(PKG_CONFIG) --libs speexdsp)
 
-DEFINES :=
-DEPDIR := $(SOURCEDIR)/deps
 INCLUDES := -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
 	$(CFLAGS_SPEEX)
-
-ICONS_INSTALL_DIR = $(DATAROOTDIR)/icons/hicolor/$${i}x$${i}/apps
 
 LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
@@ -94,6 +92,9 @@ else
 	SHARE_DEST := jgrf
 	TARGET := $(NAME)
 endif
+
+ICONS_INSTALL_DIR = $(DATAROOTDIR)/icons/hicolor/$${i}x$${i}/apps
+SHADER_INSTALL_DIR := $(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 
 MKDIRS :=
 
@@ -196,18 +197,18 @@ install-bin: all
 	cp $(EXE) $(DESTDIR)$(BINDIR)
 
 install-data: all
-	@mkdir -p $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	@mkdir -p $(DESTDIR)$(SHADER_INSTALL_DIR)
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/applications
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/icons/hicolor/scalable/apps
 	@mkdir -p $(DESTDIR)$(DATAROOTDIR)/pixmaps
 	cp $(INSTALLDIR)/$(NAME).desktop $(DESTDIR)$(DATAROOTDIR)/applications
-	cp $(INSTALLDIR)/shaders/default.vs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(INSTALLDIR)/shaders/default.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(INSTALLDIR)/shaders/aann.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(INSTALLDIR)/shaders/crt-yee64.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(INSTALLDIR)/shaders/crtea.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(INSTALLDIR)/shaders/lcd.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
-	cp $(INSTALLDIR)/shaders/sharp-bilinear.fs $(DESTDIR)$(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+	cp $(INSTALLDIR)/shaders/default.vs $(DESTDIR)$(SHADER_INSTALL_DIR)
+	cp $(INSTALLDIR)/shaders/default.fs $(DESTDIR)$(SHADER_INSTALL_DIR)
+	cp $(INSTALLDIR)/shaders/aann.fs $(DESTDIR)$(SHADER_INSTALL_DIR)
+	cp $(INSTALLDIR)/shaders/crt-yee64.fs $(DESTDIR)$(SHADER_INSTALL_DIR)
+	cp $(INSTALLDIR)/shaders/crtea.fs $(DESTDIR)$(SHADER_INSTALL_DIR)
+	cp $(INSTALLDIR)/shaders/lcd.fs $(DESTDIR)$(SHADER_INSTALL_DIR)
+	cp $(INSTALLDIR)/shaders/sharp-bilinear.fs $(DESTDIR)$(SHADER_INSTALL_DIR)
 	for i in 32 48 64 96 128 256 512 1024; do \
 		mkdir -p $(DESTDIR)$(ICONS_INSTALL_DIR); \
 		if test "$$i" = '96' || test "$$i" = '1024'; then \
