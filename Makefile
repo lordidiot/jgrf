@@ -12,7 +12,11 @@ DEPDIR := $(SOURCEDIR)/deps
 
 DOCS := ChangeLog LICENSE README
 
+# Object dirs
+MKDIRS := deps
+
 include $(SOURCEDIR)/mk/common.mk
+include $(SOURCEDIR)/mk/miniz.mk
 
 CFLAGS_EPOXY = $(shell $(PKG_CONFIG) --cflags epoxy)
 LIBS_EPOXY = $(shell $(PKG_CONFIG) --libs epoxy)
@@ -23,10 +27,10 @@ LIBS_SDL2 = $(shell $(PKG_CONFIG) --libs sdl2)
 CFLAGS_SPEEX = $(shell $(PKG_CONFIG) --cflags speexdsp)
 LIBS_SPEEX = $(shell $(PKG_CONFIG) --libs speexdsp)
 
-INCLUDES := -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_SDL2) \
-	$(CFLAGS_SPEEX)
+INCLUDES := -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_MINIZ) \
+	$(CFLAGS_SDL2) $(CFLAGS_SPEEX)
 
-LIBS := $(LIBS_EPOXY) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
+LIBS := $(LIBS_EPOXY) $(LIBS_MINIZ) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
 ifeq ($(UNAME), Darwin)
 	LIBS += -Wl,-undefined,error
@@ -86,8 +90,6 @@ endif
 ICONS_INSTALL_DIR = $(DATAROOTDIR)/icons/hicolor/$${i}x$${i}/apps
 SHADER_INSTALL_DIR := $(DATADIR)/jollygood/$(SHARE_DEST)/shaders
 
-MKDIRS := deps
-
 CSRCS := jgrf.c \
 	audio.c \
 	cheats.c \
@@ -114,13 +116,11 @@ else
 	LIBS_MD5 = $(shell $(PKG_CONFIG) --libs libcrypto)
 endif
 
-include $(SOURCEDIR)/mk/miniz.mk
-
-INCLUDES += $(CFLAGS_MD5) $(CFLAGS_MINIZ)
-LIBS += $(LIBS_MD5) $(LIBS_MINIZ)
+INCLUDES += $(CFLAGS_MD5)
+LIBS += $(LIBS_MD5)
 
 # List of object files
-OBJS := $(patsubst %,$(OBJDIR)/%,$(CSRCS:.c=.o))
+OBJS := $(patsubst %,$(OBJDIR)/%,$(CSRCS:.c=.o) $(OBJS_MINIZ))
 
 # Compiler command
 COMPILE_C = $(strip $(CC) $(CFLAGS) $(CPPFLAGS) $(1) -c $< -o $@)
