@@ -1083,6 +1083,9 @@ void jgrf_state_save(int slot) {
 }
 
 void jgrf_set_screenfps(int fps) {
+    if (!fps)
+        return;
+
     screenfps = fps;
     jgrf_log(JG_LOG_DBG, "Screen base FPS set: %dfps\n", screenfps);
 }
