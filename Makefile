@@ -8,7 +8,6 @@ CFLAGS ?= -O2
 
 FLAGS := -std=c99 -Wall -Wextra -Wshadow -Wmissing-prototypes -pedantic
 DEFINES :=
-DEPDIR := $(SOURCEDIR)/deps
 
 DOCS := ChangeLog LICENSE README
 
