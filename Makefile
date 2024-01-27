@@ -26,10 +26,10 @@ LIBS_SDL2 = $(shell $(PKG_CONFIG) --libs sdl2)
 CFLAGS_SPEEX = $(shell $(PKG_CONFIG) --cflags speexdsp)
 LIBS_SPEEX = $(shell $(PKG_CONFIG) --libs speexdsp)
 
-INCLUDES := -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_MINIZ) \
+INCLUDES = -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_MINIZ) \
 	$(CFLAGS_SDL2) $(CFLAGS_SPEEX)
 
-LIBS := $(LIBS_EPOXY) $(LIBS_MINIZ) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
+LIBS = $(LIBS_EPOXY) $(LIBS_MINIZ) $(LIBS_SDL2) $(LIBS_SPEEX) -lm
 
 ifeq ($(UNAME), Darwin)
 	LIBS += -Wl,-undefined,error
