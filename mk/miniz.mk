@@ -16,8 +16,22 @@ ifeq ($(USE_EXTERNAL_MINIZ), 0)
 install-docs::
 	cp $(DIR_MINIZ)/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
 else
-	override REQUIRES_PRIVATE += miniz
 	CFLAGS_MINIZ = $(shell $(PKG_CONFIG) --cflags miniz)
 	LIBS_MINIZ = $(shell $(PKG_CONFIG) --libs miniz)
 	OBJS_MINIZ :=
+endif
+
+ifneq (,$(and $(findstring miniz,$(LIBS_REQUIRES)), \
+		$(filter-out 0,$(USE_EXTERNAL_MINIZ))))
+	override REQUIRES_PRIVATE += miniz
+endif
+
+ifneq ($(DIR_MINIZ),)
+FLAGS_MINIZ := -std=c99 $(WARNINGS_DEF_C)
+
+BUILD_MINIZ = $(call COMPILE_C, $(FLAGS_MINIZ))
+
+$(OBJDIR)/deps/miniz/%.o: $(DIR_MINIZ)/%.c $(OBJDIR)/.tag
+	$(call COMPILE_INFO,$(BUILD_MINIZ))
+	@$(BUILD_MINIZ)
 endif

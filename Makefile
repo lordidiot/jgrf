@@ -6,9 +6,6 @@ USE_EXTERNAL_MD5 ?= 0
 
 CFLAGS ?= -O2
 
-FLAGS := -std=c99 -Wall -Wextra -Wshadow -Wmissing-prototypes -pedantic
-DEFINES :=
-
 DOCS := ChangeLog LICENSE README
 
 # Object dirs
@@ -19,7 +16,12 @@ include $(SOURCEDIR)/mk/common.mk
 INCLUDES = -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_MINIZ) \
 	$(CFLAGS_SDL2) $(CFLAGS_SPEEXDSP)
 
+FLAGS := -std=c99 $(WARNINGS_DEF_C)
+DEFINES :=
+
 LIBS = $(LIBS_EPOXY) $(LIBS_MINIZ) $(LIBS_SDL2) $(LIBS_SPEEXDSP) -lm
+
+LIBS_REQUIRES :=
 
 ifeq ($(UNAME), Darwin)
 	LIBS += -Wl,-undefined,error
