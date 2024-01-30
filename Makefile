@@ -6,6 +6,8 @@ USE_EXTERNAL_MD5 ?= 0
 
 CFLAGS ?= -O2
 
+LIBS_REQUIRES :=
+
 DOCS := ChangeLog LICENSE README
 
 # Object dirs
@@ -20,8 +22,6 @@ FLAGS := -std=c99 $(WARNINGS_DEF_C)
 DEFINES :=
 
 LIBS = $(LIBS_EPOXY) $(LIBS_MINIZ) $(LIBS_SDL2) $(LIBS_SPEEXDSP) -lm
-
-LIBS_REQUIRES :=
 
 ifeq ($(UNAME), Darwin)
 	LIBS += -Wl,-undefined,error
