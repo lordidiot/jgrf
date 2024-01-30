@@ -15,19 +15,14 @@ MKDIRS := deps
 
 include $(SOURCEDIR)/mk/common.mk
 
+FLAGS := -std=c99 $(WARNINGS_DEF_C)
+
 INCLUDES = -I$(DEPDIR) $(CFLAGS_JG) $(CFLAGS_EPOXY) $(CFLAGS_MINIZ) \
 	$(CFLAGS_SDL2) $(CFLAGS_SPEEXDSP)
 
-FLAGS := -std=c99 $(WARNINGS_DEF_C)
+LIBS = -lm
+
 DEFINES :=
-
-LIBS = $(LIBS_EPOXY) $(LIBS_MINIZ) $(LIBS_SDL2) $(LIBS_SPEEXDSP) -lm
-
-ifeq ($(UNAME), Darwin)
-	LIBS += -Wl,-undefined,error
-else
-	LIBS += -Wl,--no-undefined
-endif
 
 # Conditions for DEFINES
 ifneq ($(OS), Windows_NT)
@@ -80,6 +75,14 @@ endif
 
 ICONS_INSTALL_DIR = $(DATAROOTDIR)/icons/hicolor/$${i}x$${i}/apps
 SHADER_INSTALL_DIR := $(DATADIR)/jollygood/$(SHARE_DEST)/shaders
+
+LIBS += $(LIBS_EPOXY) $(LIBS_MINIZ) $(LIBS_SDL2) $(LIBS_SPEEXDSP)
+
+ifeq ($(UNAME), Darwin)
+	LIBS += -Wl,-undefined,error
+else
+	LIBS += -Wl,--no-undefined
+endif
 
 CSRCS := jgrf.c \
 	audio.c \
@@ -138,7 +141,7 @@ $(EXE): $(OBJS)
 ifneq ($(BUILD_STATIC), 0)
 	@mkdir -p $(NAME)
 endif
-	$(strip $(CC) $^ $(LDFLAGS) $(LIBS) -o $@)
+	$(strip $(CC) -o $@ $^ $(LDFLAGS) $(LIBS))
 
 ifneq ($(BUILD_STATIC), 0)
 ifneq ($(ASSETS),)
