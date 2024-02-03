@@ -125,7 +125,7 @@ BUILD_DEPS = $(call COMPILE_C, $(FLAGS))
 # Core command
 BUILD_MAIN = $(call COMPILE_C, $(FLAGS) $(DEFINES) $(INCLUDES))
 
-.PHONY: $(PHONY) install-bin install-data install-docs install-man
+.PHONY: $(PHONY) install-bin install-data install-man
 
 all: $(TARGET)
 
