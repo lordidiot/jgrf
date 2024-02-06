@@ -12,9 +12,6 @@ ifeq ($(USE_EXTERNAL_MINIZ), 0)
 	MKDIRS += deps/miniz
 	SRCS_MINIZ := deps/miniz/miniz.c
 	OBJS_MINIZ := $(SRCS_MINIZ:.c=.o)
-
-install-docs::
-	cp $(DIR_MINIZ)/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
 else
 	CFLAGS_MINIZ = $(shell $(PKG_CONFIG) --cflags miniz)
 	LIBS_MINIZ = $(shell $(PKG_CONFIG) --libs miniz)
@@ -34,4 +31,9 @@ BUILD_MINIZ = $(call COMPILE_C, $(FLAGS_MINIZ))
 $(OBJDIR)/deps/miniz/%.o: $(DIR_MINIZ)/%.c $(OBJDIR)/.tag
 	$(call COMPILE_INFO,$(BUILD_MINIZ))
 	@$(BUILD_MINIZ)
+
+ifeq ($(USE_EXTERNAL_MINIZ), 0)
+install-docs::
+	cp $(DIR_MINIZ)/LICENSE $(DESTDIR)$(DOCDIR)/LICENSE-miniz
+endif
 endif
