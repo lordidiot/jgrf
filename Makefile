@@ -4,8 +4,6 @@ SOURCEDIR := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword \
 BUILD_STATIC ?= 0
 USE_EXTERNAL_MD5 ?= 0
 
-CFLAGS ?= -O2
-
 LIBS_REQUIRES :=
 
 DOCS := ChangeLog LICENSE README
