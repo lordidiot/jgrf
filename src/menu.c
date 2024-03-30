@@ -313,6 +313,11 @@ static void jgrf_menu_select_input(int item) {
         jgrf_input_config_enable(1);
         jgrf_input_config(item);
         skip_redraw = 1;
+
+        // Ensure the menu system knows it has not really gone a layer deeper
+        ezm.sel = menupath & 0xff;
+        menupath >>= 8;
+        ezmenu_update(&ezm);
     }
 }
 
