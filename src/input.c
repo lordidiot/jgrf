@@ -109,6 +109,7 @@ static int confindex = 0;
 static int confport = 0;
 static uint64_t conftimer = 0;
 static int menuactive = 0;
+static int discard_keyup = 0;
 
 void jgrf_input_config_enable(int e) {
     confactive = e;
@@ -426,7 +427,12 @@ static void jgrf_inputcfg_handler(SDL_Event *event) {
     char defbuf[32];
 
     switch(event->type) {
-        case SDL_KEYDOWN: {
+        case SDL_KEYUP: {
+            if (discard_keyup) {
+                --discard_keyup;
+                break;
+            }
+
             if (event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                 ini_table_create_entry(iconf, inputinfo[confport]->name,
                     inputinfo[confport]->defs[confindex], "");
@@ -762,6 +768,11 @@ void jgrf_input_handler(SDL_Event *event) {
 
                     confport--;
                     confindex = 0;
+
+                    /* Discard a keyup event to prevent it from registering as
+                       a desired input definition
+                    */
+                    discard_keyup = 1;
 
                     jgrf_input_config(confport);
                 }
