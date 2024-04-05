@@ -238,6 +238,10 @@ void *jgrf_video_gl_get_pixels(int *rw, int *rh) {
     uint8_t *pixels = (uint8_t*)calloc(dimensions.rw * dimensions.rh,
         sizeof(uint32_t));
 
+    // Clear any on-screen text before grabbing the framebuffer
+    textframes[0] = textframes[1] = textframes[2] = 0;
+    jgrf_video_gl_render(0);
+
     // Read the pixels and flip them vertically
     glReadPixels(dimensions.xo, dimensions.yo, dimensions.rw, dimensions.rh,
         GL_RGBA, GL_UNSIGNED_BYTE, pixels);
