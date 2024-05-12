@@ -1067,6 +1067,16 @@ void jgrf_state_load(int slot) {
         slot, success ? "loaded." : "load failed.");
 }
 
+void jgrf_state_load_file(const char *statepath) {
+    int success = jgapi.jg_state_load(statepath);
+
+    success ? jgrf_log(JG_LOG_INF, "State Loaded: %s\n", statepath):
+        jgrf_log(JG_LOG_WRN, "State Load failed: %s\n", statepath);
+
+    jgrf_log(JG_LOG_SCR, "State file '%s' %s",
+        statepath, success ? "loaded." : "load failed.");
+}
+
 // Save state
 void jgrf_state_save(int slot) {
     char statepath[260];
@@ -1306,6 +1316,11 @@ int main(int argc, char *argv[]) {
 
     // SDL_Event struct to be filled and passed to SDL event queue
     SDL_Event event;
+
+    // Load saved game state
+    if (jgrf_cli_state()) {
+        jgrf_state_load_file(jgrf_cli_state());
+    }
 
     int runframes = 0;
     double collector = 0;

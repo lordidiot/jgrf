@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "a:b:c:fg:ho:r:s:vwx:";
+static const char *os_def = "a:b:c:fg:ho:r:s:vwx:l:";
 static const struct parg_option po_def[] = {
     { "video", PARG_REQARG, NULL, 'a' },
     { "benchmark", PARG_REQARG, NULL, 'b' },
@@ -57,10 +57,12 @@ static const struct parg_option po_def[] = {
     { "verbose", PARG_NOARG, NULL, 'v' },
     { "window", PARG_NOARG, NULL, 'w' },
     { "scale", PARG_REQARG, NULL, 'x' },
+    { "loadstate", PARG_REQARG, NULL, 'l' },
 };
 
 static const char *corename = NULL;
 static const char *wavfile = NULL;
+static const char *statepath = NULL;
 
 static int video = -1;
 static int fullscreen = 0;
@@ -81,6 +83,11 @@ const char *jgrf_cli_core(void) {
 // Return the wave file name specified at the command line
 const char *jgrf_cli_wave(void) {
     return wavfile;
+}
+
+// Return the state file path specified at the command line
+const char *jgrf_cli_state(void) {
+    return statepath;
 }
 
 // Override settings with command line arguments
@@ -203,6 +210,10 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 scale = atoi(ps.optarg);
                 break;
             }
+            case 'l': { // Scale
+                statepath = ps.optarg;
+                break;
+            }
             case '?': {
                 jgrf_log(JG_LOG_WRN, "Unknown option '-%c'\n", ps.optopt);
                 break;
@@ -236,6 +247,8 @@ void jgrf_cli_usage(char *binname) {
     fprintf(stdout, "    -c, --core <corename>   "
         "Specify which core to use\n");
 #endif
+    fprintf(stdout, "    -l, --loadstate <filename> "
+        "Load game state from file\n");
     fprintf(stdout, "    -f, --fullscreen        "
         "Start in Fullscreen mode\n");
     fprintf(stdout, "    -g, --cheats <value>    "

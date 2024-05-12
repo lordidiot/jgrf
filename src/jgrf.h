@@ -87,6 +87,7 @@ void jgrf_benchmark(size_t);
 void jgrf_data_push(uint32_t, int, const void*, size_t);
 
 void jgrf_state_load(int);
+void jgrf_state_load_file(const char*);
 void jgrf_state_save(int);
 
 void jgrf_reset(int);
