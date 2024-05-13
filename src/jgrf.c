@@ -36,6 +36,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <errno.h>
 #include <libgen.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+
 
 #include <SDL.h>
 #include <jg/jg.h>
@@ -102,7 +108,8 @@ static struct _loaded {
     int video;
     int input;
     int settings;
-} loaded = { 0, 0, 0, 0, 0, 0 };
+    int policy;
+} loaded = { 0, 0, 0, 0, 0, 0, 0 };
 
 // Pointer to core info struct
 static jg_coreinfo_t *coreinfo = NULL;
@@ -132,6 +139,11 @@ int corefps = 60;
 int screenfps = 60;
 size_t framecount = 0;
 size_t bmarkframes = 0;
+
+// Policy variables
+int policy_sock = -1;
+void (*stored_jg_exec_frame)(void) = NULL;
+static jg_videoinfo_t *vidinfo = NULL;
 
 // Recursive mkdir (similar to mkdir -p)
 static void mkdirr(const char *dir) {
@@ -429,6 +441,7 @@ static void jgrf_core_load(const char *corepath) {
     jgrf_set_paths();
 
     // Set up the videoinfo/audioinfo pointers in the frontend
+    vidinfo = jgapi.jg_get_videoinfo();
     jgrf_menu_set_vinfo(jgapi.jg_get_videoinfo());
     jgrf_video_set_info(jgapi.jg_get_videoinfo());
     jgrf_audio_set_info(jgapi.jg_get_audioinfo());
@@ -1034,6 +1047,7 @@ void jgrf_quit(int status) {
     if (loaded.video) jgrf_video_deinit();
     if (loaded.input) jgrf_input_deinit();
     if (loaded.settings) jgrf_settings_deinit();
+    if (loaded.policy) jgrf_policy_deinit();
     if (gameinfo.data) free(gameinfo.data);
     for (int i = 0; i < gdata.numauxfiles; ++i)
         if (auxinfo[i].data) free(auxinfo[i].data);
@@ -1104,6 +1118,83 @@ void jgrf_set_screenfps(int fps) {
 void jgrf_frametime(double frametime) {
     jgrf_audio_timing(frametime);
     corefps = frametime + 0.5;
+}
+
+static void jgrf_hooked_jg_exec_frame(void) {
+    struct {
+        uint32_t pixfmt;
+        unsigned int w;
+        unsigned int h;
+        unsigned int x;
+        unsigned int y;
+        unsigned int nbytes;
+    } frame_data = {
+        vidinfo->pixfmt, vidinfo->w, vidinfo->h,
+        vidinfo->x, vidinfo->y, 0
+    };
+
+    // Send the frame data to the policy server
+    switch (vidinfo->pixfmt) {
+        case JG_PIXFMT_XRGB8888:
+        case JG_PIXFMT_XBGR8888:
+            frame_data.nbytes =
+                (frame_data.w + frame_data.x) * (frame_data.h + frame_data.y) * 4;
+            break;
+        case JG_PIXFMT_RGBX5551:
+        case JG_PIXFMT_RGB565:
+            frame_data.nbytes =
+                (frame_data.w + frame_data.x) * (frame_data.h + frame_data.y) * 2;
+            break;
+        default:
+            jgrf_log(JG_LOG_ERR, "Unsupported pixel format\n");
+            break;
+    }
+    write(policy_sock, &frame_data, sizeof(frame_data));
+    write(policy_sock, vidinfo->buf, frame_data.nbytes);
+
+    // Call the core's frame execution function
+    stored_jg_exec_frame();
+}
+
+void jgrf_set_policy(const char *policy) {
+    int port;
+    char *addr_s, *port_s;
+    struct sockaddr_in addr;
+    struct hostent *host;
+
+    policy_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (policy_sock < 0) {
+        jgrf_log(JG_LOG_ERR, "Failed to create socket: %s\n", strerror(errno));
+    }
+
+    addr_s = strtok(policy, ":");
+    port_s = strtok(NULL, ":");
+    host = gethostbyname(addr_s);
+    port = atoi(port_s);
+    if (!host || !port_s || port < 1 || port > 65535) {
+        jgrf_log(JG_LOG_ERR, "Invalid policy address: %s\n", policy);
+    }
+
+    addr.sin_family = AF_INET;
+    memcpy(&addr.sin_addr, host->h_addr, host->h_length);
+    addr.sin_port = htons(port);
+    if (connect(policy_sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+        jgrf_log(JG_LOG_ERR, "Failed to connect to policy server: %s\n",
+            strerror(errno));
+    }
+    jgrf_log(JG_LOG_INF, "Connected to policy server at %s:%d\n", addr_s, port);
+
+    // Hook
+    stored_jg_exec_frame = jgapi.jg_exec_frame;
+    jgapi.jg_exec_frame = jgrf_hooked_jg_exec_frame;
+    loaded.policy = 1;
+}
+
+void jgrf_policy_deinit(void) {
+    if (policy_sock >= 0) {
+        close(policy_sock);
+        policy_sock = -1;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -1320,6 +1411,11 @@ int main(int argc, char *argv[]) {
     // Load saved game state
     if (jgrf_cli_state()) {
         jgrf_state_load_file(jgrf_cli_state());
+    }
+
+    // Use defined policy
+    if (jgrf_cli_policy()) {
+        jgrf_set_policy(jgrf_cli_policy());
     }
 
     int runframes = 0;

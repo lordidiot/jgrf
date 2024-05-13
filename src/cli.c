@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "a:b:c:fg:ho:r:s:vwx:l:";
+static const char *os_def = "a:b:c:fg:ho:r:s:vwx:l:p:";
 static const struct parg_option po_def[] = {
     { "video", PARG_REQARG, NULL, 'a' },
     { "benchmark", PARG_REQARG, NULL, 'b' },
@@ -58,11 +58,13 @@ static const struct parg_option po_def[] = {
     { "window", PARG_NOARG, NULL, 'w' },
     { "scale", PARG_REQARG, NULL, 'x' },
     { "loadstate", PARG_REQARG, NULL, 'l' },
+    { "policy", PARG_REQARG, NULL, 'p' },
 };
 
 static const char *corename = NULL;
 static const char *wavfile = NULL;
 static const char *statepath = NULL;
+static const char *policy = NULL;
 
 static int video = -1;
 static int fullscreen = 0;
@@ -88,6 +90,11 @@ const char *jgrf_cli_wave(void) {
 // Return the state file path specified at the command line
 const char *jgrf_cli_state(void) {
     return statepath;
+}
+
+// Return the policy server address specified at the command line
+const char *jgrf_cli_policy(void) {
+    return policy;
 }
 
 // Override settings with command line arguments
@@ -210,8 +217,12 @@ void jgrf_cli_parse(int argc, char *argv[]) {
                 scale = atoi(ps.optarg);
                 break;
             }
-            case 'l': { // Scale
+            case 'l': { // State file
                 statepath = ps.optarg;
+                break;
+            }
+            case 'p': { // Policy server address
+                policy = ps.optarg;
                 break;
             }
             case '?': {
@@ -249,6 +260,8 @@ void jgrf_cli_usage(char *binname) {
 #endif
     fprintf(stdout, "    -l, --loadstate <filename> "
         "Load game state from file\n");
+    fprintf(stdout, "    -p, --policy <address>  "
+        "Connect to policy server for control\n");
     fprintf(stdout, "    -f, --fullscreen        "
         "Start in Fullscreen mode\n");
     fprintf(stdout, "    -g, --cheats <value>    "

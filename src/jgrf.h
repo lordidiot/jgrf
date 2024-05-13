@@ -112,6 +112,8 @@ void jgrf_state_load(int);
 int jgrf_game_detect_sys(const char*);
 
 void jgrf_frametime(double);
+void jgrf_set_policy(const char*);
+void jgrf_policy_deinit(void);
 
 extern int bmark; // External benchmark mode variable
 extern int fforward; // External fast-forward level
