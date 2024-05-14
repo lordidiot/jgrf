@@ -1138,6 +1138,11 @@ static void jgrf_hooked_jg_exec_frame(void) {
         vidinfo->x, vidinfo->y, 0
     };
 
+    struct {
+        int n;
+        int scancodes[32];
+    } key_data;
+
     // Send the frame data to the policy server
     switch (vidinfo->pixfmt) {
         case JG_PIXFMT_XRGB8888:
@@ -1154,7 +1159,21 @@ static void jgrf_hooked_jg_exec_frame(void) {
             jgrf_log(JG_LOG_ERR, "Unsupported pixel format\n");
             break;
     }
-    write(policy_sock, &frame_data, sizeof(frame_data));
+    if (write(policy_sock, &frame_data, sizeof(frame_data)) < 0) {
+        jgrf_log(JG_LOG_ERR, "Failed to send frame data to policy server: %s\n",
+            strerror(errno));
+    }
+
+    // Read keyboard input
+    if (read(policy_sock, &key_data, sizeof(key_data)) < 0) {
+        jgrf_log(JG_LOG_ERR, "Failed to read keyboard input from policy server: %s\n",
+            strerror(errno));
+    }
+
+    jgrf_input_clear();
+    for (int i = 0; i < key_data.n; ++i)
+        jgrf_input_keydown(key_data.scancodes[i]);
+
     // Call the core's frame execution function
     stored_jg_exec_frame();
 }
@@ -1202,7 +1221,11 @@ void jgrf_set_policy(const char *policy) {
     ftruncate(mem_fd, mem_sz);
     vidinfo->buf = mmap(NULL, mem_sz, PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd, 0);
     jgapi.jg_setup_video(); // Need to reinitialize core video to use shared memory
-    write(policy_sock, mem_name, sizeof(mem_name));
+
+    if (write(policy_sock, mem_name, sizeof(mem_name)) < 0) {
+        jgrf_log(JG_LOG_ERR, "Failed to send shared memory name to policy server: %s\n",
+            strerror(errno));
+    }
 
     // Hook
     stored_jg_exec_frame = jgapi.jg_exec_frame;

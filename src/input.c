@@ -890,3 +890,15 @@ void jgrf_input_config(int port) {
 jg_inputinfo_t **jgrf_input_info_ptr(void) {
     return inputinfo;
 }
+
+// Unpress all input buttons
+void jgrf_input_clear(void) {
+    for (int j = 0; j < SDL_NUM_SCANCODES; ++j)
+        *kbmap.key[j] = 0;
+    for (int j = 0; j < MAXBUTTONS; ++j)
+        *msmap.button[j] = 0;
+}
+
+void jgrf_input_keydown(int scancode) {
+    *kbmap.key[scancode] = 1;
+}

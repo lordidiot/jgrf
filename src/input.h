@@ -51,4 +51,7 @@ void jgrf_input_menu_enable(int);
 void jgrf_input_config(int);
 jg_inputinfo_t **jgrf_input_info_ptr(void);
 
+void jgrf_input_clear(void);
+void jgrf_input_keydown(int);
+
 #endif
