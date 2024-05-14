@@ -35,6 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <errno.h>
 #include <libgen.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -144,6 +146,9 @@ size_t bmarkframes = 0;
 int policy_sock = -1;
 void (*stored_jg_exec_frame)(void) = NULL;
 static jg_videoinfo_t *vidinfo = NULL;
+int mem_fd = -1;
+int mem_sz = 0;
+char mem_name[64];
 
 // Recursive mkdir (similar to mkdir -p)
 static void mkdirr(const char *dir) {
@@ -1150,8 +1155,6 @@ static void jgrf_hooked_jg_exec_frame(void) {
             break;
     }
     write(policy_sock, &frame_data, sizeof(frame_data));
-    write(policy_sock, vidinfo->buf, frame_data.nbytes);
-
     // Call the core's frame execution function
     stored_jg_exec_frame();
 }
@@ -1162,6 +1165,7 @@ void jgrf_set_policy(const char *policy) {
     struct sockaddr_in addr;
     struct hostent *host;
 
+    // Setup TCP connection
     policy_sock = socket(AF_INET, SOCK_STREAM, 0);
     if (policy_sock < 0) {
         jgrf_log(JG_LOG_ERR, "Failed to create socket: %s\n", strerror(errno));
@@ -1184,6 +1188,22 @@ void jgrf_set_policy(const char *policy) {
     }
     jgrf_log(JG_LOG_INF, "Connected to policy server at %s:%d\n", addr_s, port);
 
+    // Setup shared memory
+    snprintf(mem_name, sizeof(mem_name), "/jgrf-%d", getpid());
+    mem_sz = vidinfo->wmax * vidinfo->hmax *
+        ((vidinfo->pixfmt == JG_PIXFMT_XRGB8888 || vidinfo->pixfmt == JG_PIXFMT_XBGR8888) ?
+            4 : 2);
+    mem_fd = shm_open(mem_name, O_EXCL | O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    if (mem_fd < 0) {
+        jgrf_log(JG_LOG_ERR, "Failed to create shared memory: %s\n",
+            strerror(errno));
+    }
+    jgrf_log(JG_LOG_INF, "Shared memory created: %s\n", mem_name);
+    ftruncate(mem_fd, mem_sz);
+    vidinfo->buf = mmap(NULL, mem_sz, PROT_READ | PROT_WRITE, MAP_SHARED, mem_fd, 0);
+    jgapi.jg_setup_video(); // Need to reinitialize core video to use shared memory
+    write(policy_sock, mem_name, sizeof(mem_name));
+
     // Hook
     stored_jg_exec_frame = jgapi.jg_exec_frame;
     jgapi.jg_exec_frame = jgrf_hooked_jg_exec_frame;
@@ -1194,6 +1214,11 @@ void jgrf_policy_deinit(void) {
     if (policy_sock >= 0) {
         close(policy_sock);
         policy_sock = -1;
+    }
+    if (mem_fd >= 0) {
+        shm_unlink(mem_name);
+        close(mem_fd);
+        mem_fd = -1;
     }
 }
 
