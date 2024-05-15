@@ -1080,10 +1080,9 @@ void jgrf_state_load(int slot) {
     int success = jgapi.jg_state_load(statepath);
 
     success ? jgrf_log(JG_LOG_INF, "State Loaded: %s\n", statepath):
-        jgrf_log(JG_LOG_WRN, "State Load failed: %s\n", statepath);
+        jgrf_log(JG_LOG_ERR, "State Load failed: %s\n", statepath);
 
-    jgrf_log(JG_LOG_SCR, "State %d %s",
-        slot, success ? "loaded." : "load failed.");
+    jgrf_log(JG_LOG_SCR, "State %d loaded.", slot);
 }
 
 void jgrf_state_load_file(const char *statepath) {
@@ -1165,11 +1164,10 @@ static void jgrf_hooked_jg_exec_frame(void) {
     }
 
     // Read keyboard input
-    if (read(policy_sock, &key_data, sizeof(key_data)) < 0) {
+    if (read(policy_sock, &key_data, sizeof(key_data)) <= 0) {
         jgrf_log(JG_LOG_ERR, "Failed to read keyboard input from policy server: %s\n",
             strerror(errno));
     }
-
     jgrf_input_clear();
     for (int i = 0; i < key_data.n; ++i)
         jgrf_input_keydown(key_data.scancodes[i]);
