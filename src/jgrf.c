@@ -133,6 +133,9 @@ static int running = 1;
 // Benchmark mode
 int bmark = 0;
 
+// Headless mode
+int headless = 0;
+
 // Number of extra frames to run for fast-forwarding purposes
 int fforward = 0;
 
@@ -1464,6 +1467,10 @@ int main(int argc, char *argv[]) {
         jgrf_set_policy(jgrf_cli_policy());
     }
 
+    // Check if the game should be run headless
+    // TODO: Not really proper headless
+    headless = jgrf_cli_headless();
+
     int runframes = 0;
     double collector = 0;
 
@@ -1487,15 +1494,17 @@ int main(int argc, char *argv[]) {
 
         framecount += (runframes + fforward);
 
-        // Render and output the current video
-        jgrf_video_render(runframes);
-        jgrf_video_swapbuffers();
-
         if (bmark && framecount >= bmarkframes) {
             jgrf_log(JG_LOG_INF, "Benchmark completed after %ld frames\n",
                 bmarkframes);
             jgrf_quit(EXIT_SUCCESS);
         }
+
+        if (headless) continue;
+
+        // Render and output the current video
+        jgrf_video_render(runframes);
+        jgrf_video_swapbuffers();
 
         // Poll for events
         while (SDL_PollEvent(&event)) {

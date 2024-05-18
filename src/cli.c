@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "settings.h"
 
 // Variables for command line options
-static const char *os_def = "a:b:c:fg:ho:r:s:vwx:l:p:";
+static const char *os_def = "a:b:c:fg:ho:r:s:vwx:l:p:i";
 static const struct parg_option po_def[] = {
     { "video", PARG_REQARG, NULL, 'a' },
     { "benchmark", PARG_REQARG, NULL, 'b' },
@@ -59,6 +59,7 @@ static const struct parg_option po_def[] = {
     { "scale", PARG_REQARG, NULL, 'x' },
     { "loadstate", PARG_REQARG, NULL, 'l' },
     { "policy", PARG_REQARG, NULL, 'p' },
+    { "headless", PARG_NOARG, NULL, 'i' },
 };
 
 static const char *corename = NULL;
@@ -74,6 +75,7 @@ static int scale = 0;
 static int shader = -1;
 static int verbose = 0;
 static int windowed = 0;
+static int headless = 0;
 
 int waveout = 0;
 
@@ -95,6 +97,11 @@ const char *jgrf_cli_state(void) {
 // Return the policy server address specified at the command line
 const char *jgrf_cli_policy(void) {
     return policy;
+}
+
+// Return whether the frontend should run headless
+int jgrf_cli_headless(void) {
+    return headless;
 }
 
 // Override settings with command line arguments
@@ -223,6 +230,10 @@ void jgrf_cli_parse(int argc, char *argv[]) {
             }
             case 'p': { // Policy server address
                 policy = ps.optarg;
+                break;
+            }
+            case 'i': { // Headless mode
+                headless = 1;
                 break;
             }
             case '?': {
